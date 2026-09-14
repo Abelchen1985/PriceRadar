@@ -252,13 +252,15 @@ export default function App() {
 
   // Filter & Sort
   const defaultCategories = [
+    'Hiking & Backpacking',
+    'Fishing & Angling',
+    'Camping & Bushcraft',
+    'Outdoor Apparel & Boots',
     'Audio & Headphones',
     'Gaming & Consoles',
     'Home & Kitchen',
     'Appliances',
     'Laptops & Computers',
-    'TV & Home Theater',
-    'Tools & Hardware',
     'PC Components',
     'Electronics'
   ];
@@ -342,10 +344,10 @@ export default function App() {
                 </button>
               </div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">
-                Track Any Item &amp; Compare Online Storefronts in Real-Time
+                Universal Multi-Store Price Tracker: Outdoor Gear, Fishing, Hiking &amp; Tech
               </h1>
               <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                Check for price drops to <strong>all-time lowest in history</strong>, dispatch instant email alerts to <span className="font-mono text-amber-300 font-semibold">{userEmail}</span>, and compute the <strong>best multi-merchant bundle deal</strong> across Amazon, Walmart, Target, Best Buy, and more.
+                Check for price drops to <strong>all-time lowest in history</strong>, dispatch instant email alerts to <span className="font-mono text-amber-300 font-semibold">{userEmail}</span>, and compute the <strong>best multi-merchant bundle deal</strong> across REI, Bass Pro Shops, Cabela's, Tackle Warehouse, Amazon, Walmart, and more.
               </p>
             </div>
 

@@ -27,6 +27,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
   recipients = [],
 }) => {
   const [activeTab, setActiveTab] = useState<'custom' | 'presets'>('custom');
+  const [presetCategoryFilter, setPresetCategoryFilter] = useState<string>('All');
 
   // Multi-email recipient selection
   const [selectedEmails, setSelectedEmails] = useState<string[]>(() => {
@@ -41,7 +42,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
   // Custom Form Fields
   const [title, setTitle] = useState('');
   const [brand, setBrand] = useState('');
-  const [category, setCategory] = useState<TrackedItem['category']>('CPU');
+  const [category, setCategory] = useState<TrackedItem['category']>('Hiking & Backpacking');
   const [model, setModel] = useState('');
   const [msrp, setMsrp] = useState('');
   const [targetPrice, setTargetPrice] = useState('');
@@ -394,19 +395,23 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
                     onChange={(e) => setCategory(e.target.value as any)}
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
                   >
-                    <option value="Audio & Headphones">Audio & Headphones</option>
-                    <option value="Gaming & Consoles">Gaming & Consoles</option>
-                    <option value="Home & Kitchen">Home & Kitchen</option>
-                    <option value="Appliances">Appliances & Vacuums</option>
-                    <option value="Smartphones & Tablets">Smartphones & Tablets</option>
-                    <option value="Laptops & Computers">Laptops & Computers</option>
-                    <option value="TV & Home Theater">TV & Home Theater</option>
-                    <option value="Tools & Hardware">Tools & Hardware</option>
-                    <option value="Smart Home">Smart Home & Security</option>
-                    <option value="Fashion & Apparel">Fashion & Apparel</option>
-                    <option value="Cameras & Drones">Cameras & Drones</option>
+                    <option value="Hiking & Backpacking">Hiking &amp; Backpacking</option>
+                    <option value="Fishing & Angling">Fishing &amp; Angling</option>
+                    <option value="Camping & Bushcraft">Camping &amp; Bushcraft</option>
+                    <option value="Outdoor Apparel & Boots">Outdoor Apparel &amp; Boots</option>
+                    <option value="Kayaking & Water Sports">Kayaking &amp; Water Sports</option>
+                    <option value="Hunting & Optics">Hunting &amp; Optics</option>
+                    <option value="Audio & Headphones">Audio &amp; Headphones</option>
+                    <option value="Gaming & Consoles">Gaming &amp; Consoles</option>
+                    <option value="Home & Kitchen">Home &amp; Kitchen</option>
+                    <option value="Appliances">Appliances &amp; Vacuums</option>
+                    <option value="Smartphones & Tablets">Smartphones &amp; Tablets</option>
+                    <option value="Laptops & Computers">Laptops &amp; Computers</option>
+                    <option value="Tools & Hardware">Tools &amp; Hardware</option>
+                    <option value="Smart Home">Smart Home &amp; Security</option>
+                    <option value="Cameras & Drones">Cameras &amp; Drones</option>
                     <option value="PC Components">PC Components</option>
-                    <option value="Electronics">Electronics & Gadgets</option>
+                    <option value="Electronics">Electronics &amp; Gadgets</option>
                     <option value="Other">Other Product</option>
                   </select>
                 </div>
@@ -419,7 +424,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
                     type="text"
                     value={brand}
                     onChange={(e) => setBrand(e.target.value)}
-                    placeholder="e.g. AMD, Corsair, Apple"
+                    placeholder="e.g. Osprey, Shimano, Garmin, YETI, Sony, Apple"
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -561,12 +566,41 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
             </form>
           ) : (
             <div className="space-y-3">
-              <p className="text-xs text-slate-400 mb-2">
-                Click any popular tech item to instantly add it to your tracking list with pre-configured historical lows and storefront comparisons:
-              </p>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <p className="text-xs text-slate-400">
+                  Click any gear preset to instantly add it to your tracking list with pre-configured historical lows:
+                </p>
+
+                {/* Preset filter chips */}
+                <div className="flex items-center space-x-1.5 shrink-0 overflow-x-auto">
+                  {['All', 'Hiking', 'Fishing', 'Camping', 'Tech'].map((tab) => (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setPresetCategoryFilter(tab)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
+                        presetCategoryFilter === tab
+                          ? 'bg-blue-600 text-white shadow-sm'
+                          : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-1">
-                {POPULAR_ITEM_PRESETS.map((preset, index) => (
+                {POPULAR_ITEM_PRESETS
+                  .filter(preset => {
+                    if (presetCategoryFilter === 'All') return true;
+                    if (presetCategoryFilter === 'Hiking') return preset.category.toLowerCase().includes('hiking');
+                    if (presetCategoryFilter === 'Fishing') return preset.category.toLowerCase().includes('fishing');
+                    if (presetCategoryFilter === 'Camping') return preset.category.toLowerCase().includes('camping');
+                    if (presetCategoryFilter === 'Tech') return !preset.category.toLowerCase().includes('hiking') && !preset.category.toLowerCase().includes('fishing') && !preset.category.toLowerCase().includes('camping');
+                    return true;
+                  })
+                  .map((preset, index) => (
                   <div
                     key={index}
                     className="p-3 bg-slate-950/70 border border-slate-800 hover:border-blue-500/60 rounded-xl transition flex flex-col justify-between"

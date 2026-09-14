@@ -347,23 +347,19 @@ async function startServer() {
       if (ai) {
         // Run structured prompt with Gemini 3.8 Flash to evaluate current market prices across top storefronts
         const prompt = `You are a real-time universal e-commerce price scraper and market intelligence engine for PriceRadar.
-For any product: "${searchTarget}" (which can be electronics, gaming, home goods, appliances, laptops, tools, fashion, etc.), provide current realistic live pricing across major online retailers appropriate for this product, such as:
-- Amazon
-- Walmart
-- Target
-- Best Buy
-- Home Depot (if home/tools)
-- B&H Photo (if tech/photo/audio)
-- Newegg (if PC/tech)
-- Micro Center (if tech)
+For any product: "${searchTarget}" (which spans hiking, backpacking, fishing, camping, outdoor gear, electronics, audio, home goods, etc.), provide current realistic live pricing across 3 to 5 major online retailers specifically appropriate for this category:
+- For Hiking / Backpacking / Camping / Outdoors: REI, Backcountry, Bass Pro Shops, Cabela's, Amazon, Moosejaw, Sierra.
+- For Fishing / Angling / Marine: Bass Pro Shops, Cabela's, Tackle Warehouse, Amazon, West Marine, Dick's Sporting Goods.
+- For Tech / Electronics / Audio / PC: Amazon, Best Buy, B&H Photo, Newegg, Micro Center, Walmart.
+- For Home / Tools / General: Amazon, Walmart, Target, Home Depot.
 
 Return valid JSON with an array of 3 to 5 retailers, each with:
-- retailerName: (string, e.g. 'Amazon', 'Walmart', 'Target', 'Best Buy', 'Home Depot', 'B&H Photo')
+- retailerName: (string, e.g. 'REI', 'Bass Pro Shops', "Cabela's", 'Backcountry', 'Tackle Warehouse', 'Amazon', 'Best Buy', 'Walmart')
 - price: (number)
 - originalPrice: (number)
 - inStock: (boolean)
-- stockMessage: (e.g. 'In Stock - Fast Delivery', 'In Stock', 'Limited stock')
-- shipping: (e.g. 'Free Shipping', '$5.99')
+- stockMessage: (e.g. 'In Stock - Fast Delivery', 'In Stock - Store Pickup', 'Member Discount Available', 'Limited stock')
+- shipping: (e.g. 'Free Shipping', 'Free 2-Day Shipping', '$5.99')
 - shippingCost: (number, 0 for free)
 - promoCode: (optional string coupon or rebate)
 - rating: (number 4.0-5.0)
@@ -371,9 +367,9 @@ Return valid JSON with an array of 3 to 5 retailers, each with:
 - isBestPrice: (boolean, true for the lowest price)
 Also return estimated:
 - allTimeLow: (number)
-- allTimeLowDate: (string, e.g. 'Nov 2024')
-- allTimeLowStore: (string)
-- marketAnalysis: (one concise sentence about current price trend)`;
+- allTimeLowDate: (string, e.g. 'Nov 2024' or 'Memorial Day 2024')
+- allTimeLowStore: (string, e.g. 'REI' or 'Bass Pro Shops' or 'Amazon')
+- marketAnalysis: (one concise sentence about current price trend across outdoor / tech retail)`;
 
         const geminiRes = await ai.models.generateContent({
           model: "gemini-3.8-flash",
@@ -398,61 +394,184 @@ Also return estimated:
       // Resilient Fallback if no GEMINI_API_KEY is configured yet
       const basePrice = currentItem?.retailers?.[0]?.price || 299.99;
       const variation = (percent: number) => Number((basePrice * (1 + percent)).toFixed(2));
+      const queryLower = searchTarget.toLowerCase();
+      const isOutdoor = /hike|hiking|backpack|tent|camp|trail|outdoor|yeti|cooler|osprey|climb|stove|sleeping|garmin/i.test(queryLower);
+      const isFishing = /fish|fishing|rod|reel|lure|tackle|shimano|daiwa|bass pro|cabela|angler|boat|sonar/i.test(queryLower);
 
-      const fallbackRetailers = [
-        {
-          retailerName: "Amazon",
-          url: "https://amazon.com",
-          price: variation(-0.02),
-          originalPrice: variation(0.15),
-          inStock: true,
-          stockMessage: "In Stock - Prime Delivery",
-          shipping: "Free Shipping",
-          shippingCost: 0,
-          rating: 4.8,
-          reviewCount: 4230,
-          isBestPrice: true
-        },
-        {
-          retailerName: "Walmart",
-          url: "https://walmart.com",
-          price: variation(-0.01),
-          originalPrice: variation(0.15),
-          inStock: true,
-          stockMessage: "Rollback Deal - In Stock",
-          shipping: "Free 2-Day Delivery",
-          shippingCost: 0,
-          rating: 4.6,
-          reviewCount: 2410,
-          isBestPrice: false
-        },
-        {
-          retailerName: "Target",
-          url: "https://target.com",
-          price: variation(0.00),
-          originalPrice: variation(0.15),
-          inStock: true,
-          stockMessage: "In Stock - Pickup or Ship",
-          shipping: "Free Shipping with RedCard",
-          shippingCost: 0,
-          rating: 4.7,
-          reviewCount: 1180,
-          isBestPrice: false
-        },
-        {
-          retailerName: "Best Buy",
-          url: "https://bestbuy.com",
-          price: variation(0.01),
-          originalPrice: variation(0.15),
-          inStock: true,
-          stockMessage: "In Stock - Store Pickup Today",
-          shipping: "Free Shipping",
-          shippingCost: 0,
-          rating: 4.8,
-          reviewCount: 1650,
-          isBestPrice: false
-        }
-      ];
+      let fallbackRetailers;
+      let lowStore = "Amazon";
+      let lowDate = "Black Friday 2024";
+
+      if (isFishing) {
+        lowStore = "Bass Pro Shops";
+        lowDate = "Spring Classic Sale";
+        fallbackRetailers = [
+          {
+            retailerName: "Bass Pro Shops",
+            url: "https://basspro.com",
+            price: variation(-0.04),
+            originalPrice: variation(0.12),
+            inStock: true,
+            stockMessage: "In Stock - Angler Reward Points",
+            shipping: "Free Shipping",
+            shippingCost: 0,
+            rating: 4.8,
+            reviewCount: 1820,
+            isBestPrice: true
+          },
+          {
+            retailerName: "Tackle Warehouse",
+            url: "https://tacklewarehouse.com",
+            price: variation(-0.02),
+            originalPrice: variation(0.12),
+            inStock: true,
+            stockMessage: "In Stock - Fast Tackle Delivery",
+            shipping: "Free 2-Day Shipping",
+            shippingCost: 0,
+            rating: 4.9,
+            reviewCount: 940,
+            isBestPrice: false
+          },
+          {
+            retailerName: "Cabela's",
+            url: "https://cabelas.com",
+            price: variation(0.00),
+            originalPrice: variation(0.12),
+            inStock: true,
+            stockMessage: "In Stock - Free Store Pickup",
+            shipping: "Free Shipping",
+            shippingCost: 0,
+            rating: 4.8,
+            reviewCount: 760,
+            isBestPrice: false
+          },
+          {
+            retailerName: "Amazon",
+            url: "https://amazon.com",
+            price: variation(0.02),
+            originalPrice: variation(0.12),
+            inStock: true,
+            stockMessage: "In Stock - Prime Eligible",
+            shipping: "Free Shipping",
+            shippingCost: 0,
+            rating: 4.7,
+            reviewCount: 2150,
+            isBestPrice: false
+          }
+        ];
+      } else if (isOutdoor) {
+        lowStore = "REI";
+        lowDate = "Anniversary Sale 2024";
+        fallbackRetailers = [
+          {
+            retailerName: "REI",
+            url: "https://rei.com",
+            price: variation(-0.05),
+            originalPrice: variation(0.15),
+            inStock: true,
+            stockMessage: "In Stock - Member Dividend Eligible",
+            shipping: "Free Shipping",
+            shippingCost: 0,
+            rating: 4.9,
+            reviewCount: 2340,
+            isBestPrice: true
+          },
+          {
+            retailerName: "Backcountry",
+            url: "https://backcountry.com",
+            price: variation(-0.02),
+            originalPrice: variation(0.15),
+            inStock: true,
+            stockMessage: "In Stock - Gearhead Assistance",
+            shipping: "Free 2-Day Shipping",
+            shippingCost: 0,
+            rating: 4.8,
+            reviewCount: 1120,
+            isBestPrice: false
+          },
+          {
+            retailerName: "Bass Pro Shops",
+            url: "https://basspro.com",
+            price: variation(0.00),
+            originalPrice: variation(0.15),
+            inStock: true,
+            stockMessage: "In Stock - Available for Pickup",
+            shipping: "Free Shipping",
+            shippingCost: 0,
+            rating: 4.7,
+            reviewCount: 890,
+            isBestPrice: false
+          },
+          {
+            retailerName: "Amazon",
+            url: "https://amazon.com",
+            price: variation(0.01),
+            originalPrice: variation(0.15),
+            inStock: true,
+            stockMessage: "In Stock - Prime 1-day delivery",
+            shipping: "Free Shipping",
+            shippingCost: 0,
+            rating: 4.8,
+            reviewCount: 3890,
+            isBestPrice: false
+          }
+        ];
+      } else {
+        fallbackRetailers = [
+          {
+            retailerName: "Amazon",
+            url: "https://amazon.com",
+            price: variation(-0.02),
+            originalPrice: variation(0.15),
+            inStock: true,
+            stockMessage: "In Stock - Prime Delivery",
+            shipping: "Free Shipping",
+            shippingCost: 0,
+            rating: 4.8,
+            reviewCount: 4230,
+            isBestPrice: true
+          },
+          {
+            retailerName: "Walmart",
+            url: "https://walmart.com",
+            price: variation(-0.01),
+            originalPrice: variation(0.15),
+            inStock: true,
+            stockMessage: "Rollback Deal - In Stock",
+            shipping: "Free 2-Day Delivery",
+            shippingCost: 0,
+            rating: 4.6,
+            reviewCount: 2410,
+            isBestPrice: false
+          },
+          {
+            retailerName: "Target",
+            url: "https://target.com",
+            price: variation(0.00),
+            originalPrice: variation(0.15),
+            inStock: true,
+            stockMessage: "In Stock - Pickup or Ship",
+            shipping: "Free Shipping with RedCard",
+            shippingCost: 0,
+            rating: 4.7,
+            reviewCount: 1180,
+            isBestPrice: false
+          },
+          {
+            retailerName: "Best Buy",
+            url: "https://bestbuy.com",
+            price: variation(0.01),
+            originalPrice: variation(0.15),
+            inStock: true,
+            stockMessage: "In Stock - Store Pickup Today",
+            shipping: "Free Shipping",
+            shippingCost: 0,
+            rating: 4.8,
+            reviewCount: 1650,
+            isBestPrice: false
+          }
+        ];
+      }
 
       return res.json({
         success: true,
@@ -460,10 +579,14 @@ Also return estimated:
         query: searchTarget,
         data: {
           retailers: fallbackRetailers,
-          allTimeLow: Number((basePrice * 0.88).toFixed(2)),
-          allTimeLowDate: "Black Friday 2024",
-          allTimeLowStore: "Micro Center",
-          marketAnalysis: "Prices are steady with competitive discounting between Amazon and Micro Center."
+          allTimeLow: Number((basePrice * 0.85).toFixed(2)),
+          allTimeLowDate: lowDate,
+          allTimeLowStore: lowStore,
+          marketAnalysis: isFishing 
+            ? "Competitive outdoor pricing across Bass Pro Shops and Tackle Warehouse."
+            : isOutdoor 
+              ? "Seasonal outdoor promotions active at REI and Backcountry."
+              : "Prices are steady with competitive discounting between Amazon and Best Buy."
         }
       });
     } catch (err: any) {

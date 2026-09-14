@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingCart, Bell, Sparkles, Plus, RefreshCw, Radar, Layers, Clock, Cloud } from 'lucide-react';
+import { ShoppingCart, Bell, Sparkles, Plus, RefreshCw, Radar, Layers, Clock, Cloud, Flame } from 'lucide-react';
 import { TrackedItem } from '../types';
 
 interface HeaderProps {
@@ -58,43 +58,40 @@ export const Header: React.FC<HeaderProps> = ({
                 </span>
               </div>
               <p className="text-xs text-slate-400 hidden sm:block">
-                Track any item across Amazon, Walmart, Target, Best Buy & more
+                Hiking, fishing, outdoor gear &amp; tech price tracker
               </p>
             </div>
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="hidden lg:flex items-center space-x-4 bg-slate-800/60 border border-slate-700/60 rounded-xl px-4 py-2">
-            <div className="text-right">
-              <div className="text-xs text-slate-400 font-medium">List Best Total</div>
-              <div className="text-sm font-bold text-emerald-400">
-                ${totalCurrentBest.toFixed(2)}
-              </div>
-            </div>
-            <div className="h-7 w-px bg-slate-700" />
-            <div className="text-right">
-              <div className="text-xs text-slate-400 font-medium">Total Saved vs MSRP</div>
-              <div className="text-sm font-bold text-blue-400">
-                -${totalSavings.toFixed(2)} ({totalMsrp > 0 ? ((totalSavings / totalMsrp) * 100).toFixed(1) : 0}%)
-              </div>
-            </div>
-            <div className="h-7 w-px bg-slate-700" />
-            <div className="flex items-center space-x-1.5">
-              <span className="relative flex h-2.5 w-2.5">
+          <div className="hidden lg:flex items-center space-x-3 bg-slate-800/60 border border-slate-700/60 rounded-xl px-3.5 py-1.5">
+            <div className="flex items-center space-x-2">
+              <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
               <span className="text-xs text-slate-300 font-medium">
-                {allTimeLowHits} at All-Time Low
+                Tracking <strong className="text-white">{items.length}</strong> items
               </span>
             </div>
-            <div className="h-7 w-px bg-slate-700" />
+            
+            {allTimeLowHits > 0 && (
+              <>
+                <div className="h-5 w-px bg-slate-700" />
+                <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded-lg bg-emerald-950/70 border border-emerald-500/40 text-emerald-400 text-xs font-bold">
+                  <Flame className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                  <span>{allTimeLowHits} at Record Lowest Price</span>
+                </div>
+              </>
+            )}
+
+            <div className="h-5 w-px bg-slate-700" />
             {/* 2x Daily Cron Badge */}
             <button
               id="header-schedule-badge"
               onClick={onOpenScheduleModal || onOpenGuideModal}
               title="Automated Price Updates: 12:00 AM (Midnight) & 12:00 PM (Noon). Click to view schedule & free cloud options."
-              className="hidden lg:flex items-center space-x-1.5 px-2.5 py-1 bg-blue-950/60 hover:bg-blue-900/80 border border-blue-800/80 rounded-lg text-xs transition cursor-pointer"
+              className="flex items-center space-x-1.5 px-2.5 py-1 bg-blue-950/60 hover:bg-blue-900/80 border border-blue-800/80 rounded-lg text-xs transition cursor-pointer"
             >
               <Clock className="w-3.5 h-3.5 text-amber-400" />
               <span className="text-slate-300 font-medium">Updates:</span>

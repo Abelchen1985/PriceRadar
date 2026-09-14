@@ -26,7 +26,7 @@ export const BestDealOptimizerModal: React.FC<BestDealOptimizerModalProps> = ({ 
   // 1. Single Store Totals (for retailers that carry multiple items)
   const allRetailerNames = Array.from(
     new Set([
-      'Amazon', 'Walmart', 'Target', 'Best Buy', 'Home Depot', 'B&H Photo', 'Newegg', 'Costco', 'Micro Center',
+      'REI', 'Bass Pro Shops', "Cabela's", 'Tackle Warehouse', 'Backcountry', 'Amazon', 'Walmart', 'Target', 'Best Buy', 'Home Depot', 'B&H Photo', 'Newegg', 'Costco', 'Micro Center',
       ...items.flatMap(it => it.retailers.map(r => r.retailerName))
     ])
   );

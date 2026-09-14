@@ -1,6 +1,6 @@
 {
   "name": "PriceRadar",
-  "description": "Universal multi-store price tracker, all-time lowest price alerts, live storefront comparison, and multi-item deal optimizer for any product.",
+  "description": "Universal multi-store price tracker for hiking, fishing, outdoor gear, electronics, and home goods with live storefront comparison and deal optimizer.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

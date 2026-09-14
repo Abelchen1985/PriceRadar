@@ -61,7 +61,8 @@ export const ItemRow: React.FC<ItemRowProps> = ({
   }
 
   const currentPrice = lowestRetailer ? lowestRetailer.price : item.msrp;
-  const priceDropFromMsrp = item.msrp > 0 ? ((item.msrp - currentPrice) / item.msrp) * 100 : 0;
+  const savedVsMsrp = Math.max(0, item.msrp - currentPrice);
+  const percentSaved = item.msrp > 0 ? (savedVsMsrp / item.msrp) * 100 : 0;
   const isAllTimeLow = currentPrice <= item.allTimeLow;
   const isNearAllTimeLow = !isAllTimeLow && currentPrice <= item.allTimeLow * 1.05;
   const isBelowTarget = currentPrice <= item.targetPrice;
@@ -106,8 +107,8 @@ export const ItemRow: React.FC<ItemRowProps> = ({
 
               {/* Status Badges */}
               {isAllTimeLow ? (
-                <span className="inline-flex items-center space-x-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-500/50">
-                  <Flame className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                <span className="inline-flex items-center space-x-1.5 text-xs font-black px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500 shadow-sm shadow-emerald-950 ring-1 ring-emerald-500/40">
+                  <Flame className="w-3.5 h-3.5 text-emerald-400 animate-pulse fill-emerald-400" />
                   <span>ALL-TIME LOWEST IN HISTORY!</span>
                 </span>
               ) : isNearAllTimeLow ? (
@@ -115,10 +116,10 @@ export const ItemRow: React.FC<ItemRowProps> = ({
                   <TrendingDown className="w-3.5 h-3.5" />
                   <span>Within 5% of Record Low</span>
                 </span>
-              ) : priceDropFromMsrp > 10 ? (
-                <span className="inline-flex items-center space-x-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-950/60 text-amber-300 border border-amber-600/40">
+              ) : percentSaved > 10 ? (
+                <span className="inline-flex items-center space-x-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-950/60 text-blue-300 border border-blue-600/40">
                   <TrendingDown className="w-3.5 h-3.5" />
-                  <span>-{priceDropFromMsrp.toFixed(0)}% from MSRP</span>
+                  <span>-{percentSaved.toFixed(0)}% from MSRP</span>
                 </span>
               ) : null}
 
@@ -181,17 +182,88 @@ export const ItemRow: React.FC<ItemRowProps> = ({
             })}
           </div>
 
+          {/* Relocated Total Saved vs MSRP on Each Product */}
+          <div 
+            id={`savings-card-${item.id}`}
+            className={`px-3.5 py-2 rounded-xl border flex flex-col justify-center min-w-[160px] transition ${
+              isAllTimeLow 
+                ? 'bg-gradient-to-br from-emerald-950 via-emerald-900/50 to-slate-900 border-emerald-500 shadow-md shadow-emerald-950/60 ring-2 ring-emerald-500/50' 
+                : isNearAllTimeLow
+                  ? 'bg-blue-950/70 border-blue-500/60 text-blue-200'
+                  : savedVsMsrp > 0
+                    ? 'bg-slate-800/80 border-slate-700/80 text-slate-200'
+                    : 'bg-slate-900/50 border-slate-800 text-slate-500'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-1.5 mb-0.5">
+              <span className={`text-[10px] uppercase font-black tracking-wider ${
+                isAllTimeLow ? 'text-emerald-300' : 'text-slate-400'
+              }`}>
+                Total Saved vs MSRP
+              </span>
+              {isAllTimeLow ? (
+                <span className="inline-flex items-center space-x-1 px-1.5 py-0.5 bg-emerald-400 text-slate-950 rounded text-[9px] font-black uppercase tracking-tight shadow-sm">
+                  <Flame className="w-2.5 h-2.5 fill-slate-950" />
+                  <span>Lowest Price</span>
+                </span>
+              ) : isNearAllTimeLow ? (
+                <span className="px-1.5 py-0.2 bg-blue-500/20 text-blue-400 border border-blue-500/40 rounded text-[9px] font-bold">
+                  Near Low
+                </span>
+              ) : null}
+            </div>
+
+            <div className="flex items-baseline space-x-1.5">
+              <span className={`text-base sm:text-lg font-black tracking-tight ${
+                isAllTimeLow 
+                  ? 'text-emerald-300' 
+                  : savedVsMsrp > 0 
+                    ? 'text-blue-400' 
+                    : 'text-slate-500'
+              }`}>
+                {savedVsMsrp > 0 ? `-$${savedVsMsrp.toFixed(2)}` : '$0.00'}
+              </span>
+              {savedVsMsrp > 0 && (
+                <span className={`text-xs font-bold ${
+                  isAllTimeLow ? 'text-emerald-400 font-extrabold' : 'text-slate-400'
+                }`}>
+                  ({percentSaved.toFixed(0)}% off)
+                </span>
+              )}
+            </div>
+
+            {isAllTimeLow ? (
+              <div className="text-[10px] text-emerald-300 font-bold flex items-center space-x-1 mt-0.5">
+                <span>⚡ Lowest price in history!</span>
+              </div>
+            ) : isNearAllTimeLow ? (
+              <div className="text-[10px] text-blue-300 font-medium mt-0.5">
+                Within 5% of record low
+              </div>
+            ) : (
+              <div className="text-[10px] text-slate-400 mt-0.5">
+                MSRP: ${item.msrp.toFixed(2)}
+              </div>
+            )}
+          </div>
+
           {/* Current Best Price Display */}
           <div className="text-right shrink-0">
             <div className="text-xs text-slate-400 font-medium">
               Best on <span className="text-slate-200 font-semibold">{lowestRetailer?.retailerName || 'Retailer'}</span>
             </div>
-            <div className="text-2xl font-black text-emerald-400 tracking-tight">
+            <div className={`text-2xl sm:text-3xl font-black tracking-tight ${
+              isAllTimeLow ? 'text-emerald-400' : 'text-white'
+            }`}>
               ${currentPrice.toFixed(2)}
             </div>
-            {priceDropFromMsrp > 0 && (
-              <div className="text-xs text-emerald-500 font-semibold">
-                Save ${(item.msrp - currentPrice).toFixed(2)}
+            {isAllTimeLow ? (
+              <span className="inline-block text-[10px] font-bold text-emerald-400 bg-emerald-950/90 border border-emerald-500/50 px-1.5 py-0.2 rounded">
+                All-Time Low (${item.allTimeLow.toFixed(0)})
+              </span>
+            ) : (
+              <div className="text-[10px] text-slate-400">
+                Record Low: ${item.allTimeLow.toFixed(2)}
               </div>
             )}
           </div>

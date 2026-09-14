@@ -168,14 +168,31 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
                   </div>
 
                   {/* Price & Direct Purchase Action */}
-                  <div className="flex items-center justify-between md:justify-end space-x-5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-700/60">
+                  <div className="flex items-center justify-between md:justify-end space-x-4 sm:space-x-5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-700/60">
+                    {/* Saved vs MSRP for this retailer */}
+                    {item.msrp > retailer.price && (
+                      <div className="hidden sm:flex flex-col text-right">
+                        <div className="text-[10px] uppercase font-bold text-slate-400">Saved vs MSRP</div>
+                        <div className={`text-xs font-bold ${
+                          isBest && retailer.price <= item.allTimeLow ? 'text-emerald-300 font-black' : 'text-blue-400'
+                        }`}>
+                          -${(item.msrp - retailer.price).toFixed(2)} ({(((item.msrp - retailer.price) / item.msrp) * 100).toFixed(0)}% off)
+                        </div>
+                        {isBest && retailer.price <= item.allTimeLow && (
+                          <span className="text-[9px] text-emerald-400 font-bold">★ All-Time Low</span>
+                        )}
+                      </div>
+                    )}
+
                     <div className="text-left md:text-right">
                       <div className="text-2xl font-black text-white">
                         ${retailer.price.toFixed(2)}
                       </div>
                       <div className="text-xs">
                         {isBest ? (
-                          <span className="text-emerald-400 font-semibold">Best Available</span>
+                          <span className="text-emerald-400 font-semibold">
+                            {retailer.price <= item.allTimeLow ? 'Record Low Available' : 'Best Available'}
+                          </span>
                         ) : (
                           <span className="text-slate-400">
                             +${diffFromBest.toFixed(2)} ({((diffFromBest / lowestPrice) * 100).toFixed(0)}% more)

@@ -3,6 +3,14 @@ export type CommonRetailer =
   | 'Walmart' 
   | 'Target' 
   | 'Best Buy' 
+  | 'REI'
+  | 'Bass Pro Shops'
+  | "Cabela's"
+  | 'Backcountry'
+  | 'Tackle Warehouse'
+  | 'Dick\'s Sporting Goods'
+  | 'Moosejaw'
+  | 'Sierra'
   | 'B&H Photo' 
   | 'Home Depot' 
   | 'Newegg' 
@@ -11,6 +19,8 @@ export type CommonRetailer =
   | 'Costco' 
   | 'Apple' 
   | 'Nike' 
+  | 'Patagonia'
+  | 'Columbia'
   | string;
 
 export interface RetailerPrice {
@@ -34,15 +44,27 @@ export interface PriceHistoryPoint {
   date: string;
   amazon?: number;
   bestBuy?: number;
+  rei?: number;
+  bassPro?: number;
+  cabelas?: number;
+  backcountry?: number;
+  tackleWarehouse?: number;
+  walmart?: number;
+  target?: number;
   newegg?: number;
   bh?: number;
   microcenter?: number;
-  walmart?: number;
-  target?: number;
   lowest: number;
+  [key: string]: string | number | undefined;
 }
 
 export type ItemCategory = 
+  | 'Hiking & Backpacking'
+  | 'Fishing & Angling'
+  | 'Camping & Bushcraft'
+  | 'Outdoor Apparel & Boots'
+  | 'Kayaking & Water Sports'
+  | 'Hunting & Optics'
   | 'Audio & Headphones'
   | 'Gaming & Consoles'
   | 'Home & Kitchen'
@@ -51,8 +73,6 @@ export type ItemCategory =
   | 'Laptops & Computers'
   | 'Smart Home'
   | 'Tools & Hardware'
-  | 'Fashion & Apparel'
-  | 'TV & Home Theater'
   | 'Cameras & Drones'
   | 'PC Components'
   | 'Electronics'
