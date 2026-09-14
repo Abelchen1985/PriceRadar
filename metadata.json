@@ -1,0 +1,7 @@
+{
+  "name": "PriceRadar",
+  "description": "Universal multi-store price tracker, all-time lowest price alerts, live storefront comparison, and multi-item deal optimizer for any product.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

@@ -1,0 +1,38 @@
+name: PriceRadar 2x Daily Price Sweep (Midnight & Noon)
+
+on:
+  schedule:
+    # Runs at 00:00 (Midnight) and 12:00 (Noon) UTC every day
+    - cron: '0 0,12 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  sweep-prices:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Ping Live Scraper & Price Update Endpoint
+        env:
+          APP_URL: ${{ secrets.APP_URL || 'https://your-deployed-app.run.app' }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'abelchen1985@gmail.com' }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          echo "Starting PriceRadar Midnight & Noon Automated Price Sweep..."
+          echo "Target App URL: $APP_URL"
+          
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "$APP_URL/api/cron/sync-now" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -d "{\"email\": \"$ALERT_EMAIL\"}")
+            
+          echo "Response from PriceRadar Engine:"
+          echo "$RESPONSE"
+          
+          STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS" | cut -d: -f2)
+          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 300 ]; then
+            echo "Price sweep completed successfully."
+          else
+            echo "Warning: Received HTTP status $STATUS"
+          fi
