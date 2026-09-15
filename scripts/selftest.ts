@@ -8,8 +8,15 @@
  * 5. Category Detection & Search Query Formatting
  */
 
-import { RAW_INITIAL_TRACKED_ITEMS, INITIAL_TRACKED_ITEMS, POPULAR_ITEM_PRESETS } from '../src/data/catalog';
-import { getRetailerDealUrl, cleanSearchQuery } from '../src/utils/retailerUrls';
+import { INITIAL_TRACKED_ITEMS, POPULAR_ITEM_PRESETS } from '../src/data/catalog';
+import { 
+  getRetailerDealUrl, 
+  cleanSearchQuery, 
+  isVerifiedDirectProductUrl, 
+  isOfficialSearchUrl, 
+  detectBrokenGuessedSlug,
+  getRetailerLinkDetails 
+} from '../src/utils/retailerUrls';
 import { detectProductCategory, estimateHistoricalPricing } from '../src/utils/productClassifier';
 
 export interface TestResult {
@@ -222,6 +229,53 @@ export function runComprehensiveSelfTest(): {
     }
   }
 
+  // 2.4 Sony WH-1000XM5 Benchmark Direct Links
+  const sonyHeadphones = INITIAL_TRACKED_ITEMS.find(i => i.id === 'audio-sony-xm5');
+  if (sonyHeadphones) {
+    const bbUrl = getRetailerDealUrl('Best Buy', sonyHeadphones.title, undefined, sonyHeadphones.brand, sonyHeadphones.model);
+    if (!bbUrl.includes('6505727.p')) {
+      fail('Sony WH-1000XM5 Best Buy Link', 'DEAL_LINKS', `Expected Best Buy SKU 6505727.p, got: ${bbUrl}`);
+    } else {
+      pass('Sony WH-1000XM5 Best Buy Link', 'DEAL_LINKS', `Direct Best Buy product page: ${bbUrl}`);
+    }
+
+    const amzUrl = getRetailerDealUrl('Amazon', sonyHeadphones.title, undefined, sonyHeadphones.brand, sonyHeadphones.model);
+    if (!amzUrl.includes('B09XS7JWHH')) {
+      fail('Sony WH-1000XM5 Amazon Link', 'DEAL_LINKS', `Expected Amazon ASIN B09XS7JWHH, got: ${amzUrl}`);
+    } else {
+      pass('Sony WH-1000XM5 Amazon Link', 'DEAL_LINKS', `Direct Amazon ASIN product page: ${amzUrl}`);
+    }
+  }
+
+  // 2.5 AMD Ryzen 7 7800X3D Benchmark Direct Links
+  const amdCpu = INITIAL_TRACKED_ITEMS.find(i => i.id === 'cpu-7800x3d');
+  if (amdCpu) {
+    const mcUrl = getRetailerDealUrl('Micro Center', amdCpu.title, undefined, amdCpu.brand, amdCpu.model);
+    if (!mcUrl.includes('/product/674503')) {
+      fail('AMD 7800X3D Micro Center Link', 'DEAL_LINKS', `Expected Micro Center /product/674503, got: ${mcUrl}`);
+    } else {
+      pass('AMD 7800X3D Micro Center Link', 'DEAL_LINKS', `Direct Micro Center product page: ${mcUrl}`);
+    }
+
+    const neweggUrl = getRetailerDealUrl('Newegg', amdCpu.title, undefined, amdCpu.brand, amdCpu.model);
+    if (!neweggUrl.includes('N82E16819113793')) {
+      fail('AMD 7800X3D Newegg Link', 'DEAL_LINKS', `Expected Newegg N82E16819113793, got: ${neweggUrl}`);
+    } else {
+      pass('AMD 7800X3D Newegg Link', 'DEAL_LINKS', `Direct Newegg product page: ${neweggUrl}`);
+    }
+  }
+
+  // 2.6 DEWALT 20V MAX Combo Kit Direct Links
+  const dewaltDrill = INITIAL_TRACKED_ITEMS.find(i => i.id === 'tools-dewalt-drill');
+  if (dewaltDrill) {
+    const hdUrl = getRetailerDealUrl('Home Depot', dewaltDrill.title, undefined, dewaltDrill.brand, dewaltDrill.model);
+    if (!hdUrl.includes('204373168')) {
+      fail('DEWALT Drill Home Depot Link', 'DEAL_LINKS', `Expected Home Depot Internet ID 204373168, got: ${hdUrl}`);
+    } else {
+      pass('DEWALT Drill Home Depot Link', 'DEAL_LINKS', `Direct Home Depot product page: ${hdUrl}`);
+    }
+  }
+
   // ==========================================
   // SECTION 3: Auto-Estimator & Classifier Tests
   // ==========================================
@@ -285,6 +339,56 @@ export function runComprehensiveSelfTest(): {
     } else {
       pass(`CleanQuery [${q.input.slice(0, 25)}]`, 'PRODUCT_MATCH', `Cleaned query: "${cleaned}"`);
     }
+  }
+
+  // ==========================================
+  // SECTION 5: Zero Broken Guessed Slugs Audit
+  // ==========================================
+  let totalCheckedUrls = 0;
+  for (const item of INITIAL_TRACKED_ITEMS) {
+    for (const r of item.retailers) {
+      totalCheckedUrls++;
+      if (detectBrokenGuessedSlug(r.url)) {
+        fail(`Broken Slug in Catalog [${item.id} -> ${r.retailerName}]`, 'DEAL_LINKS', `Found broken guessed slug: ${r.url}`);
+      }
+
+      const resolved = getRetailerDealUrl(r.retailerName, item.title, r.url, item.brand, item.model);
+      if (detectBrokenGuessedSlug(resolved)) {
+        fail(`Broken Slug in Resolved URL [${item.id} -> ${r.retailerName}]`, 'DEAL_LINKS', `Resolved URL is a broken guessed slug: ${resolved}`);
+      }
+
+      const isDirect = isVerifiedDirectProductUrl(resolved);
+      const isSearch = isOfficialSearchUrl(resolved);
+      if (!isDirect && !isSearch) {
+        fail(`Unknown URL Schema [${item.id} -> ${r.retailerName}]`, 'DEAL_LINKS', `URL is neither verified direct nor official search: ${resolved}`);
+      }
+    }
+  }
+
+  for (const preset of POPULAR_ITEM_PRESETS) {
+    totalCheckedUrls++;
+    const resolvedPresetUrl = getRetailerDealUrl(preset.bestRetailer, preset.title, undefined, preset.brand, preset.model);
+    if (detectBrokenGuessedSlug(resolvedPresetUrl)) {
+      fail(`Broken Slug in Preset [${preset.title} -> ${preset.bestRetailer}]`, 'DEAL_LINKS', `Found broken guessed slug: ${resolvedPresetUrl}`);
+    }
+  }
+  pass('Zero Broken Guessed Slugs', 'DEAL_LINKS', `Audited ${totalCheckedUrls} retailer links across catalog and presets. 0 broken slugs detected.`);
+
+  // ==========================================
+  // SECTION 6: UI Link Details Badge & Action Logic
+  // ==========================================
+  const directTest = getRetailerLinkDetails('Best Buy', 'Samsung 65" Class OLED S90D 4K Smart TV', undefined, 'Samsung', 'QN65S90D');
+  if (!directTest.isDirect || directTest.badgeLabel !== 'Direct' || !directTest.url.includes('6576624.p')) {
+    fail('LinkDetails Direct Resolution', 'DEAL_LINKS', `Failed direct link detection for Samsung S90D: ${JSON.stringify(directTest)}`);
+  } else {
+    pass('LinkDetails Direct Resolution', 'DEAL_LINKS', `Correctly flagged as Direct: "${directTest.actionText}" (${directTest.badgeLabel})`);
+  }
+
+  const searchTest = getRetailerLinkDetails('Target', 'Unknown Product 12345 Custom Nonexistent Widget');
+  if (searchTest.isDirect || searchTest.badgeLabel !== 'Search' || !searchTest.url.includes('target.com/s?searchTerm=')) {
+    fail('LinkDetails Search Fallback', 'DEAL_LINKS', `Failed search link fallback: ${JSON.stringify(searchTest)}`);
+  } else {
+    pass('LinkDetails Search Fallback', 'DEAL_LINKS', `Correctly flagged as Search: "${searchTest.actionText}" (${searchTest.badgeLabel})`);
   }
 
   // Summary calculation

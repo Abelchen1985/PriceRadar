@@ -559,23 +559,8 @@ Also return estimated:
         if (textOutput) {
           const parsed = JSON.parse(textOutput);
           if (Array.isArray(parsed.retailers)) {
-            // Ensure allTimeLowStore is ALWAYS included in live storefronts
-            const atlStore = parsed.allTimeLowStore;
-            if (atlStore && !parsed.retailers.some((r: any) => (r.retailerName || '').toLowerCase().trim() === atlStore.toLowerCase().trim())) {
-              parsed.retailers.unshift({
-                retailerName: atlStore,
-                price: parsed.allTimeLow || (parsed.retailers[0]?.price ? parsed.retailers[0].price * 0.85 : 47.50),
-                originalPrice: parsed.retailers[0]?.originalPrice || 59.99,
-                inStock: true,
-                stockMessage: "In Stock - All-Time Low Store",
-                shipping: "Free Shipping",
-                shippingCost: 0,
-                rating: 4.8,
-                reviewCount: 1200,
-                isBestPrice: true
-              });
-            }
-
+            // Do not artificially inject a fake current retailer for historic all-time low store.
+            // Historical record remains strictly historical unless confirmed live.
             parsed.retailers = parsed.retailers.map((r: any) => ({
               ...r,
               url: getRetailerDealUrl(r.retailerName, searchTarget, r.url)

@@ -11,7 +11,7 @@ import {
   Star
 } from 'lucide-react';
 import { TrackedItem } from '../types';
-import { getRetailerDealUrl } from '../utils/retailerUrls';
+import { getRetailerLinkDetails } from '../utils/retailerUrls';
 
 interface RetailerCompareModalProps {
   item: TrackedItem | null;
@@ -108,9 +108,16 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
           </div>
 
           <div className="space-y-3">
-            {sortedRetailers.map((retailer, index) => {
+            {sortedRetailers.map((retailer) => {
               const isBest = retailer.price === lowestPrice && retailer.inStock;
               const diffFromBest = retailer.price - lowestPrice;
+              const linkDetails = getRetailerLinkDetails(
+                retailer.retailerName,
+                item.title,
+                retailer.url,
+                item.brand,
+                item.model
+              );
 
               return (
                 <div 
@@ -129,10 +136,19 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
                       {retailer.retailerName.slice(0, 3)}
                     </div>
                     <div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className="font-bold text-white text-base">
                           {retailer.retailerName}
                         </span>
+                        {linkDetails.isDirect ? (
+                          <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold rounded-full">
+                            ✓ Direct SKU Page
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 bg-sky-500/20 text-sky-300 border border-sky-500/40 text-[10px] font-bold rounded-full">
+                            ⌕ Catalog Search
+                          </span>
+                        )}
                         {isBest && (
                           <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold rounded-full">
                             ★ Lowest Price
@@ -203,9 +219,10 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
                     </div>
 
                     <a 
-                      href={getRetailerDealUrl(retailer.retailerName, item.title, retailer.url, item.brand, item.model)}
+                      href={linkDetails.url}
                       target="_blank"
                       rel="noreferrer"
+                      title={linkDetails.tooltip}
                       className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center space-x-1.5 transition ${
                         isBest
                           ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-950'
@@ -214,7 +231,7 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
                             : 'bg-slate-800 text-slate-500 cursor-not-allowed pointer-events-none'
                       }`}
                     >
-                      <span>Buy at {retailer.retailerName}</span>
+                      <span>{linkDetails.actionText}</span>
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   </div>

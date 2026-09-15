@@ -16,7 +16,7 @@ import {
   Check
 } from 'lucide-react';
 import { TrackedItem, RetailerPrice, EmailRecipient } from '../types';
-import { getRetailerDealUrl } from '../utils/retailerUrls';
+import { getRetailerDealUrl, getRetailerLinkDetails } from '../utils/retailerUrls';
 
 interface ItemRowProps {
   item: TrackedItem;
@@ -49,27 +49,8 @@ export const ItemRow: React.FC<ItemRowProps> = ({
   const [targetInput, setTargetInput] = useState(item.targetPrice.toString());
   const [showEmailPicker, setShowEmailPicker] = useState(false);
 
-  // Guarantee allTimeLowStore is always present in the storefronts list
+  // Use genuine retailers list - do not fabricate fake active stores
   const displayRetailers: RetailerPrice[] = [...item.retailers];
-  if (
-    item.allTimeLowStore && 
-    !displayRetailers.some(r => (r.retailerName || '').toLowerCase().trim() === item.allTimeLowStore.toLowerCase().trim())
-  ) {
-    displayRetailers.unshift({
-      id: `r-atl-guarantee-${item.id}`,
-      retailerName: item.allTimeLowStore,
-      url: getRetailerDealUrl(item.allTimeLowStore, item.title, undefined, item.brand, item.model),
-      price: item.allTimeLow || Number((item.msrp * 0.8).toFixed(2)),
-      originalPrice: item.msrp,
-      inStock: true,
-      stockMessage: 'In Stock - Historic Record Store',
-      shipping: 'Free Shipping',
-      shippingCost: 0,
-      rating: 4.8,
-      reviewCount: 1450,
-      isBestPrice: true
-    });
-  }
 
   // Find lowest price among retailers
   const availableRetailers = displayRetailers.filter(r => r.inStock);
@@ -270,6 +251,11 @@ export const ItemRow: React.FC<ItemRowProps> = ({
             ) : (
               <div className="text-[10px] text-slate-400">
                 Record Low: ${item.allTimeLow.toFixed(2)}
+                {item.allTimeLowStore && (
+                  <span className="text-slate-400 block text-[9px] truncate max-w-[130px]" title={`Historic low at ${item.allTimeLowStore} (${item.allTimeLowDate})`}>
+                    at {item.allTimeLowStore}
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -277,20 +263,20 @@ export const ItemRow: React.FC<ItemRowProps> = ({
 
       </div>
 
-      {/* Lower Tier: Live Storefront Deal Links & Action Controls Bar */}
+      {/* Lower Tier: Store Deals & Verified Product Links */}
       <div className="pt-3.5 border-t border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-3">
         
-        {/* Left: Multi-Retailer Live Storefront Strip (All verified deal URLs) */}
+        {/* Left: Multi-Retailer Deal Strip with Direct vs Search Badges */}
         <div className="flex items-center flex-wrap gap-2 min-w-0">
           <span className="text-xs font-semibold text-slate-400 flex items-center space-x-1 mr-1 shrink-0">
             <Store className="w-3.5 h-3.5 text-blue-400" />
-            <span>Live Storefronts:</span>
+            <span>Store Deals:</span>
           </span>
 
           <div className="flex flex-wrap items-center gap-1.5">
             {displayRetailers.map((retailer) => {
               const isBest = lowestRetailer && retailer.id === lowestRetailer.id;
-              const dealUrl = getRetailerDealUrl(
+              const linkDetails = getRetailerLinkDetails(
                 retailer.retailerName,
                 item.title,
                 retailer.url,
@@ -301,11 +287,11 @@ export const ItemRow: React.FC<ItemRowProps> = ({
               return (
                 <a
                   key={retailer.id}
-                  href={dealUrl}
+                  href={linkDetails.url}
                   target="_blank"
                   rel="noreferrer"
-                  title={`${retailer.retailerName}: $${retailer.price.toFixed(2)} (${retailer.stockMessage}) - Click to open deal`}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium border flex items-center space-x-1.5 transition ${
+                  title={`${retailer.retailerName}: $${retailer.price.toFixed(2)} (${retailer.stockMessage}) • ${linkDetails.tooltip}`}
+                  className={`px-2.5 py-1.5 rounded-xl text-xs font-medium border flex items-center space-x-1.5 transition ${
                     isBest 
                       ? 'bg-emerald-950/80 border-emerald-500 text-emerald-300 font-bold shadow-sm shadow-emerald-900/50 hover:bg-emerald-900/80' 
                       : retailer.inStock 
@@ -315,6 +301,15 @@ export const ItemRow: React.FC<ItemRowProps> = ({
                 >
                   <span className="font-semibold">{retailer.retailerName}</span>
                   <span className="font-bold">${retailer.price.toFixed(0)}</span>
+                  {linkDetails.isDirect ? (
+                    <span className="text-[9px] uppercase tracking-wider px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
+                      Direct
+                    </span>
+                  ) : (
+                    <span className="text-[9px] uppercase tracking-wider px-1 py-0.2 rounded bg-sky-500/20 text-sky-300 font-semibold border border-sky-500/30">
+                      Search
+                    </span>
+                  )}
                   {isBest ? (
                     <span className="text-[10px] text-emerald-400">★</span>
                   ) : (

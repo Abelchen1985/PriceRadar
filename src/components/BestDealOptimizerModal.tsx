@@ -13,7 +13,7 @@ import {
   Copy
 } from 'lucide-react';
 import { TrackedItem, DealOptimizationResult } from '../types';
-import { getRetailerDealUrl } from '../utils/retailerUrls';
+import { getRetailerDealUrl, getRetailerLinkDetails } from '../utils/retailerUrls';
 
 interface BestDealOptimizerModalProps {
   items: TrackedItem[];
@@ -271,7 +271,7 @@ ${Object.entries(groupedByRetailer).map(([store, list]) =>
                           </div>
                         </div>
 
-                        <div className="flex items-center space-x-4 shrink-0 pl-3">
+                        <div className="flex items-center space-x-3 shrink-0 pl-3">
                           <div className="text-right">
                             <div className="text-sm font-black text-white">
                               ${price.toFixed(2)}
@@ -283,15 +283,25 @@ ${Object.entries(groupedByRetailer).map(([store, list]) =>
                             )}
                           </div>
 
-                          <a
-                            href={url}
-                            target="_blank"
-                            rel="noreferrer"
-                            title="Direct product link"
-                            className="p-1.5 rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 hover:text-white transition"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </a>
+                          {(() => {
+                            const linkDetails = getRetailerLinkDetails(storeName, item.title, url, item.brand, item.model);
+                            return (
+                              <a
+                                href={linkDetails.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                title={linkDetails.tooltip}
+                                className={`px-2 py-1 rounded-lg text-xs font-semibold flex items-center space-x-1 transition ${
+                                  linkDetails.isDirect 
+                                    ? 'bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-900' 
+                                    : 'bg-slate-700/80 border border-slate-600 text-slate-200 hover:bg-slate-700'
+                                }`}
+                              >
+                                <span>{linkDetails.badgeLabel}</span>
+                                <ExternalLink className="w-3 h-3 opacity-75" />
+                              </a>
+                            );
+                          })()}
                         </div>
                       </div>
                     ))}
