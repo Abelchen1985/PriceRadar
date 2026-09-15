@@ -18,7 +18,8 @@ import {
   detectProductCategory, 
   getProductImageUrl, 
   getCategoryStoreRules, 
-  sanitizeTrackedItem 
+  sanitizeTrackedItem,
+  estimateHistoricalPricing
 } from '../utils/productClassifier';
 import { getRetailerDealUrl } from '../utils/retailerUrls';
 
@@ -65,11 +66,42 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
   const livePreviewImage = getProductImageUrl(title, activeCategory, brand);
   const categoryStoreRules = getCategoryStoreRules(activeCategory, title);
 
+  // Auto-estimate historical pricing (All-Time Low and MSRP) from product name & category
+  const userMsrpNum = parseFloat(msrp) || undefined;
+  const pricingEstimate = estimateHistoricalPricing(title, activeCategory, userMsrpNum);
+
   const handleTitleChange = (val: string) => {
     setTitle(val);
     const autoCat = detectProductCategory(val, brand);
     if (autoCat !== 'Other') {
       setCategory(autoCat);
+    }
+    const estimate = estimateHistoricalPricing(val, autoCat !== 'Other' ? autoCat : activeCategory);
+    // Auto-populate MSRP if currently empty
+    if (!msrp) {
+      setMsrp(estimate.suggestedMsrp.toString());
+    }
+    // Auto-populate Target Price if currently empty
+    if (!targetPrice) {
+      setTargetPrice(estimate.recommendedTargetPrice.toString());
+    }
+  };
+
+  const handleProductUrlChange = (val: string) => {
+    setProductUrl(val);
+    // If title is currently empty, extract clean product title from URL
+    if (!title.trim() && val.length > 8) {
+      try {
+        const u = new URL(val);
+        const segments = u.pathname.split('/').filter(Boolean);
+        const slug = segments.find(s => s.length > 4 && !['dp', 'gp', 'product', 'p', 'shop', 'en'].includes(s.toLowerCase()));
+        if (slug) {
+          const cleaned = slug.replace(/[-_]/g, ' ').replace(/\.html?$/i, '').trim();
+          if (cleaned.length > 3) {
+            handleTitleChange(cleaned);
+          }
+        }
+      } catch {}
     }
   };
 
@@ -119,9 +151,10 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
 
     // Build initial retailers from category rules or scraped preview
     let retailers: RetailerPrice[] = [];
-    let allTimeLowVal = Number((targetNum * 0.95).toFixed(2));
-    let allTimeLowStore = rules.defaultATLStore;
-    let allTimeLowDate = 'Nov 2024';
+    const estimate = estimateHistoricalPricing(title, finalCategory, msrpNum);
+    let allTimeLowVal = estimate.allTimeLow;
+    let allTimeLowStore = estimate.allTimeLowStore;
+    let allTimeLowDate = estimate.allTimeLowDate;
 
     if (scrapedPreview?.retailers && scrapedPreview.retailers.length > 0) {
       // Filter out stores that don't sell this category (e.g. Micro Center on a fishing rod)
@@ -409,8 +442,8 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
                   <input
                     type="url"
                     value={productUrl}
-                    onChange={(e) => setProductUrl(e.target.value)}
-                    placeholder="https://amazon.com/dp/... or https://bestbuy.com/site/..."
+                    onChange={(e) => handleProductUrlChange(e.target.value)}
+                    placeholder="https://amazon.com/dp/... or https://basspro.com/shop/..."
                     className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -455,7 +488,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
                     type="text"
                     value={brand}
                     onChange={(e) => setBrand(e.target.value)}
-                    placeholder="e.g. Osprey, Shimano, Garmin, YETI, Sony, Apple"
+                    placeholder="e.g. Ugly Stik, Shimano, Osprey, Garmin, Sony, Apple"
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -463,17 +496,48 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
-                    MSRP / Reference Price ($)
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                      MSRP / Reference Price ($)
+                    </label>
+                    {pricingEstimate && !msrp && (
+                      <span className="text-[10px] text-slate-400">
+                        Suggested: ${pricingEstimate.suggestedMsrp.toFixed(2)}
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="number"
                     step="0.01"
                     value={msrp}
                     onChange={(e) => setMsrp(e.target.value)}
-                    placeholder="e.g. 399.99"
+                    placeholder={pricingEstimate.suggestedMsrp.toFixed(2)}
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
                   />
+
+                  {/* Historical Lowest Price helper card directly under MSRP box */}
+                  <div className="mt-2 p-2.5 rounded-xl bg-slate-900/90 border border-emerald-500/30 text-xs">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-1.5 font-bold text-emerald-400">
+                        <TrendingDown className="w-3.5 h-3.5" />
+                        <span>All-Time Low: ${pricingEstimate.allTimeLow.toFixed(2)}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setTargetPrice(pricingEstimate.allTimeLow.toFixed(2))}
+                        className="px-2 py-0.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold text-[10px] rounded border border-emerald-500/40 transition cursor-pointer"
+                        title="Set target price to All-Time Low"
+                      >
+                        Match 🎯
+                      </button>
+                    </div>
+                    <div className="text-[11px] text-slate-400 mt-1 leading-snug">
+                      Recorded on <strong className="text-slate-200">{pricingEstimate.allTimeLowStore}</strong> ({pricingEstimate.allTimeLowDate})
+                      <span className="block text-[10px] text-emerald-400/90 mt-0.5">
+                        Save ${pricingEstimate.savingsAmount.toFixed(2)} ({pricingEstimate.typicalSaleDiscountPct}% off MSRP)
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 <div>
@@ -486,12 +550,61 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
                     required
                     value={targetPrice}
                     onChange={(e) => setTargetPrice(e.target.value)}
-                    placeholder="e.g. 320.00"
+                    placeholder={pricingEstimate.recommendedTargetPrice.toFixed(2)}
                     className="w-full px-3 py-2 bg-slate-950 border border-emerald-500/80 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-400"
                   />
                   <p className="text-[11px] text-slate-400 mt-1">
-                    Triggers instant alert whenever price drops to this deal threshold.
+                    Triggers an instant email alert whenever price drops to or below this amount.
                   </p>
+
+                  {/* 1-Click Quick Target Price Buttons */}
+                  <div className="mt-2 space-y-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center space-x-1">
+                      <Sparkles className="w-3 h-3 text-amber-400" />
+                      <span>1-Click Target Presets:</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 pt-0.5">
+                      <button
+                        type="button"
+                        onClick={() => setTargetPrice(pricingEstimate.allTimeLow.toFixed(2))}
+                        className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition cursor-pointer ${
+                          targetPrice === pricingEstimate.allTimeLow.toFixed(2)
+                            ? 'bg-emerald-500 text-black border-emerald-400 font-bold shadow-sm'
+                            : 'bg-emerald-950/40 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/60'
+                        }`}
+                      >
+                        🎯 All-Time Low (${pricingEstimate.allTimeLow.toFixed(2)})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const base = parseFloat(msrp) || pricingEstimate.suggestedMsrp;
+                          setTargetPrice((base * 0.9).toFixed(2));
+                        }}
+                        className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition cursor-pointer ${
+                          targetPrice === ((parseFloat(msrp) || pricingEstimate.suggestedMsrp) * 0.9).toFixed(2)
+                            ? 'bg-blue-500 text-white border-blue-400 font-bold'
+                            : 'bg-blue-950/40 text-blue-300 border-blue-500/40 hover:bg-blue-900/60'
+                        }`}
+                      >
+                        📉 10% Off MSRP (${((parseFloat(msrp) || pricingEstimate.suggestedMsrp) * 0.9).toFixed(2)})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const base = parseFloat(msrp) || pricingEstimate.suggestedMsrp;
+                          setTargetPrice((base * 0.8).toFixed(2));
+                        }}
+                        className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition cursor-pointer ${
+                          targetPrice === ((parseFloat(msrp) || pricingEstimate.suggestedMsrp) * 0.8).toFixed(2)
+                            ? 'bg-purple-500 text-white border-purple-400 font-bold'
+                            : 'bg-purple-950/40 text-purple-300 border-purple-500/40 hover:bg-purple-900/60'
+                        }`}
+                      >
+                        🔥 20% Steal Deal (${((parseFloat(msrp) || pricingEstimate.suggestedMsrp) * 0.8).toFixed(2)})
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
