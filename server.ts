@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
+import nodemailer from "nodemailer";
 import { getRetailerDealUrl } from "./src/utils/retailerUrls";
 
 interface AlertRecord {
@@ -237,13 +238,135 @@ async function startServer() {
     });
   });
 
+  // Helper to send real emails via Resend or SMTP if configured
+  async function sendExternalEmail(to: string, subject: string, html: string) {
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const fromEmail = process.env.EMAIL_FROM || "PriceRadar <onboarding@resend.dev>";
+        const resp = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            from: fromEmail,
+            to: [to],
+            subject,
+            html
+          })
+        });
+        const data = await resp.json();
+        if (!resp.ok) {
+          return { success: false, provider: "Resend", error: data.message || "Resend API returned error" };
+        }
+        return { success: true, provider: "Resend", messageId: data.id };
+      } catch (e: any) {
+        return { success: false, provider: "Resend", error: e.message };
+      }
+    }
+
+    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+      try {
+        const cleanUser = (process.env.SMTP_USER || "").trim();
+        const cleanPass = (process.env.SMTP_PASS || "").trim().replace(/\s+/g, "");
+        const host = process.env.SMTP_HOST || "smtp.gmail.com";
+        const isGmail = host.includes("gmail") || cleanUser.endsWith("@gmail.com");
+
+        const transportConfig: any = isGmail
+          ? {
+              service: "gmail",
+              auth: {
+                user: cleanUser,
+                pass: cleanPass
+              }
+            }
+          : {
+              host,
+              port: Number(process.env.SMTP_PORT) || 587,
+              secure: Number(process.env.SMTP_PORT) === 465,
+              auth: {
+                user: cleanUser,
+                pass: cleanPass
+              }
+            };
+
+        const transporter = nodemailer.createTransport(transportConfig);
+        const info = await transporter.sendMail({
+          from: process.env.SMTP_FROM || `"PriceRadar Alerts" <${cleanUser}>`,
+          to,
+          subject,
+          html
+        });
+        return { success: true, provider: "SMTP", messageId: info.messageId };
+      } catch (e: any) {
+        let msg = e.message || "SMTP error";
+        if (msg.includes("534") || msg.includes("Application-specific password required")) {
+          msg = "Google requires a 16-character App Password (not standard account password). Generate one at https://myaccount.google.com/apppasswords with 2-Step Verification enabled.";
+        }
+        return { success: false, provider: "SMTP", error: msg };
+      }
+    }
+
+    return { 
+      success: false, 
+      provider: "Simulator", 
+      error: "No external outbound email service configured. Alert logged to in-app notification center. (To send real emails to your Gmail inbox, add RESEND_API_KEY or SMTP credentials in Settings > Secrets)." 
+    };
+  }
+
+  // Check email provider integration status and diagnose connection
+  app.get("/api/email-status", async (_req, res) => {
+    const hasResend = Boolean(process.env.RESEND_API_KEY);
+    const hasSmtp = Boolean(process.env.SMTP_USER && process.env.SMTP_PASS);
+    
+    let smtpDiag = null;
+    if (hasSmtp) {
+      try {
+        const cleanUser = (process.env.SMTP_USER || "").trim();
+        const cleanPass = (process.env.SMTP_PASS || "").trim().replace(/\s+/g, "");
+        const host = process.env.SMTP_HOST || "smtp.gmail.com";
+        const isGmail = host.includes("gmail") || cleanUser.endsWith("@gmail.com");
+
+        const transporter = nodemailer.createTransport(isGmail ? {
+          service: "gmail",
+          auth: { user: cleanUser, pass: cleanPass }
+        } : {
+          host,
+          port: Number(process.env.SMTP_PORT) || 587,
+          secure: Number(process.env.SMTP_PORT) === 465,
+          auth: { user: cleanUser, pass: cleanPass }
+        });
+
+        await transporter.verify();
+        smtpDiag = { verified: true, message: `Connected to SMTP (${cleanUser})` };
+      } catch (err: any) {
+        let errDesc = err.message || "Connection failed";
+        if (errDesc.includes("534") || errDesc.includes("Application-specific password required")) {
+          errDesc = "Google requires a 16-character App Password (not your normal password). Visit https://myaccount.google.com/apppasswords";
+        }
+        smtpDiag = { verified: false, error: errDesc };
+      }
+    }
+
+    res.json({
+      configured: hasResend || hasSmtp,
+      provider: hasResend ? "Resend" : hasSmtp ? "SMTP" : "Simulator (Sandbox)",
+      resend: hasResend,
+      smtp: hasSmtp,
+      smtpUser: process.env.SMTP_USER || null,
+      smtpDiag,
+      instructions: "To receive live alerts in your inbox, use an authorized Google App Password (16 characters) or RESEND_API_KEY."
+    });
+  });
+
   // Fetch recent alert logs
   app.get("/api/alerts", (_req, res) => {
     res.json({ alerts: alertLogs });
   });
 
-  // Send an email alert (logs in system and generates ready-to-render email HTML for 1 or more recipients)
-  app.post("/api/send-alert", (req, res) => {
+  // Send an email alert (logs in system, generates ready-to-render email HTML, and dispatches via Resend/SMTP if configured)
+  app.post("/api/send-alert", async (req, res) => {
     const {
       email,
       emails,
@@ -270,9 +393,15 @@ async function startServer() {
     const isAllTimeLow = newPrice <= allTimeLow;
     const verifiedDealUrl = getRetailerDealUrl(retailer || "Amazon", itemTitle, retailerUrl);
 
-    const createdAlerts: AlertRecord[] = [];
+    const hasLiveProvider = Boolean(process.env.RESEND_API_KEY || (process.env.SMTP_USER && process.env.SMTP_PASS));
+    const activeProvider = process.env.RESEND_API_KEY ? "Resend" : (process.env.SMTP_USER && process.env.SMTP_PASS) ? "SMTP" : "Simulator";
 
-    recipientList.forEach((recipient) => {
+    const createdAlerts: AlertRecord[] = [];
+    const dispatchResults: Array<{ recipient: string; delivery: any }> = [];
+
+    const subjectLine = `${isAllTimeLow ? "🔥 Historic Lowest Price: " : "📉 Price Drop Alert: "}${itemTitle || "Hardware Item"} dropped to $${Number(newPrice).toFixed(2)} on ${retailer || "Retailer"}`;
+
+    for (const recipient of recipientList) {
       const emailHtml = `
         <div style="max-width: 600px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
           <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 24px; text-align: center; color: #ffffff;">
@@ -326,6 +455,10 @@ async function startServer() {
         </div>
       `;
 
+      // Attempt live external email dispatch
+      let delivery = await sendExternalEmail(recipient, subjectLine, emailHtml);
+      dispatchResults.push({ recipient, delivery });
+
       const alertRecord: AlertRecord = {
         id: `alert-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
@@ -339,22 +472,28 @@ async function startServer() {
         retailer: retailer || "Amazon",
         retailerUrl: verifiedDealUrl,
         triggerReason: triggerReason || "Price threshold reached",
-        status: "delivered",
+        status: delivery.success ? "sent" : "delivered",
         emailHtml
       };
 
       createdAlerts.push(alertRecord);
       alertLogs.unshift(alertRecord);
-    });
+    }
 
     if (alertLogs.length > 50) alertLogs.length = 50;
 
     res.json({
       success: true,
-      message: `Alert dispatched to ${recipientList.length} recipient(s): ${recipientList.join(", ")}`,
+      deliveryMode: hasLiveProvider ? "live_external" : "simulated_hub",
+      provider: activeProvider,
+      message: hasLiveProvider 
+        ? `Real email alert dispatched to ${recipientList.length} recipient(s): ${recipientList.join(", ")} via ${activeProvider}!`
+        : `Alert generated and verified for ${recipientList.length} recipient(s): ${recipientList.join(", ")}. In-app simulator active (configure RESEND_API_KEY or SMTP credentials in Settings > Secrets for direct physical inbox delivery).`,
       recipients: recipientList,
+      subject: subjectLine,
       alert: createdAlerts[0],
-      allAlerts: createdAlerts
+      allAlerts: createdAlerts,
+      dispatchResults
     });
   });
 

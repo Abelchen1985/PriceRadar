@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Plus, 
@@ -8,10 +8,19 @@ import {
   Check, 
   Cpu, 
   TrendingDown, 
-  RefreshCw 
+  RefreshCw,
+  Image as ImageIcon,
+  Store
 } from 'lucide-react';
 import { TrackedItem, RetailerPrice, EmailRecipient } from '../types';
 import { POPULAR_ITEM_PRESETS } from '../data/catalog';
+import { 
+  detectProductCategory, 
+  getProductImageUrl, 
+  getCategoryStoreRules, 
+  sanitizeTrackedItem 
+} from '../utils/productClassifier';
+import { getRetailerDealUrl } from '../utils/retailerUrls';
 
 interface AddItemModalProps {
   onAddItem: (item: TrackedItem) => void;
@@ -42,13 +51,27 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
   // Custom Form Fields
   const [title, setTitle] = useState('');
   const [brand, setBrand] = useState('');
-  const [category, setCategory] = useState<TrackedItem['category']>('Hiking & Backpacking');
+  const [category, setCategory] = useState<TrackedItem['category']>('Fishing & Angling');
   const [model, setModel] = useState('');
   const [msrp, setMsrp] = useState('');
   const [targetPrice, setTargetPrice] = useState('');
   const [productUrl, setProductUrl] = useState('');
   const [isScraping, setIsScraping] = useState(false);
   const [scrapedPreview, setScrapedPreview] = useState<any | null>(null);
+
+  // Auto-detect category & real image preview as user types
+  const detectedCategory = detectProductCategory(title, brand);
+  const activeCategory = category === 'Other' || !category ? (detectedCategory !== 'Other' ? detectedCategory : 'Other') : category;
+  const livePreviewImage = getProductImageUrl(title, activeCategory, brand);
+  const categoryStoreRules = getCategoryStoreRules(activeCategory, title);
+
+  const handleTitleChange = (val: string) => {
+    setTitle(val);
+    const autoCat = detectProductCategory(val, brand);
+    if (autoCat !== 'Other') {
+      setCategory(autoCat);
+    }
+  };
 
   const handleLiveScrapePreview = async () => {
     if (!title.trim() && !productUrl.trim()) return;
@@ -84,105 +107,85 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
     e.preventDefault();
     if (!title.trim()) return;
 
-    const msrpNum = parseFloat(msrp) || 199.99;
+    const msrpNum = parseFloat(msrp) || 59.99;
     const targetNum = parseFloat(targetPrice) || msrpNum * 0.85;
 
-    // Build initial retailers
+    // Resolve accurate category and valid storefront rules
+    const finalCategory = (category === 'Other' || !category) && detectedCategory !== 'Other' 
+      ? detectedCategory 
+      : category;
+    const rules = getCategoryStoreRules(finalCategory, title);
+    const resolvedImageUrl = getProductImageUrl(title, finalCategory, brand);
+
+    // Build initial retailers from category rules or scraped preview
     let retailers: RetailerPrice[] = [];
-    let allTimeLowVal = targetNum * 0.95;
-    let allTimeLowStore = 'Micro Center';
+    let allTimeLowVal = Number((targetNum * 0.95).toFixed(2));
+    let allTimeLowStore = rules.defaultATLStore;
     let allTimeLowDate = 'Nov 2024';
 
     if (scrapedPreview?.retailers && scrapedPreview.retailers.length > 0) {
-      retailers = scrapedPreview.retailers.map((r: any, idx: number) => ({
-        id: `r-cust-${Date.now()}-${idx}`,
-        retailerName: r.retailerName,
-        url: r.url || productUrl || 'https://amazon.com',
-        price: r.price,
-        originalPrice: r.originalPrice || msrpNum,
-        inStock: r.inStock ?? true,
-        stockMessage: r.stockMessage || 'In Stock',
-        shipping: r.shipping || 'Free Shipping',
-        shippingCost: r.shippingCost || 0,
-        promoCode: r.promoCode,
-        rating: r.rating || 4.7,
-        reviewCount: r.reviewCount || 450,
-        isBestPrice: r.isBestPrice
-      }));
+      // Filter out stores that don't sell this category (e.g. Micro Center on a fishing rod)
+      const validScraped = scrapedPreview.retailers.filter((r: any) => {
+        const rName = (r.retailerName || '').toLowerCase();
+        return !rules.forbiddenStores.some(f => rName.includes(f.toLowerCase()));
+      });
 
-      if (scrapedPreview.allTimeLow) {
-        allTimeLowVal = scrapedPreview.allTimeLow;
-        allTimeLowStore = scrapedPreview.allTimeLowStore || 'Amazon';
-        allTimeLowDate = scrapedPreview.allTimeLowDate || 'Last Month';
+      if (validScraped.length > 0) {
+        retailers = validScraped.map((r: any, idx: number) => ({
+          id: `r-cust-${Date.now()}-${idx}`,
+          retailerName: r.retailerName,
+          url: getRetailerDealUrl(r.retailerName, title, r.url || productUrl, brand, model),
+          price: r.price,
+          originalPrice: r.originalPrice || msrpNum,
+          inStock: r.inStock ?? true,
+          stockMessage: r.stockMessage || 'In Stock',
+          shipping: r.shipping || 'Free Shipping',
+          shippingCost: r.shippingCost || 0,
+          promoCode: r.promoCode,
+          rating: r.rating || 4.8,
+          reviewCount: r.reviewCount || 650,
+          isBestPrice: r.isBestPrice
+        }));
+
+        if (scrapedPreview.allTimeLow) {
+          allTimeLowVal = scrapedPreview.allTimeLow;
+          const scrapedStore = scrapedPreview.allTimeLowStore || rules.defaultATLStore;
+          const isForbidden = rules.forbiddenStores.some(f => scrapedStore.toLowerCase().includes(f.toLowerCase()));
+          allTimeLowStore = isForbidden ? rules.defaultATLStore : scrapedStore;
+          allTimeLowDate = scrapedPreview.allTimeLowDate || 'Last Month';
+        }
       }
-    } else {
-      retailers = [
-        {
-          id: `r-cust-${Date.now()}-amz`,
-          retailerName: 'Amazon',
-          url: productUrl || 'https://amazon.com',
-          price: Number((msrpNum * 0.92).toFixed(2)),
+    }
+
+    // Fallback to verified category-appropriate storefronts
+    if (retailers.length === 0) {
+      retailers = rules.defaultRetailers.map((storeName, idx) => {
+        const discounts = [0.92, 0.94, 0.96, 0.98];
+        const discountRate = discounts[idx] || 0.95;
+        return {
+          id: `r-cust-${Date.now()}-${idx}`,
+          retailerName: storeName,
+          url: getRetailerDealUrl(storeName, title, productUrl, brand, model),
+          price: Number((msrpNum * discountRate).toFixed(2)),
           originalPrice: msrpNum,
           inStock: true,
-          stockMessage: 'In Stock - Prime Eligible',
+          stockMessage: idx === 0 ? 'In Stock - Best Deal Available' : 'In Stock - Fast Delivery',
           shipping: 'Free Shipping',
           shippingCost: 0,
           rating: 4.8,
-          reviewCount: 1200,
-          isBestPrice: true
-        },
-        {
-          id: `r-cust-${Date.now()}-wm`,
-          retailerName: 'Walmart',
-          url: 'https://walmart.com',
-          price: Number((msrpNum * 0.93).toFixed(2)),
-          originalPrice: msrpNum,
-          inStock: true,
-          stockMessage: 'In Stock - Free 2-day Delivery',
-          shipping: 'Free Shipping',
-          shippingCost: 0,
-          rating: 4.6,
-          reviewCount: 780,
-          isBestPrice: false
-        },
-        {
-          id: `r-cust-${Date.now()}-tgt`,
-          retailerName: 'Target',
-          url: 'https://target.com',
-          price: Number((msrpNum * 0.95).toFixed(2)),
-          originalPrice: msrpNum,
-          inStock: true,
-          stockMessage: 'In Stock - Pickup or Ship',
-          shipping: 'Free Shipping',
-          shippingCost: 0,
-          rating: 4.7,
-          reviewCount: 420,
-          isBestPrice: false
-        },
-        {
-          id: `r-cust-${Date.now()}-bb`,
-          retailerName: 'Best Buy',
-          url: 'https://bestbuy.com',
-          price: Number((msrpNum * 0.96).toFixed(2)),
-          originalPrice: msrpNum,
-          inStock: true,
-          stockMessage: 'In Stock',
-          shipping: 'Free Shipping',
-          shippingCost: 0,
-          rating: 4.7,
-          reviewCount: 540,
-          isBestPrice: false
-        }
-      ];
+          reviewCount: 750 + idx * 180,
+          isBestPrice: idx === 0
+        };
+      });
     }
 
-    const newItem: TrackedItem = {
+    const newItem: TrackedItem = sanitizeTrackedItem({
       id: `item-${Date.now()}`,
       title: title.trim(),
-      category,
-      brand: brand.trim() || 'Custom Brand',
-      model: model.trim() || 'Model-X',
-      imageUrl: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=300&auto=format&fit=crop&q=80',
+      category: finalCategory,
+      brand: brand.trim() || (title.includes('Ugly Stik') ? 'Shakespeare' : 'Specialized Brand'),
+      model: model.trim() || (title.includes('GX2') ? 'GX2-Spinning' : 'Model-Standard'),
+      imageUrl: resolvedImageUrl,
       msrp: msrpNum,
       allTimeLow: allTimeLowVal,
       allTimeLowDate,
@@ -196,12 +199,12 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
       retailers,
       priceHistory: [
         { date: '90d ago', lowest: msrpNum },
-        { date: '60d ago', lowest: msrpNum * 0.96 },
-        { date: '30d ago', lowest: msrpNum * 0.94 },
+        { date: '60d ago', lowest: Number((msrpNum * 0.96).toFixed(2)) },
+        { date: '30d ago', lowest: Number((msrpNum * 0.94).toFixed(2)) },
         { date: 'Today', lowest: Math.min(...retailers.map(r => r.price)) }
       ],
       isCustom: true
-    };
+    });
 
     onAddItem(newItem);
     onClose();
@@ -352,8 +355,8 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
                     type="text"
                     required
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g. AMD Ryzen 9 7950X3D or Sony WH-1000XM5"
+                    onChange={(e) => handleTitleChange(e.target.value)}
+                    placeholder="e.g. Ugly Stik GX2 Spinning Rod or Sony WH-1000XM5"
                     className="flex-1 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
                   />
                   <button
@@ -367,6 +370,34 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
                     <span>{isScraping ? 'Scraping...' : 'Fetch Live Prices'}</span>
                   </button>
                 </div>
+
+                {/* Live Category & Photo Auto-Match Card */}
+                {title.trim().length > 2 && (
+                  <div className="mt-2.5 p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center space-x-3 text-xs animate-in fade-in">
+                    <img 
+                      src={livePreviewImage} 
+                      alt="Auto-matched product preview" 
+                      className="w-12 h-12 rounded-lg object-cover border border-slate-700 shrink-0"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-semibold text-white truncate">Auto-matched:</span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                          {activeCategory}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-400 mt-0.5 flex items-center space-x-1">
+                        <Store className="w-3 h-3 text-emerald-400 shrink-0" />
+                        <span className="truncate">
+                          Authorized Stores: <strong className="text-slate-300">{categoryStoreRules.allowedStores.slice(0, 4).join(', ')}</strong>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>

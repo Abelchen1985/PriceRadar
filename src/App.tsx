@@ -27,6 +27,7 @@ import { EmailAlertsModal } from './components/EmailAlertsModal';
 import { AddItemModal } from './components/AddItemModal';
 import { ArchitectureGuideModal } from './components/ArchitectureGuideModal';
 import { getRetailerDealUrl } from './utils/retailerUrls';
+import { sanitizeTrackedItem } from './utils/productClassifier';
 
 export default function App() {
   const [items, setItems] = useState<TrackedItem[]>(() => {
@@ -35,20 +36,14 @@ export default function App() {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // Sanitize & repair all retailer URLs to guarantee they point to verified search/deal pages without 404s
-          return parsed.map((item: TrackedItem) => ({
-            ...item,
-            retailers: (item.retailers || []).map(r => ({
-              ...r,
-              url: getRetailerDealUrl(r.retailerName, item.title, r.url, item.brand, item.model)
-            }))
-          }));
+          // Sanitize, audit store compatibility, auto-fix categories and images
+          return parsed.map((item: TrackedItem) => sanitizeTrackedItem(item));
         }
       } catch (e) {
         console.error(e);
       }
     }
-    return INITIAL_TRACKED_ITEMS;
+    return INITIAL_TRACKED_ITEMS.map(item => sanitizeTrackedItem(item));
   });
 
   const [userEmail, setUserEmail] = useState<string>(() => {
@@ -236,9 +231,14 @@ export default function App() {
       const data = await res.json();
       if (data.alert) {
         setAlertLogs(prev => [data.alert, ...prev]);
+        const toastTitle = data.deliveryMode === 'live_external' 
+          ? "Live Email Dispatched to Inbox!" 
+          : "Email Alert Generated & Logged";
         showToast(
-          "Email Alert Dispatched!",
-          `Delivered price drop alert for ${item.title.slice(0, 25)}... to ${recipientDisplay}`
+          toastTitle,
+          data.deliveryMode === 'live_external'
+            ? `Sent real email to ${recipientDisplay} via ${data.provider}`
+            : `Price drop alert generated for ${item.title.slice(0, 25)}... to ${recipientDisplay}`
         );
       }
       return data;

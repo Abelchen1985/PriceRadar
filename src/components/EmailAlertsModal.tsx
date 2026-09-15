@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Bell, 
@@ -15,7 +15,9 @@ import {
   Filter, 
   Tag, 
   ExternalLink,
-  Check
+  Check,
+  AlertCircle,
+  Copy
 } from 'lucide-react';
 import { TrackedItem, AlertLog, EmailRecipient } from '../types';
 
@@ -59,6 +61,30 @@ export const EmailAlertsModal: React.FC<EmailAlertsModalProps> = ({
   const [customTestEmail, setCustomTestEmail] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [previewAlert, setPreviewAlert] = useState<any | null>(null);
+  const [lastDispatchInfo, setLastDispatchInfo] = useState<{ mode: string; provider: string; message: string } | null>(null);
+  const [emailStatus, setEmailStatus] = useState<{
+    configured: boolean;
+    provider: string;
+    resend: boolean;
+    smtp: boolean;
+    instructions: string;
+  } | null>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/email-status')
+      .then(res => res.json())
+      .then(data => setEmailStatus(data))
+      .catch(() => {});
+  }, []);
+
+  const getGmailComposeUrl = (alert: any) => {
+    if (!alert) return '#';
+    const targetEmail = alert.email || userEmail;
+    const subject = `🔥 Deal Alert: ${alert.itemTitle} dropped to $${Number(alert.newPrice).toFixed(2)} on ${alert.retailer}!`;
+    const body = `Hi,\n\nAn item on your PriceRadar watchlist reached a deal price!\n\nProduct: ${alert.itemTitle}\nDeal Price: $${Number(alert.newPrice).toFixed(2)} (MSRP: $${Number(alert.oldPrice).toFixed(2)})\nRetailer: ${alert.retailer}\nStore Link: ${alert.retailerUrl}\n\nHistorical Status: ${alert.isAllTimeLow ? 'Historic All-Time Lowest Price!' : `${alert.dropPercent}% off MSRP`}\n\nTracked via PriceRadar`;
+    return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(targetEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
 
   // Log filter
   const [filterLogEmail, setFilterLogEmail] = useState<string>('all');
@@ -95,6 +121,13 @@ export const EmailAlertsModal: React.FC<EmailAlertsModalProps> = ({
       const res = await onSendAlert(item, targetEmails);
       if (res && res.alert) {
         setPreviewAlert(res.alert);
+        if (res.deliveryMode || res.provider) {
+          setLastDispatchInfo({
+            mode: res.deliveryMode || 'simulated_hub',
+            provider: res.provider || 'Simulator',
+            message: res.message || 'Alert dispatched successfully'
+          });
+        }
       }
     } catch (err) {
       console.error(err);
@@ -431,10 +464,60 @@ export const EmailAlertsModal: React.FC<EmailAlertsModalProps> = ({
         {/* Tab 3: Send Live Test Alert */}
         {activeTab === 'test-dispatcher' && (
           <div className="p-6 space-y-6">
+            {/* Outbound Delivery Status Banner */}
+            <div className={`p-4 rounded-xl border flex items-start space-x-3 text-xs ${
+              (emailStatus?.smtpDiag?.verified || emailStatus?.resend)
+                ? 'bg-emerald-950/30 border-emerald-500/40 text-emerald-200'
+                : 'bg-amber-950/30 border-amber-500/40 text-amber-200'
+            }`}>
+              {(emailStatus?.smtpDiag?.verified || emailStatus?.resend) ? (
+                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+              ) : (
+                <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+              )}
+              <div className="space-y-1 w-full">
+                <div className="font-bold flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2">
+                    <span>Outbound Dispatch Engine:</span>
+                    <span className={`px-2 py-0.5 rounded font-mono font-bold text-[11px] ${
+                      (emailStatus?.smtpDiag?.verified || emailStatus?.resend)
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' 
+                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                    }`}>
+                      {emailStatus?.smtpDiag?.verified 
+                        ? `🟢 Gmail SMTP Connected (${emailStatus?.smtpUser || userEmail})` 
+                        : emailStatus?.resend 
+                        ? '🟢 Resend API Connected'
+                        : '🟡 Action Needed for Gmail SMTP'}
+                    </span>
+                  </div>
+                </div>
+
+                {emailStatus?.smtpDiag?.error ? (
+                  <div className="mt-1 p-2.5 bg-amber-950/60 rounded-lg border border-amber-500/30 text-[11px] text-amber-200">
+                    <p className="font-bold mb-1">Google SMTP Authentication Notice:</p>
+                    <p className="text-slate-300">{emailStatus.smtpDiag.error}</p>
+                    <p className="mt-1.5 text-[10px] text-amber-300 font-medium">
+                      💡 Quick fix: Enable 2-Step Verification on your Google Account, visit <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="underline font-bold text-amber-200 hover:text-white">myaccount.google.com/apppasswords</a>, generate a 16-character App Password for "Mail", and update <code className="bg-slate-900 px-1 py-0.5 rounded">SMTP_PASS</code> in Settings &gt; Secrets.
+                    </p>
+                  </div>
+                ) : emailStatus?.smtpDiag?.verified ? (
+                  <p className="text-slate-300 leading-relaxed text-[11px]">
+                    Live Gmail SMTP is connected and verified! Triggering a test alert will dispatch an email directly through your Gmail account to <strong className="text-white">{userEmail}</strong>.
+                  </p>
+                ) : (
+                  <p className="text-slate-300 leading-relaxed text-[11px]">
+                    To deliver live alerts directly into your Gmail inbox, configure your Google App Password for <code className="bg-slate-900 px-1 py-0.5 rounded text-amber-200">{userEmail}</code> in Settings &gt; Secrets. You can also use the 1-Click "Open in Gmail" button below to preview and send immediately.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Test Form */}
             <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-4">
               <div className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
                 <Send className="w-4 h-4 text-amber-400" />
-                <span>Simulate &amp; Dispatch Live Test Alert</span>
+                <span>Trigger Live Price Drop Alert Test</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -490,7 +573,17 @@ export const EmailAlertsModal: React.FC<EmailAlertsModalProps> = ({
                 </div>
               )}
 
-              <div className="flex justify-end pt-2">
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                <span className="text-[11px] text-slate-400">
+                  Target: <strong className="text-amber-300 font-mono">
+                    {selectedRecipientForTest === 'all' 
+                      ? `${recipients.length} configured inboxes` 
+                      : selectedRecipientForTest === 'custom' 
+                        ? (customTestEmail || 'Custom email') 
+                        : selectedRecipientForTest}
+                  </strong>
+                </span>
+
                 <button
                   onClick={handleTriggerTest}
                   disabled={isSending}
@@ -500,25 +593,53 @@ export const EmailAlertsModal: React.FC<EmailAlertsModalProps> = ({
                   <span>{isSending ? 'Dispatching...' : 'Dispatch Live Test Alert'}</span>
                 </button>
               </div>
+
+              {lastDispatchInfo && (
+                <div className="p-3 bg-slate-900 border border-slate-700/80 rounded-xl text-xs flex items-center justify-between animate-in fade-in">
+                  <div className="flex items-center space-x-2 text-slate-300">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <span>{lastDispatchInfo.message}</span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-slate-700">
+                    {lastDispatchInfo.provider}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Live Email Inbox Preview */}
             {previewAlert && (
-              <div className="p-5 bg-slate-950 rounded-2xl border border-slate-800 animate-in fade-in duration-200">
-                <div className="flex items-center justify-between mb-3">
+              <div className="p-5 bg-slate-950 rounded-2xl border border-slate-800 animate-in fade-in duration-200 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center space-x-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
                     <Inbox className="w-4 h-4" />
-                    <span>Delivered to {previewAlert.email}</span>
+                    <span>Generated Alert for {previewAlert.email}</span>
                   </div>
-                  <button
-                    onClick={() => setPreviewAlert(null)}
-                    className="text-xs text-slate-400 hover:text-white"
-                  >
-                    Dismiss Preview
-                  </button>
+
+                  <div className="flex items-center space-x-2">
+                    {/* 1-Click Gmail Opener */}
+                    <a
+                      href={getGmailComposeUrl(previewAlert)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-sm"
+                      title="Open pre-filled deal alert directly in Gmail"
+                    >
+                      <Mail className="w-3.5 h-3.5" />
+                      <span>Open in Gmail (1-Click Test)</span>
+                      <ExternalLink className="w-3 h-3 ml-0.5" />
+                    </a>
+
+                    <button
+                      onClick={() => setPreviewAlert(null)}
+                      className="text-xs text-slate-400 hover:text-white px-2 py-1"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
                 </div>
 
-                <div className="bg-white rounded-xl p-4 text-slate-900 shadow-xl max-h-80 overflow-y-auto border border-slate-200">
+                <div className="bg-white rounded-xl p-4 text-slate-900 shadow-xl max-h-96 overflow-y-auto border border-slate-200">
                   <div 
                     dangerouslySetInnerHTML={{ __html: previewAlert.emailHtml }} 
                   />
