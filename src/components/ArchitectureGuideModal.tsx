@@ -26,13 +26,15 @@ interface ArchitectureGuideModalProps {
   initialTab?: 'free-hosting' | 'cron-schedule' | 'blueprint' | 'deployment';
   items?: TrackedItem[];
   userEmail?: string;
+  onItemsUpdated?: (updatedItems: TrackedItem[]) => void;
 }
 
 export const ArchitectureGuideModal: React.FC<ArchitectureGuideModalProps> = ({ 
   onClose,
   initialTab = 'free-hosting',
   items = [],
-  userEmail = 'abelchen1985@gmail.com'
+  userEmail = 'abelchen1985@gmail.com',
+  onItemsUpdated
 }) => {
   const [activeTab, setActiveTab] = useState<'free-hosting' | 'cron-schedule' | 'blueprint' | 'deployment'>(initialTab);
   const [copiedWorkflow, setCopiedWorkflow] = useState(false);
@@ -64,6 +66,9 @@ export const ArchitectureGuideModal: React.FC<ArchitectureGuideModalProps> = ({
       });
       const data = await res.json();
       setSyncResult(data);
+      if (data?.verifiedItems && onItemsUpdated) {
+        onItemsUpdated(data.verifiedItems);
+      }
       if (data?.schedule) {
         setCronStatus((prev: any) => ({ ...prev, schedule: data.schedule }));
       }

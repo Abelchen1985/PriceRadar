@@ -13,6 +13,7 @@ import {
   Copy
 } from 'lucide-react';
 import { TrackedItem, DealOptimizationResult } from '../types';
+import { getRetailerDealUrl } from '../utils/retailerUrls';
 
 interface BestDealOptimizerModalProps {
   items: TrackedItem[];
@@ -69,7 +70,9 @@ export const BestDealOptimizerModal: React.FC<BestDealOptimizerModalProps> = ({ 
       price: bestRetailer ? bestRetailer.price : item.msrp,
       storeName: bestRetailer ? bestRetailer.retailerName : 'Unknown',
       shipping: bestRetailer?.shipping || 'Free Shipping',
-      url: bestRetailer?.url || '#'
+      url: bestRetailer 
+        ? getRetailerDealUrl(bestRetailer.retailerName, item.title, bestRetailer.url, item.brand, item.model) 
+        : '#'
     };
   });
 
@@ -234,7 +237,7 @@ ${Object.entries(groupedByRetailer).map(([store, list]) =>
                       </div>
 
                       <a
-                        href={storeItemsList[0]?.url || '#'}
+                        href={getRetailerDealUrl(storeName, storeItemsList[0]?.item.title || storeName)}
                         target="_blank"
                         rel="noreferrer"
                         className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1"

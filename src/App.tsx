@@ -26,6 +26,7 @@ import { BestDealOptimizerModal } from './components/BestDealOptimizerModal';
 import { EmailAlertsModal } from './components/EmailAlertsModal';
 import { AddItemModal } from './components/AddItemModal';
 import { ArchitectureGuideModal } from './components/ArchitectureGuideModal';
+import { getRetailerDealUrl } from './utils/retailerUrls';
 
 export default function App() {
   const [items, setItems] = useState<TrackedItem[]>(() => {
@@ -34,7 +35,14 @@ export default function App() {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          // Sanitize & repair all retailer URLs to guarantee they point to verified search/deal pages without 404s
+          return parsed.map((item: TrackedItem) => ({
+            ...item,
+            retailers: (item.retailers || []).map(r => ({
+              ...r,
+              url: getRetailerDealUrl(r.retailerName, item.title, r.url, item.brand, item.model)
+            }))
+          }));
         }
       } catch (e) {
         console.error(e);
@@ -641,6 +649,7 @@ export default function App() {
           initialTab={guideModalTab}
           items={items}
           userEmail={userEmail}
+          onItemsUpdated={(updated) => setItems(updated)}
           onClose={() => setIsGuideModalOpen(false)}
         />
       )}

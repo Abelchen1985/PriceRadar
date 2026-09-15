@@ -11,6 +11,7 @@ import {
   Star
 } from 'lucide-react';
 import { TrackedItem } from '../types';
+import { getRetailerDealUrl } from '../utils/retailerUrls';
 
 interface RetailerCompareModalProps {
   item: TrackedItem | null;
@@ -202,7 +203,7 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
                     </div>
 
                     <a 
-                      href={retailer.url}
+                      href={getRetailerDealUrl(retailer.retailerName, item.title, retailer.url, item.brand, item.model)}
                       target="_blank"
                       rel="noreferrer"
                       className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center space-x-1.5 transition ${

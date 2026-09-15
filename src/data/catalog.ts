@@ -1,4 +1,5 @@
 import { TrackedItem, EmailRecipient } from '../types';
+import { getRetailerDealUrl } from '../utils/retailerUrls';
 
 export const DEFAULT_EMAIL_RECIPIENTS: EmailRecipient[] = [
   {
@@ -21,7 +22,7 @@ export const DEFAULT_EMAIL_RECIPIENTS: EmailRecipient[] = [
   }
 ];
 
-export const INITIAL_TRACKED_ITEMS: TrackedItem[] = [
+const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
   {
     id: 'outdoor-osprey-atmos-65',
     title: "Osprey Atmos AG 65 Men's Expedition Backpack",
@@ -1113,6 +1114,14 @@ export const INITIAL_TRACKED_ITEMS: TrackedItem[] = [
     ]
   }
 ];
+
+export const INITIAL_TRACKED_ITEMS: TrackedItem[] = RAW_INITIAL_TRACKED_ITEMS.map(item => ({
+  ...item,
+  retailers: item.retailers.map(r => ({
+    ...r,
+    url: getRetailerDealUrl(r.retailerName, item.title, r.url, item.brand, item.model)
+  }))
+}));
 
 export const POPULAR_ITEM_PRESETS = [
   {

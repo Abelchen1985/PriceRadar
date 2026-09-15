@@ -16,6 +16,7 @@ import {
   Check
 } from 'lucide-react';
 import { TrackedItem, RetailerPrice, EmailRecipient } from '../types';
+import { getRetailerDealUrl } from '../utils/retailerUrls';
 
 interface ItemRowProps {
   item: TrackedItem;
@@ -78,65 +79,68 @@ export const ItemRow: React.FC<ItemRowProps> = ({
   return (
     <div 
       id={`tracked-item-${item.id}`}
-      className="bg-slate-900/80 border border-slate-800 hover:border-slate-700/80 rounded-2xl p-4 sm:p-5 transition shadow-sm hover:shadow-md"
+      className="bg-slate-900/90 border border-slate-800 hover:border-slate-700/90 rounded-2xl p-4 sm:p-5 transition shadow-sm hover:shadow-md space-y-4"
     >
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      {/* Upper Tier: Product Identity & Core Pricing (Side-by-Side on Desktop, Stacked on Mobile) */}
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         
-        {/* Item Core Info */}
+        {/* Left: Product Thumbnail & Detailed Identity */}
         <div className="flex items-start space-x-4 min-w-0 flex-1">
-          <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-slate-800 shrink-0 border border-slate-700/60">
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-slate-800 shrink-0 border border-slate-700/60 shadow-inner">
             <img 
               src={item.imageUrl} 
               alt={item.title} 
               className="w-full h-full object-cover"
               referrerPolicy="no-referrer"
             />
-            <span className="absolute bottom-1 right-1 text-[10px] font-bold px-1.5 py-0.2 bg-black/80 text-white rounded">
+            <span className="absolute bottom-1 right-1 text-[10px] font-bold px-1.5 py-0.5 bg-black/85 text-slate-200 rounded tracking-tight backdrop-blur-xs">
               {item.category}
             </span>
           </div>
 
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+            {/* Meta Tags & Deal Badges */}
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5">
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-200 border border-slate-700 whitespace-nowrap">
                 {item.brand}
               </span>
-              <span className="text-xs text-slate-400 font-mono">
+              <span className="text-xs text-slate-400 font-mono px-2 py-0.5 rounded bg-slate-950/70 border border-slate-800/80 whitespace-nowrap">
                 {item.model}
               </span>
 
-              {/* Status Badges */}
+              {/* Status Badges with whitespace-nowrap so they never awkwardly wrap */}
               {isAllTimeLow ? (
-                <span className="inline-flex items-center space-x-1.5 text-xs font-black px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500 shadow-sm shadow-emerald-950 ring-1 ring-emerald-500/40">
+                <span className="inline-flex items-center space-x-1.5 text-xs font-black px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500 shadow-sm shadow-emerald-950 ring-1 ring-emerald-500/40 whitespace-nowrap">
                   <Flame className="w-3.5 h-3.5 text-emerald-400 animate-pulse fill-emerald-400" />
                   <span>ALL-TIME LOWEST IN HISTORY!</span>
                 </span>
               ) : isNearAllTimeLow ? (
-                <span className="inline-flex items-center space-x-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-950/60 text-blue-300 border border-blue-600/40">
+                <span className="inline-flex items-center space-x-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-950/60 text-blue-300 border border-blue-600/40 whitespace-nowrap">
                   <TrendingDown className="w-3.5 h-3.5" />
                   <span>Within 5% of Record Low</span>
                 </span>
               ) : percentSaved > 10 ? (
-                <span className="inline-flex items-center space-x-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-950/60 text-blue-300 border border-blue-600/40">
+                <span className="inline-flex items-center space-x-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-950/60 text-blue-300 border border-blue-600/40 whitespace-nowrap">
                   <TrendingDown className="w-3.5 h-3.5" />
                   <span>-{percentSaved.toFixed(0)}% from MSRP</span>
                 </span>
               ) : null}
 
               {isBelowTarget && (
-                <span className="inline-flex items-center space-x-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-950/70 text-indigo-300 border border-indigo-600/50">
+                <span className="inline-flex items-center space-x-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-950/70 text-indigo-300 border border-indigo-600/50 whitespace-nowrap">
                   <CheckCircle2 className="w-3 h-3 text-indigo-400" />
                   <span>Target Met (${item.targetPrice.toFixed(0)})</span>
                 </span>
               )}
             </div>
 
-            <h3 className="text-base sm:text-lg font-bold text-white line-clamp-1 hover:line-clamp-none transition-all">
+            {/* Product Title */}
+            <h3 className="text-base sm:text-lg font-bold text-white leading-snug line-clamp-2 hover:line-clamp-none transition-all">
               {item.title}
             </h3>
 
             {/* Historical comparison footer */}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs text-slate-400">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-slate-400">
               <div>
                 MSRP: <span className="text-slate-300 line-through">${item.msrp.toFixed(2)}</span>
               </div>
@@ -152,42 +156,14 @@ export const ItemRow: React.FC<ItemRowProps> = ({
           </div>
         </div>
 
-        {/* Multi-Retailer Live Strip & Pricing */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between lg:justify-end gap-4 border-t lg:border-t-0 border-slate-800 pt-3 lg:pt-0">
-          
-          {/* Storefront Mini-Pills */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            {item.retailers.map((retailer) => {
-              const isBest = lowestRetailer && retailer.id === lowestRetailer.id;
-              return (
-                <a
-                  key={retailer.id}
-                  href={retailer.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  title={`${retailer.retailerName}: $${retailer.price.toFixed(2)} (${retailer.stockMessage})`}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium border flex items-center space-x-1 transition ${
-                    isBest 
-                      ? 'bg-emerald-950/70 border-emerald-500/80 text-emerald-300 font-bold shadow-sm shadow-emerald-900/40' 
-                      : retailer.inStock 
-                        ? 'bg-slate-800/80 border-slate-700/80 text-slate-300 hover:border-slate-600 hover:text-white' 
-                        : 'bg-slate-900 border-slate-800 text-slate-600 line-through'
-                  }`}
-                >
-                  <span>{retailer.retailerName}</span>
-                  <span>${retailer.price.toFixed(0)}</span>
-                  {isBest && <span className="text-[10px] text-emerald-400">★</span>}
-                </a>
-              );
-            })}
-          </div>
-
+        {/* Right: Key Price Metrics (Total Saved vs MSRP + Current Best Price) */}
+        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 shrink-0 pt-2 xl:pt-0 border-t xl:border-t-0 border-slate-800/80">
           {/* Relocated Total Saved vs MSRP on Each Product */}
           <div 
             id={`savings-card-${item.id}`}
-            className={`px-3.5 py-2 rounded-xl border flex flex-col justify-center min-w-[160px] transition ${
+            className={`px-4 py-2.5 rounded-xl border flex flex-col justify-center min-w-[170px] sm:min-w-[190px] transition ${
               isAllTimeLow 
-                ? 'bg-gradient-to-br from-emerald-950 via-emerald-900/50 to-slate-900 border-emerald-500 shadow-md shadow-emerald-950/60 ring-2 ring-emerald-500/50' 
+                ? 'bg-gradient-to-br from-emerald-950 via-emerald-900/60 to-slate-900 border-emerald-500 shadow-md shadow-emerald-950/60 ring-2 ring-emerald-500/50' 
                 : isNearAllTimeLow
                   ? 'bg-blue-950/70 border-blue-500/60 text-blue-200'
                   : savedVsMsrp > 0
@@ -214,7 +190,7 @@ export const ItemRow: React.FC<ItemRowProps> = ({
             </div>
 
             <div className="flex items-baseline space-x-1.5">
-              <span className={`text-base sm:text-lg font-black tracking-tight ${
+              <span className={`text-lg sm:text-xl font-black tracking-tight ${
                 isAllTimeLow 
                   ? 'text-emerald-300' 
                   : savedVsMsrp > 0 
@@ -248,9 +224,9 @@ export const ItemRow: React.FC<ItemRowProps> = ({
           </div>
 
           {/* Current Best Price Display */}
-          <div className="text-right shrink-0">
+          <div className="text-right min-w-[130px] sm:min-w-[150px] shrink-0 bg-slate-950/60 p-2.5 px-3.5 rounded-xl border border-slate-800">
             <div className="text-xs text-slate-400 font-medium">
-              Best on <span className="text-slate-200 font-semibold">{lowestRetailer?.retailerName || 'Retailer'}</span>
+              Best on <span className="text-slate-100 font-bold">{lowestRetailer?.retailerName || 'Retailer'}</span>
             </div>
             <div className={`text-2xl sm:text-3xl font-black tracking-tight ${
               isAllTimeLow ? 'text-emerald-400' : 'text-white'
@@ -258,7 +234,7 @@ export const ItemRow: React.FC<ItemRowProps> = ({
               ${currentPrice.toFixed(2)}
             </div>
             {isAllTimeLow ? (
-              <span className="inline-block text-[10px] font-bold text-emerald-400 bg-emerald-950/90 border border-emerald-500/50 px-1.5 py-0.2 rounded">
+              <span className="inline-block text-[10px] font-bold text-emerald-400 bg-emerald-950/90 border border-emerald-500/50 px-1.5 py-0.5 rounded">
                 All-Time Low (${item.allTimeLow.toFixed(0)})
               </span>
             ) : (
@@ -267,9 +243,64 @@ export const ItemRow: React.FC<ItemRowProps> = ({
               </div>
             )}
           </div>
+        </div>
 
+      </div>
+
+      {/* Lower Tier: Live Storefront Deal Links & Action Controls Bar */}
+      <div className="pt-3.5 border-t border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        
+        {/* Left: Multi-Retailer Live Storefront Strip (All verified deal URLs) */}
+        <div className="flex items-center flex-wrap gap-2 min-w-0">
+          <span className="text-xs font-semibold text-slate-400 flex items-center space-x-1 mr-1 shrink-0">
+            <Store className="w-3.5 h-3.5 text-blue-400" />
+            <span>Live Storefronts:</span>
+          </span>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            {item.retailers.map((retailer) => {
+              const isBest = lowestRetailer && retailer.id === lowestRetailer.id;
+              const dealUrl = getRetailerDealUrl(
+                retailer.retailerName,
+                item.title,
+                retailer.url,
+                item.brand,
+                item.model
+              );
+
+              return (
+                <a
+                  key={retailer.id}
+                  href={dealUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={`${retailer.retailerName}: $${retailer.price.toFixed(2)} (${retailer.stockMessage}) - Click to open deal`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium border flex items-center space-x-1.5 transition ${
+                    isBest 
+                      ? 'bg-emerald-950/80 border-emerald-500 text-emerald-300 font-bold shadow-sm shadow-emerald-900/50 hover:bg-emerald-900/80' 
+                      : retailer.inStock 
+                        ? 'bg-slate-800/90 border-slate-700 text-slate-200 hover:border-slate-500 hover:text-white hover:bg-slate-700/80' 
+                        : 'bg-slate-900 border-slate-800 text-slate-600 line-through cursor-not-allowed'
+                  }`}
+                >
+                  <span className="font-semibold">{retailer.retailerName}</span>
+                  <span className="font-bold">${retailer.price.toFixed(0)}</span>
+                  {isBest ? (
+                    <span className="text-[10px] text-emerald-400">★</span>
+                  ) : (
+                    <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                  )}
+                </a>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right: Email Alert Settings & Quick Action Buttons */}
+        <div className="flex items-center flex-wrap gap-2.5 justify-end shrink-0">
+          
           {/* Email Alert Trigger Setup */}
-          <div className="flex items-center space-x-2 bg-slate-800/60 p-2 rounded-xl border border-slate-700/50">
+          <div className="flex items-center space-x-2 bg-slate-950/80 p-1.5 px-2.5 rounded-xl border border-slate-800">
             <button
               id={`toggle-alert-${item.id}`}
               onClick={() => onToggleAlert(item.id, !item.emailAlertEnabled)}
@@ -277,10 +308,10 @@ export const ItemRow: React.FC<ItemRowProps> = ({
               className={`p-1.5 rounded-lg transition ${
                 item.emailAlertEnabled 
                   ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' 
-                  : 'bg-slate-700 text-slate-400 hover:text-slate-200'
+                  : 'bg-slate-800 text-slate-400 hover:text-slate-200'
               }`}
             >
-              {item.emailAlertEnabled ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
+              {item.emailAlertEnabled ? <Bell className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5" />}
             </button>
 
             <div className="text-xs">
@@ -295,13 +326,13 @@ export const ItemRow: React.FC<ItemRowProps> = ({
                     onBlur={handleSaveTarget}
                     onKeyDown={(e) => e.key === 'Enter' && handleSaveTarget()}
                     autoFocus
-                    className="w-14 px-1 py-0.5 bg-slate-900 border border-blue-500 text-white rounded text-xs font-semibold focus:outline-none"
+                    className="w-16 px-1 py-0.5 bg-slate-900 border border-blue-500 text-white rounded text-xs font-semibold focus:outline-none"
                   />
                 </div>
               ) : (
                 <button
                   onClick={() => setEditingTarget(true)}
-                  className="font-bold text-slate-200 hover:text-blue-400 underline decoration-dotted transition"
+                  className="font-bold text-slate-200 hover:text-blue-400 underline decoration-dotted transition text-xs"
                   title="Click to edit target alert price"
                 >
                   ${item.targetPrice.toFixed(2)}
@@ -321,11 +352,11 @@ export const ItemRow: React.FC<ItemRowProps> = ({
                       <button
                         type="button"
                         onClick={() => setShowEmailPicker(!showEmailPicker)}
-                        className="flex items-center space-x-1 px-1.5 py-1 rounded bg-slate-900/90 hover:bg-slate-700/80 border border-slate-700 text-[10px] text-slate-300 hover:text-amber-300 transition"
+                        className="flex items-center space-x-1 px-1.5 py-1 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[10px] text-slate-300 hover:text-amber-300 transition"
                         title="Click to configure recipient inboxes for this product"
                       >
                         <Mail className="w-3 h-3 text-amber-400" />
-                        <span className="font-mono max-w-[80px] truncate">
+                        <span className="font-mono max-w-[85px] truncate">
                           {itemEmails.length === 1 
                             ? itemEmails[0].split('@')[0] 
                             : `${itemEmails.length} inboxes`}
@@ -380,13 +411,13 @@ export const ItemRow: React.FC<ItemRowProps> = ({
           </div>
 
           {/* Action Tools */}
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1 bg-slate-950/60 p-1 rounded-xl border border-slate-800">
             {/* Compare All Stores Modal Trigger */}
             <button
               id={`compare-stores-${item.id}`}
               onClick={() => onCompareStores(item)}
               title="Compare all storefronts side-by-side"
-              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
+              className="p-2 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition"
             >
               <Store className="w-4 h-4 text-blue-400" />
             </button>
@@ -396,7 +427,7 @@ export const ItemRow: React.FC<ItemRowProps> = ({
               id={`view-history-${item.id}`}
               onClick={() => onViewHistory(item)}
               title="View Price History & All-Time Low Chart"
-              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
+              className="p-2 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition"
             >
               <History className="w-4 h-4 text-purple-400" />
             </button>
@@ -407,7 +438,7 @@ export const ItemRow: React.FC<ItemRowProps> = ({
               onClick={() => onScrapeItem(item)}
               disabled={isScraping}
               title="Scrape live prices across stores right now"
-              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition disabled:opacity-50"
+              className="p-2 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition disabled:opacity-50"
             >
               <RefreshCw className={`w-4 h-4 ${isScraping ? 'animate-spin text-blue-400' : 'text-slate-400'}`} />
             </button>
@@ -417,7 +448,7 @@ export const ItemRow: React.FC<ItemRowProps> = ({
               id={`test-alert-${item.id}`}
               onClick={() => onSendTestAlert(item)}
               title={`Simulate & send price drop alert email to ${item.userEmail}`}
-              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 border border-slate-700 transition"
+              className="p-2 rounded-lg hover:bg-slate-800 text-amber-400 hover:text-amber-300 transition"
             >
               <Send className="w-4 h-4" />
             </button>
@@ -427,7 +458,7 @@ export const ItemRow: React.FC<ItemRowProps> = ({
               id={`remove-item-${item.id}`}
               onClick={() => onRemoveItem(item.id)}
               title="Remove from tracking list"
-              className="p-2 rounded-lg bg-slate-800 hover:bg-rose-900/50 text-slate-400 hover:text-rose-400 border border-slate-700 transition"
+              className="p-2 rounded-lg hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 transition"
             >
               <Trash2 className="w-4 h-4" />
             </button>
