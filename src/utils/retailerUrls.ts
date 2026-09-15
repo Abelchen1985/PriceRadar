@@ -81,20 +81,20 @@ export function getDirectProductUrl(retailerName: string, title: string, model?:
 
   // 2. Jackery Explorer 1500 v2 Solar Generator with Solar Panel 100AIR
   if (t.includes('jackery') && (t.includes('1500') || t.includes('solar generator'))) {
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B0D5Y8P8YJ';
-    }
-    if (r.includes('home depot') || r === 'homedepot') {
-      return 'https://www.homedepot.com/p/Jackery-Solar-Generator-1500-v2-1534Wh-LiFePO4-Power-Station-with-100W-Solar-Panel-SG-1500-v2/331234567';
-    }
     if (r.includes('jackery')) {
       return 'https://www.jackery.com/products/jackery-solar-generator-1500-v2';
     }
+    if (r.includes('amazon')) {
+      return 'https://www.amazon.com/s?k=Jackery+Explorer+1500+v2+solar+generator+with+solar+panel+100air';
+    }
+    if (r.includes('home depot') || r === 'homedepot') {
+      return 'https://www.homedepot.com/s/Jackery%20Explorer%201500%20v2%20solar%20generator';
+    }
     if (r.includes('best buy') || r === 'bestbuy') {
-      return 'https://www.bestbuy.com/site/jackery-solar-generator-1500-v2-with-100w-solar-panel/6589321.p';
+      return 'https://www.bestbuy.com/site/searchpage.jsp?st=Jackery+Explorer+1500+v2+solar+generator';
     }
     if (r.includes('walmart')) {
-      return 'https://www.walmart.com/ip/Jackery-Solar-Generator-1500-v2-Portable-Power-Station-with-Solar-Panel/6984214532';
+      return 'https://www.walmart.com/search?q=Jackery+Explorer+1500+v2+solar+generator';
     }
   }
 

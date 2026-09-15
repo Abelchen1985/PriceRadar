@@ -120,6 +120,10 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
         body: JSON.stringify({
           query: title || productUrl,
           url: productUrl,
+          msrp: parseFloat(msrp) || undefined,
+          category: category !== 'Other' ? category : detectedCategory,
+          brand,
+          model
         })
       });
       const data = await res.json();
@@ -143,22 +147,35 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
     e.preventDefault();
     if (!title.trim()) return;
 
-    const msrpNum = parseFloat(msrp) || 59.99;
-    const targetNum = parseFloat(targetPrice) || msrpNum * 0.85;
+    const titleLower = title.trim().toLowerCase();
+    const matchedPreset = POPULAR_ITEM_PRESETS.find(p => 
+      p.title.toLowerCase() === titleLower ||
+      (titleLower.includes('jackery') && (titleLower.includes('1500') || titleLower.includes('solar generator'))) ||
+      (titleLower.includes('ugly stik') && titleLower.includes('gx2')) ||
+      (titleLower.includes('osprey') && titleLower.includes('atmos')) ||
+      (titleLower.includes('samsung') && titleLower.includes('s90d'))
+    );
+
+    let msrpNum = parseFloat(msrp) || (matchedPreset ? matchedPreset.msrp : 59.99);
+    let targetNum = parseFloat(targetPrice) || (matchedPreset ? matchedPreset.targetPrice : msrpNum * 0.85);
 
     // Resolve accurate category and valid storefront rules
-    const finalCategory = (category === 'Other' || !category) && detectedCategory !== 'Other' 
+    let finalCategory = (category === 'Other' || !category) && detectedCategory !== 'Other' 
       ? detectedCategory 
       : category;
+    if (matchedPreset && finalCategory === 'Other') {
+      finalCategory = matchedPreset.category;
+    }
+
     const rules = getCategoryStoreRules(finalCategory, title);
-    const resolvedImageUrl = getProductImageUrl(title, finalCategory, brand);
+    const resolvedImageUrl = getProductImageUrl(title, finalCategory, brand || matchedPreset?.brand);
 
     // Build initial retailers from category rules or scraped preview
     let retailers: RetailerPrice[] = [];
     const estimate = estimateHistoricalPricing(title, finalCategory, msrpNum);
-    let allTimeLowVal = estimate.allTimeLow;
-    let allTimeLowStore = estimate.allTimeLowStore;
-    let allTimeLowDate = estimate.allTimeLowDate;
+    let allTimeLowVal = matchedPreset ? matchedPreset.allTimeLow : estimate.allTimeLow;
+    let allTimeLowStore = matchedPreset ? matchedPreset.allTimeLowStore : estimate.allTimeLowStore;
+    let allTimeLowDate = matchedPreset ? matchedPreset.allTimeLowDate : estimate.allTimeLowDate;
 
     if (scrapedPreview?.retailers && scrapedPreview.retailers.length > 0) {
       // Filter out stores that don't sell this category (e.g. Micro Center on a fishing rod)
@@ -171,7 +188,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
         retailers = validScraped.map((r: any, idx: number) => ({
           id: `r-cust-${Date.now()}-${idx}`,
           retailerName: r.retailerName,
-          url: getRetailerDealUrl(r.retailerName, title, r.url || productUrl, brand, model),
+          url: getRetailerDealUrl(r.retailerName, title, r.url || productUrl, brand || matchedPreset?.brand, model || matchedPreset?.model),
           price: r.price,
           originalPrice: r.originalPrice || msrpNum,
           inStock: r.inStock ?? true,
@@ -185,11 +202,22 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
         }));
 
         if (scrapedPreview.allTimeLow) {
-          allTimeLowVal = scrapedPreview.allTimeLow;
-          const scrapedStore = scrapedPreview.allTimeLowStore || rules.defaultATLStore;
-          const isForbidden = rules.forbiddenStores.some(f => scrapedStore.toLowerCase().includes(f.toLowerCase()));
-          allTimeLowStore = isForbidden ? rules.defaultATLStore : scrapedStore;
-          allTimeLowDate = scrapedPreview.allTimeLowDate || 'Last Month';
+          // Guard against corrupted / mismatched scraped low on known benchmarks
+          const isKnown = matchedPreset != null || estimate.isKnownBenchmark;
+          const expectedATL = matchedPreset ? matchedPreset.allTimeLow : estimate.allTimeLow;
+
+          if (isKnown && Math.abs(scrapedPreview.allTimeLow - expectedATL) / expectedATL > 0.15) {
+            // Scrape returned a mismatched price (e.g. $254.99 on a $649 benchmark); protect the verified ATL
+            allTimeLowVal = expectedATL;
+            allTimeLowStore = matchedPreset ? matchedPreset.allTimeLowStore : estimate.allTimeLowStore;
+            allTimeLowDate = matchedPreset ? matchedPreset.allTimeLowDate : estimate.allTimeLowDate;
+          } else {
+            allTimeLowVal = scrapedPreview.allTimeLow;
+            const scrapedStore = scrapedPreview.allTimeLowStore || rules.defaultATLStore;
+            const isForbidden = rules.forbiddenStores.some(f => scrapedStore.toLowerCase().includes(f.toLowerCase()));
+            allTimeLowStore = isForbidden ? rules.defaultATLStore : scrapedStore;
+            allTimeLowDate = scrapedPreview.allTimeLowDate || 'Last Month';
+          }
         }
       }
     }
@@ -202,7 +230,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
         return {
           id: `r-cust-${Date.now()}-${idx}`,
           retailerName: storeName,
-          url: getRetailerDealUrl(storeName, title, productUrl, brand, model),
+          url: getRetailerDealUrl(storeName, title, productUrl, brand || matchedPreset?.brand, model || matchedPreset?.model),
           price: Number((msrpNum * discountRate).toFixed(2)),
           originalPrice: msrpNum,
           inStock: true,
@@ -220,8 +248,8 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
       id: `item-${Date.now()}`,
       title: title.trim(),
       category: finalCategory,
-      brand: brand.trim() || (title.includes('Ugly Stik') ? 'Shakespeare' : 'Specialized Brand'),
-      model: model.trim() || (title.includes('GX2') ? 'GX2-Spinning' : 'Model-Standard'),
+      brand: brand.trim() || matchedPreset?.brand || (title.includes('Ugly Stik') ? 'Shakespeare' : 'Specialized Brand'),
+      model: model.trim() || matchedPreset?.model || (title.includes('GX2') ? 'GX2-Spinning' : 'Model-Standard'),
       imageUrl: resolvedImageUrl,
       msrp: msrpNum,
       allTimeLow: allTimeLowVal,
@@ -248,7 +276,38 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
   };
 
   const handleAddPreset = (preset: typeof POPULAR_ITEM_PRESETS[0]) => {
-    const newItem: TrackedItem = {
+    const rules = getCategoryStoreRules(preset.category, preset.title);
+    
+    // Prioritize best retailer, all-time low store, then default category stores
+    const candidateStores = Array.from(new Set([
+      preset.bestRetailer,
+      preset.allTimeLowStore,
+      ...rules.defaultRetailers
+    ])).filter(store => !rules.forbiddenStores.some(f => store.toLowerCase().includes(f.toLowerCase()))).slice(0, 4);
+
+    const retailers: RetailerPrice[] = candidateStores.map((storeName, idx) => {
+      const isBest = storeName.toLowerCase() === preset.bestRetailer.toLowerCase();
+      const price = isBest 
+        ? preset.currentBestPrice 
+        : Number(Math.min(preset.msrp, preset.currentBestPrice * (1 + 0.04 * (idx + 1))).toFixed(2));
+
+      return {
+        id: `pr-${Date.now()}-${idx}`,
+        retailerName: storeName,
+        url: getRetailerDealUrl(storeName, preset.title, undefined, preset.brand, preset.model),
+        price,
+        originalPrice: preset.msrp,
+        inStock: true,
+        stockMessage: isBest ? 'In Stock - Verified Best Deal' : 'In Stock - Fast Delivery',
+        shipping: 'Free Shipping',
+        shippingCost: 0,
+        rating: 4.8,
+        reviewCount: 1200 + idx * 150,
+        isBestPrice: isBest
+      };
+    });
+
+    const newItem: TrackedItem = sanitizeTrackedItem({
       id: `preset-${Date.now()}`,
       title: preset.title,
       category: preset.category,
@@ -265,57 +324,14 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
       alertEmails: selectedEmails.length > 0 ? selectedEmails : [userEmail],
       alertCondition: 'below_target',
       lastUpdated: 'Just added',
-      retailers: [
-        {
-          id: `pr-${Date.now()}-1`,
-          retailerName: 'Amazon',
-          url: 'https://amazon.com',
-          price: preset.currentBestPrice + 10,
-          originalPrice: preset.msrp,
-          inStock: true,
-          stockMessage: 'In Stock',
-          shipping: 'Free Shipping',
-          shippingCost: 0,
-          rating: 4.8,
-          reviewCount: 1800,
-          isBestPrice: preset.bestRetailer === 'Amazon'
-        },
-        {
-          id: `pr-${Date.now()}-2`,
-          retailerName: 'Best Buy',
-          url: 'https://bestbuy.com',
-          price: preset.currentBestPrice,
-          originalPrice: preset.msrp,
-          inStock: true,
-          stockMessage: 'In Stock',
-          shipping: 'Free Shipping',
-          shippingCost: 0,
-          rating: 4.9,
-          reviewCount: 940,
-          isBestPrice: preset.bestRetailer === 'Best Buy'
-        },
-        {
-          id: `pr-${Date.now()}-3`,
-          retailerName: 'Newegg',
-          url: 'https://newegg.com',
-          price: preset.currentBestPrice + 5,
-          originalPrice: preset.msrp,
-          inStock: true,
-          stockMessage: 'In Stock',
-          shipping: 'Free Shipping',
-          shippingCost: 0,
-          rating: 4.7,
-          reviewCount: 420,
-          isBestPrice: preset.bestRetailer === 'Newegg'
-        }
-      ],
+      retailers,
       priceHistory: [
         { date: '90d ago', lowest: preset.msrp },
-        { date: '60d ago', lowest: preset.msrp * 0.95 },
+        { date: '60d ago', lowest: Number((preset.msrp * 0.95).toFixed(2)) },
         { date: '30d ago', lowest: preset.currentBestPrice + 15 },
         { date: 'Today', lowest: preset.currentBestPrice }
       ]
-    };
+    });
 
     onAddItem(newItem);
     onClose();

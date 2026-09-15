@@ -219,13 +219,13 @@ export const SelfTestModal: React.FC<SelfTestModalProps> = ({ isOpen, onClose })
               <ExternalLink className="w-3 h-3 text-blue-300" />
             </a>
             <a
-              href="https://www.amazon.com/dp/B0D5Y8P8YJ"
+              href="https://www.jackery.com/products/jackery-solar-generator-1500-v2"
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setVerifiedClickCount(c => c + 1)}
               className="px-2.5 py-1 bg-amber-600/30 hover:bg-amber-600/50 text-amber-200 border border-amber-500/40 rounded-lg flex items-center space-x-1 transition font-mono text-[11px]"
             >
-              <span>Jackery 1500 v2 (Amazon Direct ASIN)</span>
+              <span>Jackery 1500 v2 (Official Store Direct)</span>
               <ExternalLink className="w-3 h-3 text-amber-300" />
             </a>
             <a

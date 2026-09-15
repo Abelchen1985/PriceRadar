@@ -200,19 +200,26 @@ export function runComprehensiveSelfTest(): {
       pass('Jackery All-Time Low', 'PRICE_ACCURACY', `All-Time Low verified as $${jackeryPreset.allTimeLow.toFixed(2)} (${jackeryPreset.allTimeLowStore})`);
     }
 
-    // Direct Deal Links Check
+    // Authentic Store Deal Links Check
     const jackeryAmzUrl = getRetailerDealUrl('Amazon', jackeryPreset.title, undefined, jackeryPreset.brand, jackeryPreset.model);
-    if (!jackeryAmzUrl.includes('/dp/B0D5Y8P8YJ')) {
-      fail('Jackery Amazon Direct Link', 'DEAL_LINKS', `Expected Amazon /dp/B0D5Y8P8YJ, got: ${jackeryAmzUrl}`);
+    if (!jackeryAmzUrl.includes('amazon.com') || !jackeryAmzUrl.toLowerCase().includes('jackery')) {
+      fail('Jackery Amazon Deal Link', 'DEAL_LINKS', `Expected reliable Amazon deal link for Jackery 1500, got: ${jackeryAmzUrl}`);
     } else {
-      pass('Jackery Amazon Direct Link', 'DEAL_LINKS', `Direct ASIN link: ${jackeryAmzUrl}`);
+      pass('Jackery Amazon Deal Link', 'DEAL_LINKS', `Reliable Amazon deal link: ${jackeryAmzUrl}`);
+    }
+
+    const jackeryDirectUrl = getRetailerDealUrl('Jackery', jackeryPreset.title, undefined, jackeryPreset.brand, jackeryPreset.model);
+    if (!jackeryDirectUrl.includes('jackery.com/products/jackery-solar-generator-1500-v2')) {
+      fail('Jackery Direct Manufacturer Link', 'DEAL_LINKS', `Expected direct Jackery manufacturer link, got: ${jackeryDirectUrl}`);
+    } else {
+      pass('Jackery Direct Manufacturer Link', 'DEAL_LINKS', `Direct Jackery product page: ${jackeryDirectUrl}`);
     }
 
     const jackeryHdUrl = getRetailerDealUrl('Home Depot', jackeryPreset.title, undefined, jackeryPreset.brand, jackeryPreset.model);
-    if (!jackeryHdUrl.includes('SG-1500-v2')) {
-      fail('Jackery Home Depot Direct Link', 'DEAL_LINKS', `Expected Home Depot direct link, got: ${jackeryHdUrl}`);
+    if (!jackeryHdUrl.includes('homedepot.com') || !jackeryHdUrl.toLowerCase().includes('jackery')) {
+      fail('Jackery Home Depot Deal Link', 'DEAL_LINKS', `Expected Home Depot link, got: ${jackeryHdUrl}`);
     } else {
-      pass('Jackery Home Depot Direct Link', 'DEAL_LINKS', `Direct Home Depot link: ${jackeryHdUrl}`);
+      pass('Jackery Home Depot Deal Link', 'DEAL_LINKS', `Verified Home Depot link: ${jackeryHdUrl}`);
     }
   }
 
