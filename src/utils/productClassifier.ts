@@ -27,7 +27,7 @@ export function detectProductCategory(title: string, brand?: string): ItemCatego
 
   // 3. Camping & Bushcraft
   if (
-    /tent|sleeping\s*bag|sleeping\s*pad|camping\s*stove|pocketrocket|big\s*agnes|camp\s*kitchen|yeti|cooler|bushcraft|lantern|fire\s*starter|hammock/i.test(
+    /tent|sleeping\s*bag|sleeping\s*pad|camping\s*stove|pocketrocket|big\s*agnes|camp\s*kitchen|yeti|cooler|bushcraft|lantern|fire\s*starter|hammock|jackery|solar\s*generator|power\s*station|solar\s*panel|ecoflow|bluetti|anker\s*solix|goal\s*zero|lifepo4/i.test(
       text
     )
   ) {
@@ -593,10 +593,82 @@ export function estimateHistoricalPricing(
     };
   }
 
+  // 9. Jackery & Solar Generator / Portable Power Station Benchmark
+  if (text.includes('jackery') || text.includes('solar generator') || text.includes('power station') || (text.includes('solar') && text.includes('panel') && text.includes('generator'))) {
+    if (text.includes('1500') || text.includes('100air') || text.includes('100 air')) {
+      return {
+        suggestedMsrp: 799.99,
+        allTimeLow: 649.00,
+        allTimeLowStore: 'Amazon',
+        allTimeLowDate: 'Nov 2024 (Black Friday)',
+        typicalSaleDiscountPct: 18.8,
+        recommendedTargetPrice: 679.00,
+        savingsAmount: 150.99,
+        isKnownBenchmark: true,
+        marketNote: 'Jackery Explorer 1500 v2 + 100W Solar Panel official bundle holiday promotion'
+      };
+    }
+    if (text.includes('2000')) {
+      return {
+        suggestedMsrp: 1499.99,
+        allTimeLow: 1199.00,
+        allTimeLowStore: 'Amazon',
+        allTimeLowDate: 'Nov 2024',
+        typicalSaleDiscountPct: 20.0,
+        recommendedTargetPrice: 1249.00,
+        savingsAmount: 300.99,
+        isKnownBenchmark: true,
+        marketNote: 'Flagship high-capacity solar generator discount'
+      };
+    }
+    if (text.includes('1000')) {
+      return {
+        suggestedMsrp: 599.99,
+        allTimeLow: 479.00,
+        allTimeLowStore: 'Amazon',
+        allTimeLowDate: 'Prime Day 2024',
+        typicalSaleDiscountPct: 20.1,
+        recommendedTargetPrice: 499.00,
+        savingsAmount: 120.99,
+        isKnownBenchmark: true,
+        marketNote: 'Mid-capacity power station combo benchmark'
+      };
+    }
+    return {
+      suggestedMsrp: 799.99,
+      allTimeLow: 649.00,
+      allTimeLowStore: 'Amazon',
+      allTimeLowDate: 'Nov 2024',
+      typicalSaleDiscountPct: 18.8,
+      recommendedTargetPrice: 679.00,
+      savingsAmount: 150.99,
+      isKnownBenchmark: true,
+      marketNote: 'Portable solar generator bundle market benchmark'
+    };
+  }
+
+  // 10. Samsung OLED S90D / S95D 4K Smart TV Benchmark
+  if (text.includes('s90d') || text.includes('s95d') || text.includes('qn65s90d') || (text.includes('samsung') && text.includes('oled') && (text.includes('tv') || text.includes('65')))) {
+    const is65 = text.includes('65') || text.includes('qn65');
+    const tvMsrp = is65 ? 2199.99 : 1799.99;
+    const tvAtl = is65 ? 1497.99 : 1297.99;
+    return {
+      suggestedMsrp: tvMsrp,
+      allTimeLow: tvAtl,
+      allTimeLowStore: 'Amazon',
+      allTimeLowDate: 'Dec 14, 2024',
+      typicalSaleDiscountPct: 31.9,
+      recommendedTargetPrice: is65 ? 1550.00 : 1350.00,
+      savingsAmount: Number((tvMsrp - tvAtl).toFixed(2)),
+      isKnownBenchmark: true,
+      marketNote: 'Direct manufacturer instant rebate matched by Best Buy & Amazon'
+    };
+  }
+
   // 2. Intelligent Category-Based Market Calculation
   const baseMsrp = userMsrp && userMsrp > 0 
     ? userMsrp 
-    : getDefaultCategoryMsrp(category);
+    : getDefaultCategoryMsrp(category, title);
 
   // Typical maximum sale discount for category (e.g. 20-30% for outdoor, 15-20% for electronics)
   let discountPct = 20;
@@ -624,7 +696,16 @@ export function estimateHistoricalPricing(
   };
 }
 
-function getDefaultCategoryMsrp(category: ItemCategory): number {
+function getDefaultCategoryMsrp(category: ItemCategory, title?: string): number {
+  const text = (title || '').toLowerCase();
+  
+  if (text.includes('generator') || text.includes('power station') || text.includes('jackery') || text.includes('ecoflow') || text.includes('bluetti')) {
+    return 799.99;
+  }
+  if (text.includes('oled') || text.includes('qled') || text.includes('smart tv') || text.includes('4k tv')) {
+    return 1499.99;
+  }
+
   switch (category) {
     case 'Fishing & Angling': return 79.99;
     case 'Hiking & Backpacking': return 179.99;

@@ -26,6 +26,7 @@ import { BestDealOptimizerModal } from './components/BestDealOptimizerModal';
 import { EmailAlertsModal } from './components/EmailAlertsModal';
 import { AddItemModal } from './components/AddItemModal';
 import { ArchitectureGuideModal } from './components/ArchitectureGuideModal';
+import { SelfTestModal } from './components/SelfTestModal';
 import { getRetailerDealUrl } from './utils/retailerUrls';
 import { sanitizeTrackedItem } from './utils/productClassifier';
 
@@ -80,6 +81,7 @@ export default function App() {
   const [isAlertsModalOpen, setIsAlertsModalOpen] = useState(false);
   const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
   const [guideModalTab, setGuideModalTab] = useState<'free-hosting' | 'cron-schedule' | 'blueprint' | 'deployment'>('free-hosting');
+  const [isSelfTestOpen, setIsSelfTestOpen] = useState(false);
 
   // Sync to localStorage
   useEffect(() => {
@@ -322,6 +324,7 @@ export default function App() {
           setGuideModalTab('cron-schedule');
           setIsGuideModalOpen(true);
         }}
+        onOpenSelfTestModal={() => setIsSelfTestOpen(true)}
         onRefreshAll={handleRefreshAll}
         isRefreshing={isRefreshing}
         userEmail={userEmail}
@@ -651,6 +654,13 @@ export default function App() {
           userEmail={userEmail}
           onItemsUpdated={(updated) => setItems(updated)}
           onClose={() => setIsGuideModalOpen(false)}
+        />
+      )}
+
+      {isSelfTestOpen && (
+        <SelfTestModal
+          isOpen={isSelfTestOpen}
+          onClose={() => setIsSelfTestOpen(false)}
         />
       )}
 

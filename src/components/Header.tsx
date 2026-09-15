@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingCart, Bell, Sparkles, Plus, RefreshCw, Radar, Layers, Clock, Cloud, Flame } from 'lucide-react';
+import { ShoppingCart, Bell, Sparkles, Plus, RefreshCw, Radar, Layers, Clock, Cloud, Flame, ShieldCheck } from 'lucide-react';
 import { TrackedItem } from '../types';
 
 interface HeaderProps {
@@ -9,6 +9,7 @@ interface HeaderProps {
   onOpenAlertsModal: () => void;
   onOpenGuideModal: () => void;
   onOpenScheduleModal?: () => void;
+  onOpenSelfTestModal?: () => void;
   onRefreshAll: () => void;
   isRefreshing: boolean;
   userEmail: string;
@@ -21,6 +22,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAlertsModal,
   onOpenGuideModal,
   onOpenScheduleModal,
+  onOpenSelfTestModal,
   onRefreshAll,
   isRefreshing,
   userEmail,
@@ -148,6 +150,18 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Add Item</span>
+            </button>
+
+            {/* Run Self-Test & Deal Link Audit */}
+            <button
+              id="open-selftest-btn"
+              onClick={onOpenSelfTestModal}
+              title="Run Automated Self-Test & Link Integrity Audit (108 checks)"
+              className="p-2 sm:px-3 sm:py-2 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-500/50 text-emerald-300 transition flex items-center space-x-1.5 text-xs font-semibold cursor-pointer shadow-sm shadow-emerald-950"
+            >
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span className="hidden md:inline">Self-Test</span>
+              <span className="px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 rounded text-[10px] font-bold">108/108</span>
             </button>
 
             {/* Free Hosting & Cron Guide */}

@@ -52,10 +52,12 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
   // Custom Form Fields
   const [title, setTitle] = useState('');
   const [brand, setBrand] = useState('');
-  const [category, setCategory] = useState<TrackedItem['category']>('Fishing & Angling');
+  const [category, setCategory] = useState<TrackedItem['category']>('Camping & Bushcraft');
   const [model, setModel] = useState('');
   const [msrp, setMsrp] = useState('');
   const [targetPrice, setTargetPrice] = useState('');
+  const [isMsrpManuallySet, setIsMsrpManuallySet] = useState(false);
+  const [isTargetManuallySet, setIsTargetManuallySet] = useState(false);
   const [productUrl, setProductUrl] = useState('');
   const [isScraping, setIsScraping] = useState(false);
   const [scrapedPreview, setScrapedPreview] = useState<any | null>(null);
@@ -76,13 +78,15 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
     if (autoCat !== 'Other') {
       setCategory(autoCat);
     }
-    const estimate = estimateHistoricalPricing(val, autoCat !== 'Other' ? autoCat : activeCategory);
-    // Auto-populate MSRP if currently empty
-    if (!msrp) {
+    const catToUse = autoCat !== 'Other' ? autoCat : (category || 'Camping & Bushcraft');
+    const estimate = estimateHistoricalPricing(val, catToUse);
+    
+    // Auto-populate MSRP if user hasn't typed their own value
+    if (!isMsrpManuallySet) {
       setMsrp(estimate.suggestedMsrp.toString());
     }
-    // Auto-populate Target Price if currently empty
-    if (!targetPrice) {
+    // Auto-populate Target Price if user hasn't typed their own value
+    if (!isTargetManuallySet) {
       setTargetPrice(estimate.recommendedTargetPrice.toString());
     }
   };
@@ -510,7 +514,10 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
                     type="number"
                     step="0.01"
                     value={msrp}
-                    onChange={(e) => setMsrp(e.target.value)}
+                    onChange={(e) => {
+                      setMsrp(e.target.value);
+                      setIsMsrpManuallySet(true);
+                    }}
                     placeholder={pricingEstimate.suggestedMsrp.toFixed(2)}
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
                   />
@@ -524,7 +531,10 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
                       </div>
                       <button
                         type="button"
-                        onClick={() => setTargetPrice(pricingEstimate.allTimeLow.toFixed(2))}
+                        onClick={() => {
+                          setTargetPrice(pricingEstimate.allTimeLow.toFixed(2));
+                          setIsTargetManuallySet(true);
+                        }}
                         className="px-2 py-0.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold text-[10px] rounded border border-emerald-500/40 transition cursor-pointer"
                         title="Set target price to All-Time Low"
                       >
@@ -549,7 +559,10 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
                     step="0.01"
                     required
                     value={targetPrice}
-                    onChange={(e) => setTargetPrice(e.target.value)}
+                    onChange={(e) => {
+                      setTargetPrice(e.target.value);
+                      setIsTargetManuallySet(true);
+                    }}
                     placeholder={pricingEstimate.recommendedTargetPrice.toFixed(2)}
                     className="w-full px-3 py-2 bg-slate-950 border border-emerald-500/80 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-400"
                   />
@@ -566,7 +579,10 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
                     <div className="flex flex-wrap gap-1.5 pt-0.5">
                       <button
                         type="button"
-                        onClick={() => setTargetPrice(pricingEstimate.allTimeLow.toFixed(2))}
+                        onClick={() => {
+                          setTargetPrice(pricingEstimate.allTimeLow.toFixed(2));
+                          setIsTargetManuallySet(true);
+                        }}
                         className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition cursor-pointer ${
                           targetPrice === pricingEstimate.allTimeLow.toFixed(2)
                             ? 'bg-emerald-500 text-black border-emerald-400 font-bold shadow-sm'
@@ -580,6 +596,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
                         onClick={() => {
                           const base = parseFloat(msrp) || pricingEstimate.suggestedMsrp;
                           setTargetPrice((base * 0.9).toFixed(2));
+                          setIsTargetManuallySet(true);
                         }}
                         className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition cursor-pointer ${
                           targetPrice === ((parseFloat(msrp) || pricingEstimate.suggestedMsrp) * 0.9).toFixed(2)
@@ -594,6 +611,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
                         onClick={() => {
                           const base = parseFloat(msrp) || pricingEstimate.suggestedMsrp;
                           setTargetPrice((base * 0.8).toFixed(2));
+                          setIsTargetManuallySet(true);
                         }}
                         className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition cursor-pointer ${
                           targetPrice === ((parseFloat(msrp) || pricingEstimate.suggestedMsrp) * 0.8).toFixed(2)

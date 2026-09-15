@@ -4,6 +4,7 @@ import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import nodemailer from "nodemailer";
 import { getRetailerDealUrl } from "./src/utils/retailerUrls";
+import { runComprehensiveSelfTest } from "./scripts/selftest";
 
 interface AlertRecord {
   id: string;
@@ -363,6 +364,16 @@ async function startServer() {
   // Fetch recent alert logs
   app.get("/api/alerts", (_req, res) => {
     res.json({ alerts: alertLogs });
+  });
+
+  // Automated self-test & link integrity suite
+  app.get("/api/selftest", (_req, res) => {
+    try {
+      const report = runComprehensiveSelfTest();
+      res.json(report);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to execute self-test" });
+    }
   });
 
   // Send an email alert (logs in system, generates ready-to-render email HTML, and dispatches via Resend/SMTP if configured)

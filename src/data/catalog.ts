@@ -966,7 +966,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-tv-bb',
         retailerName: 'Best Buy',
-        url: 'https://bestbuy.com/site/samsung-65-class-s90d-oled',
+        url: 'https://www.bestbuy.com/site/samsung-65-class-s90d-series-oled-4k-uhd-smart-tizen-tv-2024/6576624.p?skuId=6576624',
         price: 1499.99,
         originalPrice: 2199.99,
         inStock: true,
@@ -980,7 +980,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-tv-costco',
         retailerName: 'Costco',
-        url: 'https://costco.com/samsung-65-oled-s90d',
+        url: 'https://www.costco.com/samsung-65-class---oled-s90d-series---4k-uhd-oled-tv---all-state-3-year-protection-plan-bundle-included.product.4000257099.html',
         price: 1499.99,
         originalPrice: 2199.99,
         inStock: true,
@@ -994,7 +994,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-tv-tgt',
         retailerName: 'Target',
-        url: 'https://target.com/p/samsung-65-oled-tv',
+        url: 'https://www.target.com/p/samsung-65-oled-4k-smart-tv-qn65s90dafxza/-/A-91456910',
         price: 1599.99,
         originalPrice: 2199.99,
         inStock: true,
@@ -1124,6 +1124,20 @@ export const INITIAL_TRACKED_ITEMS: TrackedItem[] = RAW_INITIAL_TRACKED_ITEMS.ma
 }));
 
 export const POPULAR_ITEM_PRESETS = [
+  {
+    title: 'Jackery Explorer 1500 v2 Solar Generator with Solar Panel 100AIR',
+    category: 'Camping & Bushcraft',
+    brand: 'Jackery',
+    model: 'Explorer 1500 v2',
+    msrp: 799.99,
+    allTimeLow: 649.00,
+    allTimeLowStore: 'Amazon',
+    allTimeLowDate: 'Nov 29, 2024',
+    targetPrice: 679.00,
+    imageUrl: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=300&auto=format&fit=crop&q=80',
+    currentBestPrice: 699.99,
+    bestRetailer: 'Amazon'
+  },
   {
     title: 'Big Agnes Copper Spur HV UL2 Ultralight Backpacking Tent',
     category: 'Hiking & Backpacking',
