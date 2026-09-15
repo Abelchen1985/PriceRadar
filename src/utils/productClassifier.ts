@@ -115,7 +115,7 @@ export function getProductImageUrl(title: string, category: ItemCategory, brand?
 
   // Fishing Rods & Combos (e.g. Ugly Stik GX2)
   if (/rod|spinning\s*rod|casting\s*rod|ugly\s*stik|fly\s*rod|combo/i.test(text) && /fish|stik|angler|spinning|rod/i.test(text)) {
-    return 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&auto=format&fit=crop&q=80'; // Fishing rod & reel on lake
+    return 'https://images.unsplash.com/photo-1516962215378-7fa2e137ae93?w=600&auto=format&fit=crop&q=80'; // Fisherman casting spinning rod & reel
   }
 
   // Fishing Reel (Shimano Stradic, Daiwa, Penn)
@@ -228,10 +228,10 @@ export function getCategoryStoreRules(category: ItemCategory, title?: string): C
 
   if (isFishing) {
     return {
-      allowedStores: ['Bass Pro Shops', "Cabela's", 'Tackle Warehouse', 'Walmart', 'Amazon', "Dick's Sporting Goods"],
+      allowedStores: ['Bass Pro Shops', 'Tackle Warehouse', "Cabela's", 'Walmart', 'Amazon', "Dick's Sporting Goods"],
       defaultATLStore: 'Bass Pro Shops',
-      defaultRetailers: ['Bass Pro Shops', 'Tackle Warehouse', "Cabela's", 'Amazon'],
-      forbiddenStores: ['Micro Center', 'Best Buy', 'Home Depot', 'B&H Photo', 'Apple', 'Costco', 'Newegg']
+      defaultRetailers: ['Bass Pro Shops', 'Tackle Warehouse', "Cabela's", 'Walmart', 'Amazon'],
+      forbiddenStores: ['Micro Center', 'Best Buy', 'Home Depot', 'B&H Photo', 'Apple', 'Costco', 'Newegg', 'Target']
     };
   }
 
@@ -337,8 +337,11 @@ export function sanitizeTrackedItem(item: TrackedItem): TrackedItem {
 
   // 3. Validate and replace product image
   const cpuImageMarker = '1591799264318-7e6ef8ddb7ea';
+  const scubaImageMarker = '1544551763-46a013bb70d5';
   let imageUrl = item.imageUrl;
-  if (!imageUrl || imageUrl.includes(cpuImageMarker) && category !== 'PC Components') {
+  if (!imageUrl || 
+      (imageUrl.includes(cpuImageMarker) && category !== 'PC Components') ||
+      (imageUrl.includes(scubaImageMarker) && category === 'Fishing & Angling')) {
     imageUrl = getProductImageUrl(item.title, category, item.brand);
   }
 
@@ -376,6 +379,73 @@ export function sanitizeTrackedItem(item: TrackedItem): TrackedItem {
       url: getRetailerDealUrl(r.retailerName, item.title, r.url, item.brand, item.model)
     }));
   }
+
+  // 5. CRITICAL GUARANTEE: allTimeLowStore MUST ALWAYS exist in the live storefronts list!
+  const hasATLStore = validRetailers.some(
+    r => (r.retailerName || '').toLowerCase().trim() === allTimeLowStore.toLowerCase().trim()
+  );
+  if (!hasATLStore && allTimeLowStore) {
+    validRetailers.unshift({
+      id: `r-atl-${Date.now()}`,
+      retailerName: allTimeLowStore,
+      url: getRetailerDealUrl(allTimeLowStore, item.title, undefined, item.brand, item.model),
+      price: item.allTimeLow && item.allTimeLow > 0 ? item.allTimeLow : Number((msrp * 0.8).toFixed(2)),
+      originalPrice: msrp,
+      inStock: true,
+      stockMessage: 'In Stock - Historic Record Store',
+      shipping: 'Free Shipping',
+      shippingCost: 0,
+      rating: 4.8,
+      reviewCount: 1420,
+      isBestPrice: true
+    });
+  }
+
+  // 6. Category-specific premier storefront guarantees (e.g. Bass Pro for fishing rods)
+  if (category === 'Fishing & Angling') {
+    const hasBassPro = validRetailers.some(r => /bass\s*pro/i.test(r.retailerName || ''));
+    if (!hasBassPro) {
+      validRetailers.unshift({
+        id: `r-bp-${Date.now()}`,
+        retailerName: 'Bass Pro Shops',
+        url: getRetailerDealUrl('Bass Pro Shops', item.title, undefined, item.brand, item.model),
+        price: item.allTimeLow || Number((msrp * 0.85).toFixed(2)),
+        originalPrice: msrp,
+        inStock: true,
+        stockMessage: 'In Stock - Premier Angler Store',
+        shipping: 'Free Shipping',
+        shippingCost: 0,
+        rating: 4.9,
+        reviewCount: 2150,
+        isBestPrice: true
+      });
+    }
+
+    const hasTackleWarehouse = validRetailers.some(r => /tackle\s*warehouse/i.test(r.retailerName || ''));
+    if (!hasTackleWarehouse) {
+      validRetailers.push({
+        id: `r-tw-${Date.now()}`,
+        retailerName: 'Tackle Warehouse',
+        url: getRetailerDealUrl('Tackle Warehouse', item.title, undefined, item.brand, item.model),
+        price: Number((msrp * 0.94).toFixed(2)),
+        originalPrice: msrp,
+        inStock: true,
+        stockMessage: 'In Stock - Fast Tackle Delivery',
+        shipping: 'Free 2-Day Shipping',
+        shippingCost: 0,
+        rating: 4.8,
+        reviewCount: 1100,
+        isBestPrice: false
+      });
+    }
+  }
+
+  // Recalculate isBestPrice accurately
+  const minPrice = Math.min(...validRetailers.map(r => r.price));
+  validRetailers = validRetailers.map(r => ({
+    ...r,
+    isBestPrice: r.price === minPrice
+  }));
 
   return {
     ...item,

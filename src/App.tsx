@@ -328,7 +328,7 @@ export default function App() {
       />
 
       {/* Main App Canvas */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main className="flex-1 max-w-screen-2xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         
         {/* Banner: PriceRadar Universal Multi-Store Tracker & Deal Optimizer */}
         <div className="bg-gradient-to-r from-blue-950/70 via-indigo-950/60 to-slate-900 border border-blue-800/40 rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden">
