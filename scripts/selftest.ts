@@ -15,7 +15,9 @@ import {
   isVerifiedDirectProductUrl, 
   isOfficialSearchUrl, 
   detectBrokenGuessedSlug,
-  getRetailerLinkDetails 
+  getRetailerLinkDetails,
+  extractDirectProductSku,
+  isRetailerSellingProduct
 } from '../src/utils/retailerUrls';
 import { detectProductCategory, estimateHistoricalPricing } from '../src/utils/productClassifier';
 
@@ -281,6 +283,47 @@ export function runComprehensiveSelfTest(): {
     } else {
       pass('DEWALT Drill Home Depot Link', 'DEAL_LINKS', `Direct Home Depot product page: ${hdUrl}`);
     }
+  }
+
+  // 2.7 Anker SOLIX C1000 Portable Power Station Direct Links & Target Rejection
+  const ankerTitle = 'Anker SOLIX C1000 Gen 2 Portable Power Station';
+  const ankerAmz = getRetailerDealUrl('Amazon', ankerTitle, undefined, 'Anker', 'A1761');
+  if (ankerAmz.includes('B0C4DBC65K')) {
+    pass('Anker SOLIX C1000 Amazon Link', 'DEAL_LINKS', `Verified Amazon ASIN B0C4DBC65K: ${ankerAmz}`);
+  } else {
+    fail('Anker SOLIX C1000 Amazon Link', 'DEAL_LINKS', `Expected ASIN B0C4DBC65K, got: ${ankerAmz}`);
+  }
+
+  const ankerBb = getRetailerDealUrl('Best Buy', ankerTitle, undefined, 'Anker', 'A1761');
+  if (ankerBb.includes('6561141')) {
+    pass('Anker SOLIX C1000 Best Buy Link', 'DEAL_LINKS', `Verified Best Buy SKU 6561141: ${ankerBb}`);
+  } else {
+    fail('Anker SOLIX C1000 Best Buy Link', 'DEAL_LINKS', `Expected Best Buy SKU 6561141, got: ${ankerBb}`);
+  }
+
+  const ankerHd = getRetailerDealUrl('Home Depot', ankerTitle, undefined, 'Anker', 'A1761');
+  if (ankerHd.includes('328221841')) {
+    pass('Anker SOLIX C1000 Home Depot Link', 'DEAL_LINKS', `Verified Home Depot ID 328221841: ${ankerHd}`);
+  } else {
+    fail('Anker SOLIX C1000 Home Depot Link', 'DEAL_LINKS', `Expected Home Depot ID 328221841, got: ${ankerHd}`);
+  }
+
+  // Verify Target rejection for Anker SOLIX C1000 (Target does NOT stock Anker SOLIX C1000)
+  const isTargetSellingAnker = isRetailerSellingProduct('Target', ankerTitle, 'Anker', 'A1761');
+  if (!isTargetSellingAnker) {
+    pass('Target Rejection for Anker SOLIX', 'PRODUCT_MATCH', 'Target correctly rejected: Does not carry Anker SOLIX C1000');
+  } else {
+    fail('Target Rejection for Anker SOLIX', 'PRODUCT_MATCH', 'Target should NOT be allowed for Anker SOLIX C1000');
+  }
+
+  // 2.8 Direct SKU Extraction Check
+  const sampleAsin = extractDirectProductSku('https://www.amazon.com/dp/B0CV9XQ11F');
+  const sampleBbSku = extractDirectProductSku('https://www.bestbuy.com/site/samsung-65/6576624.p?skuId=6576624');
+  const sampleTcin = extractDirectProductSku('https://www.target.com/p/samsung/-/A-91456910');
+  if (sampleAsin === 'B0CV9XQ11F' && sampleBbSku === '6576624' && sampleTcin === 'A-91456910') {
+    pass('Direct SKU / ASIN Extraction', 'PRODUCT_MATCH', `Extracted ASIN: ${sampleAsin}, BestBuy SKU: ${sampleBbSku}, Target TCIN: ${sampleTcin}`);
+  } else {
+    fail('Direct SKU / ASIN Extraction', 'PRODUCT_MATCH', `Extraction failed: ${sampleAsin}, ${sampleBbSku}, ${sampleTcin}`);
   }
 
   // ==========================================

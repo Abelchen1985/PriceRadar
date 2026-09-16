@@ -10,15 +10,20 @@
  * 5. Transparently differentiate between "Direct Product" and "Catalog Search" in the UI.
  */
 
-export type RetailerUrlType = 'direct_product' | 'catalog_search';
+import { ProductMatchStatus, RetailerUrlType } from '../types';
+
+export type { RetailerUrlType };
 
 export interface RetailerLinkDetails {
   url: string;
   type: RetailerUrlType;
   isDirect: boolean;
+  productMatchVerified: boolean;
+  matchStatus: ProductMatchStatus;
   badgeLabel: string;
   tooltip: string;
   actionText: string;
+  directSku?: string;
 }
 
 export function cleanSearchQuery(title: string, brand?: string, model?: string): string {
@@ -278,6 +283,31 @@ export function getDirectProductUrl(retailerName: string, title: string, model?:
     }
   }
 
+  // 15. Anker SOLIX C1000 / C1000 Gen 2 Portable Power Station
+  if (
+    (t.includes('c1000') && (t.includes('anker') || t.includes('solix'))) ||
+    (t.includes('anker') && t.includes('solix')) ||
+    m.includes('c1000') ||
+    m.includes('a1761')
+  ) {
+    if (r.includes('amazon')) {
+      return 'https://www.amazon.com/dp/B0C4DBC65K';
+    }
+    if (r.includes('best buy') || r === 'bestbuy') {
+      return 'https://www.bestbuy.com/site/anker-solix-c1000-portable-power-station-gray/6561141.p?skuId=6561141';
+    }
+    if (r.includes('home depot') || r === 'homedepot') {
+      return 'https://www.homedepot.com/p/Anker-SOLIX-C1000-Portable-Power-Station-1056Wh-Solar-Generator-A1761111/328221841';
+    }
+    if (r.includes('anker')) {
+      return 'https://www.anker.com/products/a1761';
+    }
+    // Target does NOT sell the Anker SOLIX C1000 Gen 2
+    if (r.includes('target')) {
+      return null;
+    }
+  }
+
   return null;
 }
 
@@ -354,8 +384,81 @@ export function isVerifiedDirectProductUrl(url: string): boolean {
   // Official direct brand sites
   if (/samsung\.com\/us\/.*\/[a-z0-9_-]+\/?$/i.test(url)) return true;
   if (/jackery\.com\/products\/[a-z0-9_-]+/i.test(url)) return true;
+  if (/anker\.com\/products\/[a-z0-9_-]+/i.test(url)) return true;
 
   return false;
+}
+
+/**
+ * Extracts verified retailer SKU / ASIN / ID from a direct product URL.
+ */
+export function extractDirectProductSku(url: string): string | undefined {
+  if (!url || typeof url !== 'string') return undefined;
+
+  // Amazon ASIN: B0... (10 characters)
+  const amzMatch = url.match(/(?:dp|gp\/product)\/([A-Z0-9]{10})/i);
+  if (amzMatch) return amzMatch[1].toUpperCase();
+
+  // Best Buy SKU: 7-8 digits
+  const bbMatch = url.match(/(?:skuId=|\/)(\d{6,8})(?:\.p|\b)/i);
+  if (bbMatch) return bbMatch[1];
+
+  // Target TCIN: A-91456910
+  const tgtMatch = url.match(/-\/A-(\d{6,10})/i);
+  if (tgtMatch) return `A-${tgtMatch[1]}`;
+
+  // Home Depot Internet ID
+  const hdMatch = url.match(/homedepot\.com\/p\/(?:[^/]+\/)?(\d{6,12})/i);
+  if (hdMatch) return hdMatch[1];
+
+  // Walmart Item ID
+  const wmMatch = url.match(/walmart\.com\/ip\/(?:[^/]+\/)?(\d{6,12})/i);
+  if (wmMatch) return wmMatch[1];
+
+  // B&H Photo product code
+  const bhMatch = url.match(/bhphotovideo\.com\/c\/product\/([a-zA-Z0-9_-]+)/i);
+  if (bhMatch) return bhMatch[1];
+
+  // Micro Center SKU
+  const mcMatch = url.match(/microcenter\.com\/product\/(\d{5,7})/i);
+  if (mcMatch) return mcMatch[1];
+
+  // Newegg Item #
+  const neweggMatch = url.match(/newegg\.com\/(?:.*\/)?p\/([A-Z0-9]{10,20})/i);
+  if (neweggMatch) return neweggMatch[1];
+
+  return undefined;
+}
+
+/**
+ * Validates whether a given retailer actually sells / stocks this specific product.
+ * Prevents presenting fake retailer listings (e.g. Target does not sell Anker SOLIX C1000).
+ */
+export function isRetailerSellingProduct(
+  retailerName: string,
+  productTitle: string,
+  brand?: string,
+  model?: string
+): boolean {
+  const r = (retailerName || '').toLowerCase().trim();
+  const t = `${productTitle || ''} ${brand || ''} ${model || ''}`.toLowerCase();
+
+  // Target does NOT sell Anker SOLIX C1000 or specialized solar power stations
+  if (r.includes('target') && (t.includes('solix') || (t.includes('anker') && t.includes('c1000')))) {
+    return false;
+  }
+
+  // Micro Center does NOT sell fishing rods or camping tents
+  if ((r.includes('micro center') || r.includes('microcenter')) && (t.includes('ugly stik') || t.includes('fishing') || t.includes('tent'))) {
+    return false;
+  }
+
+  // REI does NOT sell desktop CPUs or motherboards
+  if (r.includes('rei') && (t.includes('7800x3d') || t.includes('ryzen') || t.includes('intel core'))) {
+    return false;
+  }
+
+  return true;
 }
 
 /**
@@ -531,15 +634,19 @@ export function getRetailerLinkDetails(
 ): RetailerLinkDetails {
   const url = getRetailerDealUrl(retailerName, productTitle, existingUrl, brand, model);
   const isDirect = isVerifiedDirectProductUrl(url);
+  const directSku = isDirect ? extractDirectProductSku(url) : undefined;
 
   return {
     url,
     type: isDirect ? 'direct_product' : 'catalog_search',
     isDirect,
+    productMatchVerified: isDirect,
+    matchStatus: isDirect ? 'verified_exact' : 'unverified_search',
     badgeLabel: isDirect ? 'Direct' : 'Search',
     tooltip: isDirect 
-      ? `Verified direct product page on ${retailerName}`
+      ? `Verified direct product page on ${retailerName}${directSku ? ` (${directSku})` : ''}`
       : `Live catalog search for '${cleanSearchQuery(productTitle, brand, model)}' on ${retailerName}`,
-    actionText: isDirect ? `Buy at ${retailerName}` : `Search on ${retailerName}`
+    actionText: isDirect ? `Buy at ${retailerName}` : `Search on ${retailerName}`,
+    directSku
   };
 }

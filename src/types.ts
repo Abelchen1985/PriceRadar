@@ -23,6 +23,9 @@ export type CommonRetailer =
   | 'Columbia'
   | string;
 
+export type ProductMatchStatus = 'verified_exact' | 'unverified_search';
+export type RetailerUrlType = 'direct_product' | 'catalog_search';
+
 export interface RetailerPrice {
   id: string;
   retailerName: CommonRetailer;
@@ -38,6 +41,10 @@ export interface RetailerPrice {
   rating: number;
   reviewCount: number;
   isBestPrice?: boolean;
+  productMatchVerified?: boolean;
+  matchStatus?: ProductMatchStatus;
+  urlType?: RetailerUrlType;
+  directSku?: string;
 }
 
 export interface PriceHistoryPoint {
