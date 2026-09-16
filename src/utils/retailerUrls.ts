@@ -632,8 +632,9 @@ export function getRetailerLinkDetails(
   brand?: string,
   model?: string
 ): RetailerLinkDetails {
+  const isSelling = isRetailerSellingProduct(retailerName, productTitle, brand, model);
   const url = getRetailerDealUrl(retailerName, productTitle, existingUrl, brand, model);
-  const isDirect = isVerifiedDirectProductUrl(url);
+  const isDirect = isSelling && isVerifiedDirectProductUrl(url);
   const directSku = isDirect ? extractDirectProductSku(url) : undefined;
 
   return {
@@ -641,12 +642,14 @@ export function getRetailerLinkDetails(
     type: isDirect ? 'direct_product' : 'catalog_search',
     isDirect,
     productMatchVerified: isDirect,
-    matchStatus: isDirect ? 'verified_exact' : 'unverified_search',
-    badgeLabel: isDirect ? 'Direct' : 'Search',
+    matchStatus: isDirect ? 'verified_exact' : isSelling ? 'unverified_search' : 'not_stocked',
+    badgeLabel: isDirect ? 'Direct' : isSelling ? 'Search' : 'No Listing',
     tooltip: isDirect 
       ? `Verified direct product page on ${retailerName}${directSku ? ` (${directSku})` : ''}`
-      : `Live catalog search for '${cleanSearchQuery(productTitle, brand, model)}' on ${retailerName}`,
-    actionText: isDirect ? `Buy at ${retailerName}` : `Search on ${retailerName}`,
+      : isSelling
+        ? `Live catalog search for '${cleanSearchQuery(productTitle, brand, model)}' on ${retailerName}`
+        : `${retailerName} does not stock this item`,
+    actionText: isDirect ? `Buy at ${retailerName}` : isSelling ? `Search ${retailerName}` : `Search ${retailerName}`,
     directSku
   };
 }

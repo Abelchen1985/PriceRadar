@@ -20,10 +20,15 @@ import {
   isRetailerSellingProduct
 } from '../src/utils/retailerUrls';
 import { detectProductCategory, estimateHistoricalPricing } from '../src/utils/productClassifier';
+import { normalizeProductIdentity } from '../src/services/productIdentity';
+import { matchCandidateProduct, determineLinkType } from '../src/services/productMatcher';
+import { verifyRetailerPrice } from '../src/services/priceVerifier';
+import { isRetailerEligibleForProduct, checkRetailerEligibility } from '../src/services/retailerRegistry';
+import { RetailerCandidate } from '../src/types';
 
 export interface TestResult {
   name: string;
-  category: 'PRODUCT_MATCH' | 'PRICE_ACCURACY' | 'DEAL_LINKS' | 'BENCHMARKS' | 'CATEGORY_CLASSIFIER';
+  category: 'PRODUCT_MATCH' | 'PRICE_ACCURACY' | 'DEAL_LINKS' | 'BENCHMARKS' | 'CATEGORY_CLASSIFIER' | 'ACCURACY_UPGRADE';
   status: 'PASS' | 'FAIL' | 'WARN';
   details: string;
   metadata?: Record<string, any>;
@@ -439,6 +444,183 @@ export function runComprehensiveSelfTest(): {
     fail('LinkDetails Search Fallback', 'DEAL_LINKS', `Failed search link fallback: ${JSON.stringify(searchTest)}`);
   } else {
     pass('LinkDetails Search Fallback', 'DEAL_LINKS', `Correctly flagged as Search: "${searchTest.actionText}" (${searchTest.badgeLabel})`);
+  }
+
+  // ==========================================
+  // SECTION 7: Major Accuracy Upgrade Regression Suite
+  // ==========================================
+
+  // Test 1: Unknown product does not receive fabricated prices
+  const unknownId = normalizeProductIdentity({ title: 'Unknown Custom Prototype 99999XYZ' });
+  const unknownCand: RetailerCandidate = {
+    retailer: 'Amazon',
+    url: 'https://www.amazon.com/s?k=Unknown+Custom+Prototype+99999XYZ',
+    sourceType: 'search',
+    discoveredAt: new Date().toISOString()
+  };
+  const unknownVerified = verifyRetailerPrice({ requestedProduct: unknownId, retailerName: 'Amazon', candidate: unknownCand });
+  if (unknownVerified.price === null && unknownVerified.priceVerified === false) {
+    pass('Regression 1: Zero Price Fabrication', 'ACCURACY_UPGRADE', 'Unknown product has null price and is unverified (zero fabrication)');
+  } else {
+    fail('Regression 1: Zero Price Fabrication', 'ACCURACY_UPGRADE', `Expected null price, got ${unknownVerified.price}`);
+  }
+
+  // Test 2: Amazon search URL is classified as search_results, not verified_product
+  const amzSearchType = determineLinkType('https://www.amazon.com/s?k=Anker+SOLIX+C1000', 'Amazon');
+  if (amzSearchType === 'search_results') {
+    pass('Regression 2: Amazon Search Classification', 'ACCURACY_UPGRADE', 'Amazon /s?k= correctly classified as search_results');
+  } else {
+    fail('Regression 2: Amazon Search Classification', 'ACCURACY_UPGRADE', `Expected search_results, got ${amzSearchType}`);
+  }
+
+  // Test 3: Amazon /dp/ URL without matching product identity is not verified
+  const c1000Id = normalizeProductIdentity({ title: 'Anker SOLIX C1000 Gen 2', brand: 'Anker', model: 'A1761' });
+  const mismatchCand: RetailerCandidate = {
+    retailer: 'Amazon',
+    url: 'https://www.amazon.com/dp/B00F0KM1D4',
+    title: 'Shakespeare Ugly Stik GX2 Spinning Rod',
+    brand: 'Shakespeare',
+    model: 'GX2',
+    sourceType: 'retailer_page',
+    discoveredAt: new Date().toISOString()
+  };
+  const mismatchResult = matchCandidateProduct(c1000Id, mismatchCand);
+  if (mismatchResult.status === 'wrong_product') {
+    pass('Regression 3: DP URL Without Matching Identity Rejected', 'ACCURACY_UPGRADE', `Correctly rejected mismatching /dp/ product: ${mismatchResult.reasons.join(', ')}`);
+  } else {
+    fail('Regression 3: DP URL Without Matching Identity Rejected', 'ACCURACY_UPGRADE', `Expected wrong_product, got ${mismatchResult.status}`);
+  }
+
+  // Test 4: Target does not sell Anker SOLIX C1000 Gen 2
+  const targetEligible = checkRetailerEligibility('Target', c1000Id);
+  const targetVerified = verifyRetailerPrice({ requestedProduct: c1000Id, retailerName: 'Target' });
+  if (!targetEligible.eligible && !targetVerified.productVerified && targetVerified.price === null) {
+    pass('Regression 4: Target Ineligible for Anker SOLIX C1000', 'ACCURACY_UPGRADE', `Target correctly rejected: ${targetEligible.reason}`);
+  } else {
+    fail('Regression 4: Target Ineligible for Anker SOLIX C1000', 'ACCURACY_UPGRADE', 'Target was marked eligible or had price');
+  }
+
+  // Test 5: Bundle mismatch is rejected (wrong_product)
+  const standaloneId = normalizeProductIdentity({ title: 'Anker SOLIX C1000 Gen 2 Portable Power Station', isBundle: false });
+  const bundleCand: RetailerCandidate = {
+    retailer: 'Amazon',
+    url: 'https://www.amazon.com/dp/B0C4DBC65K',
+    title: 'Anker SOLIX C1000 Portable Power Station with 200W Solar Panel Bundle',
+    isBundle: true,
+    bundleItems: ['200W Solar Panel'],
+    sourceType: 'retailer_page',
+    discoveredAt: new Date().toISOString()
+  };
+  const bundleResult = matchCandidateProduct(standaloneId, bundleCand);
+  if (bundleResult.status === 'wrong_product' && bundleResult.isBundleMismatch) {
+    pass('Regression 5: Bundle Mismatch Rejected', 'ACCURACY_UPGRADE', 'Standalone vs Solar Panel Bundle correctly rejected as wrong_product');
+  } else {
+    fail('Regression 5: Bundle Mismatch Rejected', 'ACCURACY_UPGRADE', `Expected wrong_product with bundle mismatch, got ${bundleResult.status}`);
+  }
+
+  // Test 6: Exact MPN match succeeds (exact)
+  const mpnReq = normalizeProductIdentity({ title: 'Sony WH-1000XM5 Headphones', mpn: 'WH1000XM5/B' });
+  const mpnCand: RetailerCandidate = {
+    retailer: 'B&H Photo',
+    url: 'https://www.bhphotovideo.com/c/product/1706692-REG',
+    title: 'Sony WH-1000XM5 Wireless Headphones (Black)',
+    mpn: 'WH1000XM5/B',
+    sourceType: 'retailer_page',
+    discoveredAt: new Date().toISOString()
+  };
+  const mpnResult = matchCandidateProduct(mpnReq, mpnCand);
+  if (mpnResult.status === 'exact' && mpnResult.confidence >= 90) {
+    pass('Regression 6: Exact MPN Match', 'ACCURACY_UPGRADE', `Exact MPN matched (confidence: ${mpnResult.confidence})`);
+  } else {
+    fail('Regression 6: Exact MPN Match', 'ACCURACY_UPGRADE', `Expected exact, got ${mpnResult.status}`);
+  }
+
+  // Test 7: Exact GTIN match succeeds (exact)
+  const gtinReq = normalizeProductIdentity({ title: 'Samsung 65" OLED S90D TV', gtin: '887276824192' });
+  const gtinCand: RetailerCandidate = {
+    retailer: 'Best Buy',
+    url: 'https://www.bestbuy.com/site/6576624.p',
+    title: 'Samsung 65 Class S90D Series OLED 4K',
+    gtin: '887276824192',
+    sourceType: 'retailer_page',
+    discoveredAt: new Date().toISOString()
+  };
+  const gtinResult = matchCandidateProduct(gtinReq, gtinCand);
+  if (gtinResult.status === 'exact' && gtinResult.confidence >= 90) {
+    pass('Regression 7: Exact GTIN Match', 'ACCURACY_UPGRADE', `Exact GTIN barcode verified candidate (confidence: ${gtinResult.confidence})`);
+  } else {
+    fail('Regression 7: Exact GTIN Match', 'ACCURACY_UPGRADE', `Expected exact with >=90, got ${gtinResult.status}`);
+  }
+
+  // Test 8: Different generation is not matched (wrong_product)
+  const gen2Id = normalizeProductIdentity({ title: 'Anker SOLIX C1000 Gen 2', generation: 'Gen 2' });
+  const gen1Cand: RetailerCandidate = {
+    retailer: 'Amazon',
+    url: 'https://www.amazon.com/dp/B0GEN1',
+    title: 'Anker SOLIX C1000 Gen 1 Portable Power Station',
+    generation: 'Gen 1',
+    sourceType: 'retailer_page',
+    discoveredAt: new Date().toISOString()
+  };
+  const genResult = matchCandidateProduct(gen2Id, gen1Cand);
+  if (genResult.status === 'wrong_product' && genResult.isGenerationMismatch) {
+    pass('Regression 8: Generation Mismatch Rejected', 'ACCURACY_UPGRADE', 'Gen 2 vs Gen 1 correctly classified as wrong_product');
+  } else {
+    fail('Regression 8: Generation Mismatch Rejected', 'ACCURACY_UPGRADE', `Expected wrong_product, got ${genResult.status}`);
+  }
+
+  // Test 9: Different capacity is not matched (wrong_product)
+  const cap1000Id = normalizeProductIdentity({ title: 'Anker SOLIX C1000 (1056Wh)', capacity: '1056Wh' });
+  const cap2000Cand: RetailerCandidate = {
+    retailer: 'Amazon',
+    url: 'https://www.amazon.com/dp/B0CAP2000',
+    title: 'Anker SOLIX F2000 (2048Wh) Portable Power Station',
+    capacity: '2048Wh',
+    sourceType: 'retailer_page',
+    discoveredAt: new Date().toISOString()
+  };
+  const capResult = matchCandidateProduct(cap1000Id, cap2000Cand);
+  if (capResult.status === 'wrong_product' && capResult.isCapacityMismatch) {
+    pass('Regression 9: Capacity Mismatch Rejected', 'ACCURACY_UPGRADE', '1056Wh vs 2048Wh correctly classified as wrong_product');
+  } else {
+    fail('Regression 9: Capacity Mismatch Rejected', 'ACCURACY_UPGRADE', `Expected wrong_product, got ${capResult.status}`);
+  }
+
+  // Test 10: Camera Body vs Lens Kit Bundle rejected
+  const bodyOnly = normalizeProductIdentity({ title: 'Sony Alpha a7 IV Mirrorless Camera Body Only', isBundle: false });
+  const kitLensCand: RetailerCandidate = {
+    retailer: 'B&H Photo',
+    url: 'https://www.bhphotovideo.com/c/product/a7iv-kit',
+    title: 'Sony Alpha a7 IV Mirrorless Camera with 28-70mm Lens Kit',
+    isBundle: true,
+    sourceType: 'retailer_page',
+    discoveredAt: new Date().toISOString()
+  };
+  const lensMatch = matchCandidateProduct(bodyOnly, kitLensCand);
+  if (lensMatch.status === 'wrong_product' && lensMatch.isBundleMismatch) {
+    pass('Regression 10: Camera Body vs Lens Kit Bundle Rejected', 'ACCURACY_UPGRADE', 'Body only vs lens kit bundle correctly classified as wrong_product');
+  } else {
+    fail('Regression 10: Camera Body vs Lens Kit Bundle Rejected', 'ACCURACY_UPGRADE', `Expected wrong_product, got ${lensMatch.status}`);
+  }
+
+  // Multi-Category Coverage Verification
+  const categoryTestItems = [
+    { title: 'Sony WH-1000XM5 Headphones', cat: 'Electronics', brand: 'Sony', model: 'WH1000XM5' },
+    { title: 'AMD Ryzen 7 7800X3D Desktop Processor', cat: 'PC Components', brand: 'AMD', model: '7800X3D' },
+    { title: 'Roborock S8 Pro Ultra Robot Vacuum', cat: 'Home Appliances', brand: 'Roborock', model: 'S8 Pro Ultra' },
+    { title: 'DEWALT 20V MAX Cordless Drill Combo Kit', cat: 'Power Tools', brand: 'DEWALT', model: 'DCK240C2' },
+    { title: 'Shimano Stradic FM 2500 Spinning Reel', cat: 'Fishing', brand: 'Shimano', model: 'ST2500HGFM' },
+    { title: 'Osprey Atmos AG 65 Expedition Backpack', cat: 'Hiking & Backpacking', brand: 'Osprey', model: 'Atmos 65' },
+    { title: 'Jackery Explorer 1500 v2 Solar Generator', cat: 'Solar Generators', brand: 'Jackery', model: 'Explorer 1500 v2' }
+  ];
+
+  for (const cItem of categoryTestItems) {
+    const ident = normalizeProductIdentity(cItem);
+    if (!ident.productName || !ident.brand) {
+      fail(`Category Item [${cItem.cat}] Normalization`, 'ACCURACY_UPGRADE', `Failed to normalize: ${cItem.title}`);
+    } else {
+      pass(`Category Item [${cItem.cat}] Normalization`, 'ACCURACY_UPGRADE', `Normalized "${ident.productName}" (Brand: ${ident.brand}, Model: ${ident.model || 'N/A'})`);
+    }
   }
 
   // Summary calculation
