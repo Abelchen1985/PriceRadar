@@ -37,8 +37,17 @@ export default function App() {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // Sanitize, audit store compatibility, auto-fix categories and images
-          return parsed.map((item: TrackedItem) => sanitizeTrackedItem(item));
+          // Sanitize, audit store compatibility, auto-fix categories and images, and scrub any personal email
+          return parsed.map((item: TrackedItem) => {
+            const sanitized = sanitizeTrackedItem(item);
+            if (sanitized.userEmail && sanitized.userEmail.includes('abelchen')) {
+              sanitized.userEmail = 'alerts@example.com';
+            }
+            if (sanitized.alertEmails) {
+              sanitized.alertEmails = sanitized.alertEmails.map(e => e.includes('abelchen') ? 'alerts@example.com' : e);
+            }
+            return sanitized;
+          });
         }
       } catch (e) {
         console.error(e);
@@ -48,7 +57,11 @@ export default function App() {
   });
 
   const [userEmail, setUserEmail] = useState<string>(() => {
-    return localStorage.getItem('priceradar_user_email') || localStorage.getItem('pcpart_user_email') || 'abelchen1985@gmail.com';
+    const saved = localStorage.getItem('priceradar_user_email') || localStorage.getItem('pcpart_user_email');
+    if (saved && !saved.includes('abelchen')) {
+      return saved;
+    }
+    return 'alerts@example.com';
   });
 
   const [recipients, setRecipients] = useState<EmailRecipient[]>(() => {
@@ -56,7 +69,10 @@ export default function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const cleaned = parsed.filter(r => !r.email?.includes('abelchen'));
+          if (cleaned.length > 0) return cleaned;
+        }
       } catch (e) {
         console.error(e);
       }
@@ -82,6 +98,26 @@ export default function App() {
   const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
   const [guideModalTab, setGuideModalTab] = useState<'free-hosting' | 'cron-schedule' | 'blueprint' | 'deployment'>('free-hosting');
   const [isSelfTestOpen, setIsSelfTestOpen] = useState(false);
+
+  // One-time privacy cleanup for any legacy cached personal email
+  useEffect(() => {
+    try {
+      const savedEmail = localStorage.getItem('priceradar_user_email');
+      if (savedEmail && savedEmail.includes('abelchen')) {
+        localStorage.setItem('priceradar_user_email', 'alerts@example.com');
+      }
+      const pcPartEmail = localStorage.getItem('pcpart_user_email');
+      if (pcPartEmail && pcPartEmail.includes('abelchen')) {
+        localStorage.removeItem('pcpart_user_email');
+      }
+      const savedRecs = localStorage.getItem('priceradar_recipients');
+      if (savedRecs && savedRecs.includes('abelchen')) {
+        localStorage.setItem('priceradar_recipients', JSON.stringify(DEFAULT_EMAIL_RECIPIENTS));
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   // Sync to localStorage
   useEffect(() => {
@@ -171,14 +207,18 @@ export default function App() {
           if (it.id !== item.id) return it;
           return {
             ...it,
-            retailers: json.data.retailers.map((r: any, idx: number) => ({
-              ...it.retailers[idx % it.retailers.length],
-              retailerName: r.retailerName,
-              price: r.price,
-              inStock: r.inStock,
-              stockMessage: r.stockMessage || 'In Stock',
-              isBestPrice: r.isBestPrice
-            })),
+            retailers: json.data.retailers.map((r: any) => {
+              const existing = it.retailers.find((ex: any) => ex.retailerName.toLowerCase() === r.retailerName.toLowerCase());
+              return {
+                ...existing,
+                ...r,
+                url: r.url || existing?.url || '',
+                price: typeof r.price === 'number' ? r.price : (existing?.price || 0),
+                inStock: r.inStock !== undefined ? r.inStock : (existing?.inStock ?? true),
+                stockMessage: r.stockMessage || (existing?.stockMessage || 'In Stock'),
+                isBestPrice: r.isBestPrice ?? false
+              };
+            }),
             lastUpdated: 'Just now'
           };
         }));

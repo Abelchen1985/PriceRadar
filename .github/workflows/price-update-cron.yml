@@ -19,7 +19,7 @@ jobs:
       - name: Ping Live Scraper & Price Update Endpoint
         env:
           APP_URL: ${{ secrets.APP_URL || 'https://ais-pre-patyh5cmk3gi6h3fo22226-865296898510.us-east1.run.app' }}
-          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'abelchen1985@gmail.com' }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'alerts@example.com' }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           echo "Starting PriceRadar Midnight & Noon Automated Price Sweep..."

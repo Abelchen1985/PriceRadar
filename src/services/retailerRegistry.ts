@@ -219,29 +219,62 @@ export function checkRetailerEligibility(
     if (t.includes('jackery') || t.includes('solar generator') || m.includes('1500 v2')) {
       return { eligible: false, reason: 'Target does not stock heavy solar generators' };
     }
-    if (category === 'PC Components' || t.includes('7800x3d') || t.includes('ryzen') || t.includes('rtx')) {
+    if (category === 'PC Components' || t.includes('7800x3d') || t.includes('ryzen') || t.includes('rtx') || t.includes('processor')) {
       return { eligible: false, reason: 'Target does not stock standalone PC components or CPUs' };
+    }
+    if (t.includes('barista touch') || t.includes('bes880') || t.includes('oracle')) {
+      return { eligible: false, reason: 'Target does not stock high-end Breville espresso machines' };
+    }
+    if (t.includes('atmos ag 65') || t.includes('backpacking pack')) {
+      return { eligible: false, reason: 'Target does not stock technical expedition backpacks' };
     }
   }
 
-  // Micro Center does NOT sell outdoor backpacking tents, fishing gear, or general apparel
+  // Bass Pro Shops & Cabela's do NOT stock technical backpacking, PC parts, or home electronics
+  if (r.includes('bass pro') || r.includes('basspro') || r.includes('cabela')) {
+    if (t.includes('atmos ag 65') || (b.includes('osprey') && (t.includes('atmos') || t.includes('aether') || t.includes('backpack')))) {
+      return { eligible: false, reason: `${retailerName} does not stock Osprey expedition backpacks` };
+    }
+    if (t.includes('copper spur') || t.includes('neoair') || b.includes('big agnes') || b.includes('therm-a-rest')) {
+      return { eligible: false, reason: `${retailerName} does not stock ultralight backpacking gear` };
+    }
+    if (category === 'PC Components' || t.includes('7800x3d') || t.includes('ryzen') || t.includes('dyson') || t.includes('wh-1000xm5') || t.includes('playstation') || t.includes('oled') || t.includes('macbook')) {
+      return { eligible: false, reason: `${retailerName} does not stock electronics, PC parts, or home appliances` };
+    }
+  }
+
+  // Micro Center does NOT sell outdoor backpacking tents, fishing gear, or home appliances
   if (r.includes('micro center') || r.includes('microcenter')) {
-    if (t.includes('backpack') || t.includes('spinning rod') || t.includes('ugly stik') || t.includes('tent')) {
-      return { eligible: false, reason: 'Micro Center does not stock outdoor/fishing gear' };
+    if (t.includes('backpack') || t.includes('spinning rod') || t.includes('ugly stik') || t.includes('tent') || t.includes('stradic') || t.includes('cooler') || t.includes('tundra') || t.includes('drill') || t.includes('dyson') || t.includes('breville')) {
+      return { eligible: false, reason: 'Micro Center does not stock outdoor, fishing, or home appliances' };
     }
   }
 
   // Tackle Warehouse sells only Fishing & Angling gear
-  if (r.includes('tackle warehouse')) {
-    if (category && category !== 'Fishing & Angling' && !t.includes('rod') && !t.includes('reel') && !t.includes('stradic')) {
+  if (r.includes('tackle warehouse') || r.includes('tacklewarehouse')) {
+    if (category && category !== 'Fishing & Angling' && !t.includes('rod') && !t.includes('reel') && !t.includes('stradic') && !t.includes('ugly stik') && !t.includes('fishing')) {
       return { eligible: false, reason: 'Tackle Warehouse stocks exclusively fishing equipment' };
     }
   }
 
-  // REI sells outdoor gear, not internal PC components or OLED TVs
+  // REI sells outdoor gear, not internal PC components, OLED TVs, power drills, or kitchen appliances
   if (r.includes('rei')) {
-    if (category === 'PC Components' || t.includes('7800x3d') || t.includes('oled') || t.includes('tv')) {
-      return { eligible: false, reason: 'REI does not stock internal PC components or OLED televisions' };
+    if (category === 'PC Components' || t.includes('7800x3d') || t.includes('oled') || t.includes('tv') || t.includes('dyson') || t.includes('dewalt') || t.includes('drill') || t.includes('breville') || t.includes('barista') || t.includes('playstation') || t.includes('ps5') || t.includes('macbook')) {
+      return { eligible: false, reason: 'REI does not stock internal PC components, televisions, or home appliances' };
+    }
+  }
+
+  // Home Depot does NOT sell video game consoles, headphones, laptops, or fishing gear
+  if (r.includes('home depot') || r.includes('homedepot')) {
+    if (t.includes('wh-1000xm5') || t.includes('airpods') || t.includes('playstation') || t.includes('ps5') || t.includes('fishing') || t.includes('stradic') || t.includes('atmos') || t.includes('macbook')) {
+      return { eligible: false, reason: 'Home Depot does not stock consumer electronics, consoles, or fishing tackle' };
+    }
+  }
+
+  // Best Buy does NOT sell fishing tackle or technical expedition backpacks
+  if (r.includes('best buy') || r === 'bestbuy') {
+    if (t.includes('ugly stik') || t.includes('fishing rod') || t.includes('stradic') || t.includes('atmos ag 65') || t.includes('copper spur')) {
+      return { eligible: false, reason: 'Best Buy does not stock fishing tackle or expedition backpacking gear' };
     }
   }
 

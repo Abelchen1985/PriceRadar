@@ -33,7 +33,7 @@ export const ArchitectureGuideModal: React.FC<ArchitectureGuideModalProps> = ({
   onClose,
   initialTab = 'free-hosting',
   items = [],
-  userEmail = 'abelchen1985@gmail.com',
+  userEmail = 'alerts@example.com',
   onItemsUpdated
 }) => {
   const [activeTab, setActiveTab] = useState<'free-hosting' | 'cron-schedule' | 'blueprint' | 'deployment'>(initialTab);

@@ -1,22 +1,16 @@
 import { TrackedItem, EmailRecipient } from '../types';
-import { getRetailerDealUrl } from '../utils/retailerUrls';
+import { getRetailerDealUrl, isRetailerSellingProduct } from '../utils/retailerUrls';
 
 export const DEFAULT_EMAIL_RECIPIENTS: EmailRecipient[] = [
   {
     id: 'rec-1',
-    email: 'abelchen1985@gmail.com',
-    label: 'Primary / Personal',
+    email: 'alerts@example.com',
+    label: 'Primary In-Box',
     isDefault: true
   },
   {
     id: 'rec-2',
-    email: 'abelchen1985+work@gmail.com',
-    label: 'Work / Office',
-    isDefault: false
-  },
-  {
-    id: 'rec-3',
-    email: 'abelchen1985+deals@gmail.com',
+    email: 'deals@example.com',
     label: 'Deal Alerts',
     isDefault: false
   }
@@ -36,15 +30,15 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
     allTimeLowStore: 'REI',
     targetPrice: 275.00,
     emailAlertEnabled: true,
-    userEmail: 'abelchen1985@gmail.com',
-    alertEmails: ['abelchen1985@gmail.com'],
+    userEmail: 'alerts@example.com',
+    alertEmails: ['alerts@example.com'],
     alertCondition: 'below_target',
     lastUpdated: 'Just now',
     retailers: [
       {
         id: 'r-atmos-rei',
         retailerName: 'REI',
-        url: 'https://rei.com/product/osprey-atmos-ag-65',
+        url: 'https://www.rei.com/product/218570/osprey-atmos-ag-65-pack-mens',
         price: 272.00,
         originalPrice: 340.00,
         inStock: true,
@@ -58,7 +52,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-atmos-bc',
         retailerName: 'Backcountry',
-        url: 'https://backcountry.com/osprey-atmos-ag-65',
+        url: 'https://www.backcountry.com/osprey-packs-atmos-ag-65-backpack-3783-4150cu-in',
         price: 289.00,
         originalPrice: 340.00,
         inStock: true,
@@ -67,20 +61,6 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
         shippingCost: 0,
         rating: 4.8,
         reviewCount: 910,
-        isBestPrice: false
-      },
-      {
-        id: 'r-atmos-bass',
-        retailerName: 'Bass Pro Shops',
-        url: 'https://basspro.com/shop/en/osprey-atmos-ag-65',
-        price: 340.00,
-        originalPrice: 340.00,
-        inStock: true,
-        stockMessage: 'In Stock - Available for Pickup',
-        shipping: 'Free Shipping',
-        shippingCost: 0,
-        rating: 4.7,
-        reviewCount: 420,
         isBestPrice: false
       },
       {
@@ -120,8 +100,8 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
     allTimeLowStore: 'Tackle Warehouse',
     targetPrice: 215.00,
     emailAlertEnabled: true,
-    userEmail: 'abelchen1985@gmail.com',
-    alertEmails: ['abelchen1985@gmail.com'],
+    userEmail: 'alerts@example.com',
+    alertEmails: ['alerts@example.com'],
     alertCondition: 'below_target',
     lastUpdated: 'Just now',
     retailers: [
@@ -204,8 +184,8 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
     allTimeLowStore: 'REI',
     targetPrice: 349.00,
     emailAlertEnabled: true,
-    userEmail: 'abelchen1985@gmail.com',
-    alertEmails: ['abelchen1985@gmail.com'],
+    userEmail: 'alerts@example.com',
+    alertEmails: ['alerts@example.com'],
     alertCondition: 'below_target',
     lastUpdated: 'Just now',
     retailers: [
@@ -288,8 +268,8 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
     allTimeLowStore: 'Bass Pro Shops',
     targetPrice: 329.00,
     emailAlertEnabled: true,
-    userEmail: 'abelchen1985@gmail.com',
-    alertEmails: ['abelchen1985@gmail.com'],
+    userEmail: 'alerts@example.com',
+    alertEmails: ['alerts@example.com'],
     alertCondition: 'below_target',
     lastUpdated: 'Just now',
     retailers: [
@@ -358,8 +338,8 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
     allTimeLowStore: 'REI',
     targetPrice: 275.00,
     emailAlertEnabled: true,
-    userEmail: 'abelchen1985@gmail.com',
-    alertEmails: ['abelchen1985@gmail.com'],
+    userEmail: 'alerts@example.com',
+    alertEmails: ['alerts@example.com'],
     alertCondition: 'below_target',
     lastUpdated: 'Just now',
     retailers: [
@@ -442,8 +422,8 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
     allTimeLowStore: 'Amazon',
     targetPrice: 330.00,
     emailAlertEnabled: true,
-    userEmail: 'abelchen1985@gmail.com',
-    alertEmails: ['abelchen1985@gmail.com'],
+    userEmail: 'alerts@example.com',
+    alertEmails: ['alerts@example.com'],
     alertCondition: 'all_time_low',
     lastUpdated: 'Just now',
     retailers: [
@@ -540,8 +520,8 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
     allTimeLowStore: 'Target',
     targetPrice: 420.00,
     emailAlertEnabled: true,
-    userEmail: 'abelchen1985@gmail.com',
-    alertEmails: ['abelchen1985@gmail.com', 'abelchen1985+deals@gmail.com'],
+    userEmail: 'alerts@example.com',
+    alertEmails: ['alerts@example.com', 'deals@example.com'],
     alertCondition: 'below_target',
     lastUpdated: '10m ago',
     retailers: [
@@ -625,8 +605,8 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
     allTimeLowStore: 'Amazon',
     targetPrice: 850.00,
     emailAlertEnabled: true,
-    userEmail: 'abelchen1985@gmail.com',
-    alertEmails: ['abelchen1985@gmail.com', 'abelchen1985+work@gmail.com'],
+    userEmail: 'alerts@example.com',
+    alertEmails: ['alerts@example.com'],
     alertCondition: 'below_target',
     lastUpdated: '15m ago',
     retailers: [
@@ -647,7 +627,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-bv-bb',
         retailerName: 'Best Buy',
-        url: 'https://bestbuy.com/site/breville-barista-touch',
+        url: 'https://www.bestbuy.com/site/breville-the-barista-touch-espresso-machine-with-steam-wand-stainless-steel/6112521.p?skuId=6112521',
         price: 999.95,
         originalPrice: 999.95,
         inStock: true,
@@ -659,23 +639,23 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
         isBestPrice: false
       },
       {
-        id: 'r-bv-tgt',
-        retailerName: 'Target',
-        url: 'https://target.com/p/breville-barista-touch',
+        id: 'r-bv-dir',
+        retailerName: 'Breville',
+        url: 'https://www.breville.com/us/en/products/espresso/bes880.html',
         price: 999.95,
         originalPrice: 999.95,
         inStock: true,
-        stockMessage: 'In Stock',
-        shipping: 'Free Shipping',
+        stockMessage: 'In Stock - Official Manufacturer Store',
+        shipping: 'Free Shipping & 2-Yr Warranty',
         shippingCost: 0,
-        rating: 4.5,
-        reviewCount: 420,
+        rating: 4.8,
+        reviewCount: 2400,
         isBestPrice: false
       },
       {
         id: 'r-bv-wm',
         retailerName: 'Walmart',
-        url: 'https://walmart.com/ip/Breville-Barista-Touch',
+        url: 'https://www.walmart.com/ip/Breville-Barista-Touch-Espresso-Machine-Stainless-Steel-BES880BSS/739198661',
         price: 899.95,
         originalPrice: 999.95,
         inStock: true,
@@ -709,7 +689,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
     allTimeLowStore: 'Best Buy',
     targetPrice: 1280.00,
     emailAlertEnabled: true,
-    userEmail: 'abelchen1985@gmail.com',
+    userEmail: 'alerts@example.com',
     alertCondition: 'below_target',
     lastUpdated: '3m ago',
     retailers: [
@@ -792,7 +772,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
     allTimeLowStore: 'Target',
     targetPrice: 620.00,
     emailAlertEnabled: true,
-    userEmail: 'abelchen1985@gmail.com',
+    userEmail: 'alerts@example.com',
     alertCondition: 'below_target',
     lastUpdated: '1 hour ago',
     retailers: [
@@ -876,7 +856,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
     allTimeLowStore: 'Home Depot',
     targetPrice: 150.00,
     emailAlertEnabled: true,
-    userEmail: 'abelchen1985@gmail.com',
+    userEmail: 'alerts@example.com',
     alertCondition: 'below_target',
     lastUpdated: '35m ago',
     retailers: [
@@ -945,7 +925,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
     allTimeLowStore: 'Amazon',
     targetPrice: 1550.00,
     emailAlertEnabled: true,
-    userEmail: 'abelchen1985@gmail.com',
+    userEmail: 'alerts@example.com',
     alertCondition: 'below_target',
     lastUpdated: '12m ago',
     retailers: [
@@ -1028,7 +1008,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
     allTimeLowStore: 'Micro Center',
     targetPrice: 360.00,
     emailAlertEnabled: true,
-    userEmail: 'abelchen1985@gmail.com',
+    userEmail: 'alerts@example.com',
     alertCondition: 'below_target',
     lastUpdated: 'Just now',
     retailers: [
@@ -1115,13 +1095,18 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
   }
 ];
 
-export const INITIAL_TRACKED_ITEMS: TrackedItem[] = RAW_INITIAL_TRACKED_ITEMS.map(item => ({
-  ...item,
-  retailers: item.retailers.map(r => ({
-    ...r,
-    url: getRetailerDealUrl(r.retailerName, item.title, r.url, item.brand, item.model)
-  }))
-}));
+export const INITIAL_TRACKED_ITEMS: TrackedItem[] = RAW_INITIAL_TRACKED_ITEMS.map(item => {
+  const eligibleRetailers = item.retailers.filter(r =>
+    isRetailerSellingProduct(r.retailerName, item.title, item.brand, item.model)
+  );
+  return {
+    ...item,
+    retailers: eligibleRetailers.map(r => ({
+      ...r,
+      url: getRetailerDealUrl(r.retailerName, item.title, r.url, item.brand, item.model)
+    }))
+  };
+});
 
 export const POPULAR_ITEM_PRESETS = [
   {

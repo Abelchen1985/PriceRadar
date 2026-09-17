@@ -11,7 +11,7 @@ import {
   Star
 } from 'lucide-react';
 import { TrackedItem } from '../types';
-import { getRetailerLinkDetails } from '../utils/retailerUrls';
+import { getRetailerLinkDetails, isRetailerSellingProduct } from '../utils/retailerUrls';
 
 interface RetailerCompareModalProps {
   item: TrackedItem | null;
@@ -26,14 +26,21 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
 }) => {
   if (!item) return null;
 
+  // Filter out any retailer that does not actually stock or sell this specific product
+  const eligibleRetailers = item.retailers.filter(r =>
+    isRetailerSellingProduct(r.retailerName, item.title, item.brand, item.model)
+  );
+
   // Sort retailers by price ascending (in-stock first)
-  const sortedRetailers = [...item.retailers].sort((a, b) => {
+  const sortedRetailers = [...eligibleRetailers].sort((a, b) => {
     if (a.inStock && !b.inStock) return -1;
     if (!a.inStock && b.inStock) return 1;
     return a.price - b.price;
   });
 
-  const lowestPrice = Math.min(...item.retailers.map(r => r.price));
+  const lowestPrice = eligibleRetailers.length > 0 
+    ? Math.min(...eligibleRetailers.map(r => r.price))
+    : item.targetPrice;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
@@ -221,7 +228,7 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
                     <a 
                       href={linkDetails.url}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       title={linkDetails.tooltip}
                       className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center space-x-1.5 transition ${
                         isBest

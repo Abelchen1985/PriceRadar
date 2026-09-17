@@ -246,6 +246,28 @@ export function getCategoryStoreRules(category: ItemCategory, title?: string): C
     };
   }
 
+  // Technical mountaineering backpacks (Osprey Atmos, Aether, Gregory)
+  const isExpeditionPack = /atmos|osprey.*backpack|backpacking\s*pack|gregory.*baltoro/i.test(title || '');
+  if (isExpeditionPack) {
+    return {
+      allowedStores: ['REI', 'Backcountry', 'Amazon'],
+      defaultATLStore: 'REI',
+      defaultRetailers: ['REI', 'Backcountry', 'Amazon'],
+      forbiddenStores: ['Bass Pro Shops', "Cabela's", 'Target', 'Walmart', 'Micro Center', 'Best Buy', 'Home Depot', 'Newegg']
+    };
+  }
+
+  // High-end espresso machines (Breville Barista Touch, Oracle)
+  const isHighEndEspresso = /barista\s*touch|bes880|oracle|barista\s*pro/i.test(title || '');
+  if (isHighEndEspresso) {
+    return {
+      allowedStores: ['Amazon', 'Best Buy', 'Walmart'],
+      defaultATLStore: 'Amazon',
+      defaultRetailers: ['Amazon', 'Best Buy', 'Walmart'],
+      forbiddenStores: ['Target', 'Home Depot', 'Micro Center', 'REI', 'Tackle Warehouse', 'Bass Pro Shops', "Cabela's", 'Newegg']
+    };
+  }
+
   if (category === 'Hiking & Backpacking' || category === 'Camping & Bushcraft' || category === 'Kayaking & Water Sports' || category === 'Hunting & Optics' || category === 'Outdoor Apparel & Boots') {
     return {
       allowedStores: ['REI', 'Backcountry', 'Bass Pro Shops', "Cabela's", 'Amazon', 'Moosejaw', 'Sierra', 'Walmart'],

@@ -45,7 +45,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
       const defaultRec = recipients.find(r => r.isDefault);
       return [defaultRec ? defaultRec.email : recipients[0].email];
     }
-    return [userEmail || 'abelchen1985@gmail.com'];
+    return [userEmail || 'alerts@example.com'];
   });
   const [customEmailInput, setCustomEmailInput] = useState('');
 

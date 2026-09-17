@@ -16,7 +16,7 @@ import {
   Check
 } from 'lucide-react';
 import { TrackedItem, RetailerPrice, EmailRecipient } from '../types';
-import { getRetailerDealUrl, getRetailerLinkDetails } from '../utils/retailerUrls';
+import { getRetailerDealUrl, getRetailerLinkDetails, isRetailerSellingProduct } from '../utils/retailerUrls';
 
 interface ItemRowProps {
   item: TrackedItem;
@@ -49,8 +49,10 @@ export const ItemRow: React.FC<ItemRowProps> = ({
   const [targetInput, setTargetInput] = useState(item.targetPrice.toString());
   const [showEmailPicker, setShowEmailPicker] = useState(false);
 
-  // Use genuine retailers list - do not fabricate fake active stores
-  const displayRetailers: RetailerPrice[] = [...item.retailers];
+  // Filter to genuine retailers that actually carry and sell this product
+  const displayRetailers: RetailerPrice[] = item.retailers.filter(r =>
+    isRetailerSellingProduct(r.retailerName, item.title, item.brand, item.model)
+  );
 
   // Find lowest price among retailers
   const availableRetailers = displayRetailers.filter(r => r.inStock);
@@ -153,7 +155,7 @@ export const ItemRow: React.FC<ItemRowProps> = ({
                 <a
                   href={getRetailerDealUrl(item.allTimeLowStore, item.title, undefined, item.brand, item.model)}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   title={`Open record low storefront: ${item.allTimeLowStore}`}
                   className="text-slate-400 hover:text-emerald-300 text-[11px] underline decoration-slate-600 hover:decoration-emerald-400 transition ml-0.5"
                 >
@@ -289,7 +291,7 @@ export const ItemRow: React.FC<ItemRowProps> = ({
                   key={retailer.id}
                   href={linkDetails.url}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   title={`${retailer.retailerName}: $${retailer.price.toFixed(2)} (${retailer.stockMessage}) • ${linkDetails.tooltip}`}
                   className={`px-2.5 py-1.5 rounded-xl text-xs font-medium border flex items-center space-x-1.5 transition ${
                     isBest 
@@ -369,9 +371,10 @@ export const ItemRow: React.FC<ItemRowProps> = ({
             {recipients.length > 0 && (
               <div className="relative">
                 {(() => {
-                  const itemEmails = item.alertEmails && item.alertEmails.length > 0 
+                  const rawEmails = item.alertEmails && item.alertEmails.length > 0 
                     ? item.alertEmails 
-                    : [item.userEmail || 'abelchen1985@gmail.com'];
+                    : [item.userEmail || 'alerts@example.com'];
+                  const itemEmails = rawEmails.map(e => e.includes('abelchen') ? 'alerts@example.com' : e);
                   return (
                     <>
                       <button

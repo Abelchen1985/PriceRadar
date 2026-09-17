@@ -34,7 +34,7 @@ const alertLogs: AlertRecord[] = [
   {
     id: "alert-init-1",
     timestamp: new Date(Date.now() - 3600000 * 2).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + " Today",
-    email: "abelchen1985@gmail.com",
+    email: "alerts@example.com",
     itemTitle: "AMD Ryzen 7 7800X3D 8-Core Desktop Processor",
     oldPrice: 389.99,
     newPrice: 349.99,
@@ -61,6 +61,8 @@ const alertLogs: AlertRecord[] = [
 ];
 
 let geminiClient: GoogleGenAI | null = null;
+let geminiSearchCooldownUntil = 0;
+
 function getGemini(): GoogleGenAI | null {
   if (!geminiClient && process.env.GEMINI_API_KEY) {
     geminiClient = new GoogleGenAI({
@@ -182,7 +184,7 @@ async function startServer() {
     }
 
     if (targetEmails.length === 0) {
-      targetEmails = ["abelchen1985@gmail.com"];
+      targetEmails = ["alerts@example.com"];
     }
 
     const itemsCount = Array.isArray(items) && items.length > 0 ? items.length : 8;
@@ -528,7 +530,7 @@ async function startServer() {
       recipientList = String(email).split(',').map(s => s.trim()).filter(Boolean);
     }
     if (recipientList.length === 0) {
-      recipientList = ["abelchen1985@gmail.com"];
+      recipientList = ["alerts@example.com"];
     }
 
     const dropPercent = oldPrice > 0 ? Number((((oldPrice - newPrice) / oldPrice) * 100).toFixed(1)) : 0;
@@ -675,9 +677,10 @@ async function startServer() {
         targetRetailers
       );
 
-      // Web Search Grounding with Gemini (if API is configured)
+      // Web Search Grounding with Gemini (if API is configured & not in cooldown)
       const groundedCandidates: RetailerCandidate[] = [];
-      if (ai) {
+      const isGeminiAvailable = ai && Date.now() > geminiSearchCooldownUntil;
+      if (isGeminiAvailable) {
         try {
           const groundingPrompt = `Find exact product page URLs and current prices for: ${identity.productName} (${identity.brand || ''} ${identity.model || ''}).
 Look for official listings across: Amazon, Best Buy, Walmart, Home Depot, B&H Photo, REI, Bass Pro Shops.
@@ -714,7 +717,15 @@ Note if the listing is an exact standalone product, a bundle (e.g. includes sola
             }
           }
         } catch (groundingErr: any) {
-          console.warn("Gemini Search Grounding unavailable, continuing with verified discovery pipeline:", groundingErr?.message || groundingErr);
+          const errStr = String(groundingErr?.message || groundingErr || '');
+          const isQuotaExceeded = errStr.includes('429') || errStr.includes('RESOURCE_EXHAUSTED') || errStr.includes('quota');
+          if (isQuotaExceeded) {
+            // Set 15-minute cooldown to prevent repeating rate-limit failures
+            geminiSearchCooldownUntil = Date.now() + 15 * 60 * 1000;
+            console.log("[Price Engine] Gemini Search Grounding rate limit reached (429 quota exhausted). Verified discovery pipeline seamlessly active (cooldown 15 min).");
+          } else {
+            console.log("[Price Engine] External search grounding unavailable, proceeding with verified catalog engine.");
+          }
         }
       }
 

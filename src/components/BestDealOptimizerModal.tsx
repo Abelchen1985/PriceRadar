@@ -13,7 +13,7 @@ import {
   Copy
 } from 'lucide-react';
 import { TrackedItem, DealOptimizationResult } from '../types';
-import { getRetailerDealUrl, getRetailerLinkDetails } from '../utils/retailerUrls';
+import { getRetailerDealUrl, getRetailerLinkDetails, isRetailerSellingProduct } from '../utils/retailerUrls';
 
 interface BestDealOptimizerModalProps {
   items: TrackedItem[];
@@ -40,7 +40,8 @@ export const BestDealOptimizerModal: React.FC<BestDealOptimizerModalProps> = ({ 
     const storeItems: { title: string; price: number }[] = [];
 
     items.forEach(item => {
-      const match = item.retailers.find(r => r.retailerName === store && r.inStock);
+      const isSelling = isRetailerSellingProduct(store, item.title, item.brand, item.model);
+      const match = isSelling ? item.retailers.find(r => r.retailerName === store && r.inStock) : undefined;
       if (match) {
         sum += match.price;
         count++;
@@ -60,10 +61,11 @@ export const BestDealOptimizerModal: React.FC<BestDealOptimizerModalProps> = ({ 
 
   const bestSingleStore = sortedSingleStores[0] || Object.entries(singleStoreTotals).sort((a, b) => b[1].count - a[1].count || a[1].total - b[1].total)[0];
 
-  // 2. Optimal Multi-Merchant Combo: For every item, pick the retailer with the lowest in-stock price
+  // 2. Optimal Multi-Merchant Combo: For every item, pick the retailer with the lowest in-stock price that actually sells it
   const optimalItems = items.map(item => {
-    const inStock = item.retailers.filter(r => r.inStock);
-    const bestRetailer = inStock.reduce((min, r) => (r.price < min.price ? r : min), inStock[0] || item.retailers[0]);
+    const inStock = item.retailers.filter(r => r.inStock && isRetailerSellingProduct(r.retailerName, item.title, item.brand, item.model));
+    const eligibleRetailers = item.retailers.filter(r => isRetailerSellingProduct(r.retailerName, item.title, item.brand, item.model));
+    const bestRetailer = inStock.reduce((min, r) => (r.price < min.price ? r : min), inStock[0] || eligibleRetailers[0] || item.retailers[0]);
     return {
       item,
       retailer: bestRetailer,
