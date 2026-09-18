@@ -11,6 +11,9 @@ import { isRetailerEligibleForProduct, getRetailerConfig, extractSkuFromUrl, RET
 import { matchCandidateProduct, determineLinkType, isUrlSearchPage } from "./src/services/productMatcher";
 import { verifyRetailerPrice, isDealAlertTriggered } from "./src/services/priceVerifier";
 import { discoverCandidatesForProduct, VERIFIED_DIRECT_REGISTRY } from "./src/services/productDiscovery";
+import { verifyProductUrl, verifyProductUrls, LinkVerification } from "./src/services/structuredDataVerifier";
+import { buildStorefrontSearchUrl, isVerifiedDirectProductUrl } from "./src/utils/retailerUrls";
+import { INITIAL_TRACKED_ITEMS } from "./src/data/catalog";
 import { ProductIdentity, RetailerCandidate, VerifiedPrice, DebugTrace, ProductMatchResult } from "./src/types";
 
 interface AlertRecord {
@@ -161,7 +164,7 @@ async function startServer() {
   });
 
   // POST trigger or simulate the 2x daily cron price sweep
-  app.post("/api/cron/sync-now", (req, res) => {
+  app.post("/api/cron/sync-now", async (req, res) => {
     const { items, email, emails } = req.body;
     let targetEmails: string[] = [];
     if (Array.isArray(emails) && emails.length > 0) {
@@ -278,6 +281,38 @@ async function startServer() {
       ? targetEmails.join(", ") 
       : `${targetEmails[0]} and ${targetEmails.length - 1} other recipient(s)`;
     
+    // Machine-verify every link that claims to be a direct product page. This is
+    // what keeps a link from silently rotting into a different product between
+    // sweeps -- the failure mode that put an iPad case behind a CPU listing.
+    let linkHealthSummary = '';
+    let linkHealth: any = null;
+    try {
+      const auditSource = auditedItems.length > 0 ? auditedItems : INITIAL_TRACKED_ITEMS;
+      const report = await runLinkHealthAudit(auditSource);
+      linkHealth = {
+        checkedAt: report.checkedAt,
+        totalChecked: report.totalChecked,
+        verified: report.verified,
+        mismatched: report.mismatched,
+        notFound: report.notFound,
+        unverifiable: report.unverifiable,
+        demotions: report.demotions.map(d => ({
+          item: d.itemTitle,
+          retailer: d.retailer,
+          url: d.url,
+          verdict: d.verdict,
+          notes: d.notes,
+          recommendedUrl: d.recommendedUrl
+        }))
+      };
+      linkHealthSummary = ` Link health: ${report.verified}/${report.totalChecked} direct links confirmed, ${report.mismatched} wrong product, ${report.notFound} dead, ${report.unverifiable} unverifiable (blocked or no structured data).`;
+      if (report.demotions.length > 0) {
+        linkHealthSummary += ` ${report.demotions.length} link(s) flagged for demotion to catalog search.`;
+      }
+    } catch (linkErr: any) {
+      linkHealthSummary = ` Link health audit could not run: ${linkErr?.message || linkErr}.`;
+    }
+
     const newCronRecord: CronExecutionRecord = {
       id: `cron-${Date.now()}`,
       timestamp: now.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }),
@@ -286,7 +321,7 @@ async function startServer() {
       priceDropsDetected: dropsFound,
       alertsSent: dropsFound * targetEmails.length,
       status: "completed",
-      details: `Checked ${itemsCount} items (${linksChecked} links checked, ${linksFormatValidated} format validated, ${productsVerified} products verified, ${pricesVerified} prices verified). Found ${dropsFound} verified deal(s). Dispatched alerts to ${recipientsSummary}.`
+      details: `Checked ${itemsCount} items (${linksChecked} links checked, ${linksFormatValidated} format validated, ${productsVerified} products verified, ${pricesVerified} prices verified). Found ${dropsFound} verified deal(s). Dispatched alerts to ${recipientsSummary}.${linkHealthSummary}`
     };
 
     cronLogs.unshift(newCronRecord);
@@ -301,6 +336,7 @@ async function startServer() {
       productsVerified,
       pricesVerified,
       linksRepaired,
+      linkHealth,
       verifiedItems: auditedItems,
       result: newCronRecord,
       schedule: getNextScheduledInfo()
@@ -497,6 +533,154 @@ async function startServer() {
   // Fetch recent alert logs
   app.get("/api/alerts", (_req, res) => {
     res.json({ alerts: alertLogs });
+  });
+
+  // ==========================================================================
+  // Link Health: machine-verification of every link that claims to be direct
+  // ==========================================================================
+  //
+  // A link is only demoted on a CONCLUSIVE negative -- the page loaded and
+  // proved it sells something else, or it is gone. A 403, CAPTCHA wall,
+  // robots.txt exclusion or timeout leaves the link alone: those mean "could
+  // not check", not "wrong", and several major retailers block bots outright.
+
+  interface LinkHealthEntry {
+    itemId: string;
+    itemTitle: string;
+    retailer: string;
+    url: string;
+    verdict: LinkVerification['verdict'];
+    conclusive: boolean;
+    confidence: number;
+    observedPrice: number | null;
+    inStock: boolean | null;
+    matchedIdentifiers: string[];
+    mismatches: string[];
+    notes: string;
+    action: 'keep' | 'demote_to_search' | 'unverifiable';
+    recommendedUrl?: string;
+  }
+
+  interface LinkHealthReport {
+    checkedAt: string;
+    durationMs: number;
+    totalChecked: number;
+    verified: number;
+    mismatched: number;
+    notFound: number;
+    unverifiable: number;
+    demotions: LinkHealthEntry[];
+    entries: LinkHealthEntry[];
+  }
+
+  let lastLinkHealthReport: LinkHealthReport | null = null;
+
+  async function runLinkHealthAudit(items: any[], includeSearchLinks = false): Promise<LinkHealthReport> {
+    const started = Date.now();
+    const targets: Array<{ url: string; identity: ProductIdentity; itemId: string; itemTitle: string; retailer: string; brand?: string; model?: string }> = [];
+
+    for (const item of Array.isArray(items) ? items : []) {
+      const identity = normalizeProductIdentity({
+        title: item.title,
+        brand: item.brand,
+        model: item.model,
+        mpn: item.mpn,
+        gtin: item.gtin || item.upc,
+        category: item.category
+      });
+
+      for (const retailer of item.retailers || []) {
+        const url = retailer.url;
+        if (!url) continue;
+        // Only links that CLAIM to be a direct product page make a checkable
+        // claim. A catalog search URL is honest by construction.
+        if (!includeSearchLinks && !isVerifiedDirectProductUrl(url)) continue;
+        targets.push({
+          url,
+          identity,
+          itemId: item.id,
+          itemTitle: item.title,
+          retailer: retailer.retailerName,
+          brand: item.brand,
+          model: item.model
+        });
+      }
+    }
+
+    const verifications = await verifyProductUrls(targets.map(t => ({ url: t.url, identity: t.identity })));
+
+    const entries: LinkHealthEntry[] = targets.map((target, i) => {
+      const v = verifications[i] || { verdict: 'unreachable', conclusive: false, confidence: 0, matchedIdentifiers: [], mismatches: [], notes: 'No result', url: target.url } as LinkVerification;
+      const isBad = v.verdict === 'mismatch' || v.verdict === 'not_found';
+      const action: LinkHealthEntry['action'] = v.verdict === 'verified_match'
+        ? 'keep'
+        : isBad ? 'demote_to_search' : 'unverifiable';
+
+      return {
+        itemId: target.itemId,
+        itemTitle: target.itemTitle,
+        retailer: target.retailer,
+        url: target.url,
+        verdict: v.verdict,
+        conclusive: v.conclusive,
+        confidence: v.confidence,
+        observedPrice: v.observedPrice ?? null,
+        inStock: v.inStock ?? null,
+        matchedIdentifiers: v.matchedIdentifiers,
+        mismatches: v.mismatches,
+        notes: v.notes,
+        action,
+        recommendedUrl: isBad
+          ? buildStorefrontSearchUrl(target.retailer, target.itemTitle, target.brand, target.model)
+          : undefined
+      };
+    });
+
+    const report: LinkHealthReport = {
+      checkedAt: new Date().toISOString(),
+      durationMs: Date.now() - started,
+      totalChecked: entries.length,
+      verified: entries.filter(e => e.verdict === 'verified_match').length,
+      mismatched: entries.filter(e => e.verdict === 'mismatch').length,
+      notFound: entries.filter(e => e.verdict === 'not_found').length,
+      unverifiable: entries.filter(e => !e.conclusive).length,
+      demotions: entries.filter(e => e.action === 'demote_to_search'),
+      entries
+    };
+
+    lastLinkHealthReport = report;
+    return report;
+  }
+
+  // Verify one URL really is the product it claims to be
+  app.post("/api/verify-link", async (req, res) => {
+    const { url, title, brand, model, mpn, gtin, category } = req.body || {};
+    if (!url || !title) {
+      return res.status(400).json({ error: "Both 'url' and 'title' are required" });
+    }
+    const identity = normalizeProductIdentity({ title, brand, model, mpn, gtin, category });
+    const verification = await verifyProductUrl(String(url), identity);
+    res.json({ success: true, identity, verification });
+  });
+
+  // Audit every direct-product link in the catalog (or in a posted item list)
+  app.post("/api/link-health", async (req, res) => {
+    const { items, includeSearchLinks } = req.body || {};
+    const target = Array.isArray(items) && items.length > 0 ? items : INITIAL_TRACKED_ITEMS;
+    try {
+      const report = await runLinkHealthAudit(target, Boolean(includeSearchLinks));
+      res.json({ success: true, report });
+    } catch (err: any) {
+      res.status(500).json({ error: "Link health audit failed", message: err?.message || String(err) });
+    }
+  });
+
+  // Read the most recent audit without re-running it
+  app.get("/api/link-health", (_req, res) => {
+    if (!lastLinkHealthReport) {
+      return res.json({ success: true, report: null, message: "No audit has run yet. POST to this endpoint to run one." });
+    }
+    res.json({ success: true, report: lastLinkHealthReport });
   });
 
   // Automated self-test & link integrity suite

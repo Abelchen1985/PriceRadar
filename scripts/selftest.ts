@@ -25,6 +25,7 @@ import { matchCandidateProduct, determineLinkType } from '../src/services/produc
 import { verifyRetailerPrice } from '../src/services/priceVerifier';
 import { isRetailerEligibleForProduct, checkRetailerEligibility } from '../src/services/retailerRegistry';
 import { RetailerCandidate } from '../src/types';
+import { parseJsonLdProducts, compareStructuredProduct } from '../src/services/structuredDataVerifier';
 
 export interface TestResult {
   name: string;
@@ -610,6 +611,95 @@ export function runComprehensiveSelfTest(): {
     } else {
       pass(`Category Item [${cItem.cat}] Normalization`, 'ACCURACY_UPGRADE', `Normalized "${ident.productName}" (Brand: ${ident.brand}, Model: ${ident.model || 'N/A'})`);
     }
+  }
+
+  // ==========================================
+  // SECTION 8: Structured Data Link Verification
+  // ==========================================
+  // Offline coverage for the JSON-LD verifier. These are the checks that decide
+  // whether a link is confirmed, contradicted, or simply unverifiable -- the
+  // distinction that stops a bot-block from being mistaken for a bad link.
+
+  const realWorldJsonLd = `
+    <html><head>
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@graph":[
+      {"@type":"BreadcrumbList","itemListElement":[]},
+      {"@type":"Product","name":"Sony WH-1000XM5 Wireless Noise Canceling Headphones - Black",
+       "sku":"6505727","mpn":"WH1000XM5/B","gtin13":"0027242924291",
+       "brand":{"@type":"Brand","name":"Sony"},
+       "offers":{"@type":"Offer","price":"328.00","priceCurrency":"USD",
+                 "availability":"https://schema.org/InStock"}}
+    ]}
+    </script>
+    </head><body></body></html>`;
+
+  const parsed = parseJsonLdProducts(realWorldJsonLd);
+  if (parsed.length !== 1) {
+    fail('JSON-LD Product Extraction', 'DEAL_LINKS', `Expected 1 product from @graph, got ${parsed.length}`);
+  } else if (parsed[0].sku !== '6505727' || parsed[0].gtin !== '0027242924291' || parsed[0].price !== 328 || parsed[0].brand !== 'Sony') {
+    fail('JSON-LD Product Extraction', 'DEAL_LINKS', `Fields not extracted correctly: ${JSON.stringify(parsed[0])}`);
+  } else {
+    pass('JSON-LD Product Extraction', 'DEAL_LINKS', `Extracted sku ${parsed[0].sku}, gtin ${parsed[0].gtin}, price $${parsed[0].price}, availability ${parsed[0].availability}`);
+  }
+
+  if (parseJsonLdProducts('<html><body>no structured data here</body></html>').length !== 0) {
+    fail('JSON-LD Absence Handling', 'DEAL_LINKS', 'Reported products on a page with no JSON-LD');
+  } else {
+    pass('JSON-LD Absence Handling', 'DEAL_LINKS', 'Correctly reports no products when a page publishes none');
+  }
+
+  if (parseJsonLdProducts('<script type="application/ld+json">{ this is not json </script>').length !== 0) {
+    fail('JSON-LD Malformed Block', 'DEAL_LINKS', 'Malformed JSON-LD should be skipped, not throw or match');
+  } else {
+    pass('JSON-LD Malformed Block', 'DEAL_LINKS', 'Malformed JSON-LD block skipped safely');
+  }
+
+  // A page that confirms the requested product
+  const sonyIdentity = normalizeProductIdentity({
+    title: 'Sony WH-1000XM5 Wireless Noise-Canceling Headphones',
+    brand: 'Sony',
+    model: 'WH-1000XM5',
+    mpn: 'WH1000XM5/B'
+  });
+  const positive = compareStructuredProduct(sonyIdentity, parsed[0] || {});
+  if (positive.contradicted || positive.confidence < 88) {
+    fail('Structured Match (correct product)', 'DEAL_LINKS', `Expected a high-confidence match, got ${JSON.stringify(positive)}`);
+  } else {
+    pass('Structured Match (correct product)', 'DEAL_LINKS', `Confirmed via ${positive.matchedIdentifiers.join(', ')} (confidence ${positive.confidence})`);
+  }
+
+  // The exact failure this engine exists to catch: a valid product page that
+  // sells something else entirely (a real case found on a "verified" link).
+  const wrongProduct = compareStructuredProduct(sonyIdentity, {
+    name: 'Alfatron 5" 2-Way 30W Surface Mount Speaker (Black)',
+    sku: 'ALFW51B',
+    brand: 'Alfatron',
+    price: 178.99
+  });
+  if (!wrongProduct.contradicted) {
+    fail('Structured Match (wrong product)', 'DEAL_LINKS', `A different brand/product must be contradicted: ${JSON.stringify(wrongProduct)}`);
+  } else {
+    pass('Structured Match (wrong product)', 'DEAL_LINKS', `Correctly contradicted: ${wrongProduct.mismatches.join('; ')}`);
+  }
+
+  // Conflicting GTIN is decisive even when the title looks plausible
+  const gtinConflict = compareStructuredProduct(
+    normalizeProductIdentity({ title: 'Sony WH-1000XM5', brand: 'Sony', model: 'WH-1000XM5', gtin: '0027242924291' }),
+    { name: 'Sony WH-1000XM5 Wireless Headphones', brand: 'Sony', gtin: '0027242911111' }
+  );
+  if (!gtinConflict.contradicted) {
+    fail('Structured Match (GTIN conflict)', 'DEAL_LINKS', 'A differing GTIN must contradict the match');
+  } else {
+    pass('Structured Match (GTIN conflict)', 'DEAL_LINKS', `GTIN conflict detected: ${gtinConflict.mismatches.join('; ')}`);
+  }
+
+  // Thin data must stay inconclusive rather than guessing either way
+  const thin = compareStructuredProduct(sonyIdentity, { name: 'Wireless Headphones' });
+  if (thin.contradicted || thin.confidence >= 88) {
+    fail('Structured Match (insufficient data)', 'DEAL_LINKS', `Thin structured data must not produce a verdict: ${JSON.stringify(thin)}`);
+  } else {
+    pass('Structured Match (insufficient data)', 'DEAL_LINKS', 'Insufficient structured data correctly left unverified');
   }
 
   // Summary calculation
