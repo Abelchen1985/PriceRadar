@@ -116,52 +116,37 @@ export function generateDiscoveryQueries(
 }
 
 /**
- * Known Direct Product Registry for high-fidelity exact matches across categories.
- * Seeded with verified real direct SKUs for benchmark items.
+ * Verified Direct Product Registry.
+ *
+ * INTEGRITY RULE: an entry may only be added after the URL has been loaded and
+ * confirmed to show the exact product it claims. Each entry records the product
+ * title the live page actually returned.
+ *
+ * Entries for Anker SOLIX C1000 (gen 1 + gen 2), Samsung S90D, DEWALT
+ * DCK240C2, Shimano Stradic FM and Osprey Atmos AG 65 were removed after a
+ * link audit: their identifiers did not resolve to the products they claimed
+ * (several loaded completely unrelated items, e.g. the Best Buy SKU listed for
+ * the 7800X3D served an iPad case, and the REI id listed for the Atmos AG 65
+ * 404'd). A retailer with no verified entry now falls through to a catalog
+ * search, which always lands on the right product.
+ *
+ * Do not re-add an identifier without loading the page first.
  */
-export const VERIFIED_DIRECT_REGISTRY: Record<string, Record<string, { sku: string; url: string; price?: number }>> = {
-  // Anker SOLIX C1000 Gen 2
-  'anker-c1000-gen2': {
-    'Amazon': { sku: 'B0DC8LTYCS', url: 'https://www.amazon.com/dp/B0DC8LTYCS', price: 479.00 },
-    'Best Buy': { sku: '6592233', url: 'https://www.bestbuy.com/site/anker-solix-c1000-gen-2-portable-power-station/6592233.p', price: 499.00 },
-    'Home Depot': { sku: '331892110', url: 'https://www.homedepot.com/p/Anker-SOLIX-C1000-Gen-2-Portable-Power-Station-A1763/331892110', price: 549.00 }
-    // Target intentionally omitted: Target does NOT sell Anker SOLIX C1000 Gen 2
-  },
-  // Anker SOLIX C1000 (Gen 1)
-  'anker-c1000-gen1': {
-    'Amazon': { sku: 'B0C657TNZZ', url: 'https://www.amazon.com/dp/B0C657TNZZ', price: 599.00 },
-    'Best Buy': { sku: '6553412', url: 'https://www.bestbuy.com/site/anker-solix-c1000-portable-power-station/6553412.p', price: 649.00 }
-  },
-  // Samsung S90D 65"
-  'samsung-s90d-65': {
-    'Amazon': { sku: 'B0CVR7G9Q1', url: 'https://www.amazon.com/dp/B0CVR7G9Q1', price: 1597.99 },
-    'Best Buy': { sku: '6576281', url: 'https://www.bestbuy.com/site/samsung-65-class-s90d-series-oled-4k-uhd-smart-tizen-tv/6576281.p', price: 1599.99 },
-    'Walmart': { sku: '539182910', url: 'https://www.walmart.com/ip/SAMSUNG-65-Class-OLED-4K-S90D-Smart-TV-QN65S90DAFXZA-2024/539182910', price: 1597.99 }
-  },
+export const VERIFIED_DIRECT_REGISTRY: Record<string, Record<string, { sku: string; url: string; price?: number; verifiedAs?: string }>> = {
   // AMD Ryzen 7 7800X3D
   'amd-7800x3d': {
-    'Amazon': { sku: 'B0BTZB7F88', url: 'https://www.amazon.com/dp/B0BTZB7F88', price: 449.00 },
-    'Best Buy': { sku: '6537004', url: 'https://www.bestbuy.com/site/amd-ryzen-7-7800x3d-8-core-16-thread-processor/6537004.p', price: 449.00 },
-    'Micro Center': { sku: '557769', url: 'https://www.microcenter.com/product/557769/amd-ryzen-7-7800x3d-raphael-am5-42ghz-8-core-boxed-processor', price: 429.99 },
-    'Newegg': { sku: 'N82E16819113793', url: 'https://www.newegg.com/p/N82E16819113793', price: 449.00 }
-  },
-  // DEWALT DCK240C2
-  'dewalt-dck240c2': {
-    'Amazon': { sku: 'B00IJ0ALYS', url: 'https://www.amazon.com/dp/B00IJ0ALYS', price: 139.00 },
-    'Home Depot': { sku: '206526021', url: 'https://www.homedepot.com/p/DEWALT-20V-MAX-Cordless-Drill-Driver-and-Impact-Driver-2-Tool-Combo-Kit-with-2-1-3Ah-Batteries-Charger-and-Bag-DCK240C2/206526021', price: 139.00 },
-    'Lowe\'s': { sku: '50143892', url: 'https://www.lowes.com/pd/DEWALT-2-Tool-20-Volt-Max-Power-Tool-Combo-Kit-with-Soft-Case-Charger-Included-and-2-Batteries-Included/50143892', price: 139.00 }
-  },
-  // Shimano Stradic FM 2500
-  'shimano-stradic-fm': {
-    'Bass Pro Shops': { sku: '5029182', url: 'https://www.basspro.com/shop/en/shimano-stradic-fm-spinning-reel', price: 219.99 },
-    'Tackle Warehouse': { sku: 'STFM', url: 'https://www.tacklewarehouse.com/descpage-STFM.html', price: 219.99 },
-    'Amazon': { sku: 'B0CG2MQV42', url: 'https://www.amazon.com/dp/B0CG2MQV42', price: 219.99 }
-  },
-  // Osprey Atmos AG 65
-  'osprey-atmos-65': {
-    'REI': { sku: '202159', url: 'https://www.rei.com/product/202159/osprey-atmos-ag-65-pack-mens', price: 272.00 },
-    'Backcountry': { sku: 'OSP00AZ', url: 'https://www.backcountry.com/osprey-atmos-ag-65', price: 289.00 },
-    'Amazon': { sku: 'B0B52B3C99', url: 'https://www.amazon.com/dp/B0B52B3C99', price: 272.00 }
+    'Micro Center': {
+      sku: '674503',
+      url: 'https://www.microcenter.com/product/674503/amd-ryzen-7-7800x3d-raphael-am5-42ghz-8-core-boxed-processor-heatsink-not-included',
+      price: 429.99,
+      verifiedAs: 'AMD Ryzen 7 7800X3D Raphael AM5 4.2GHz 8-Core Boxed Processor - Heatsink Not Included'
+    },
+    'Newegg': {
+      sku: 'N82E16819113793',
+      url: 'https://www.newegg.com/amd-ryzen-7-7800x3d-ryzen-7-7000-series-raphael-zen-4-socket-am5/p/N82E16819113793',
+      price: 449.00,
+      verifiedAs: 'AMD Ryzen 7 7800X3D - Ryzen 7 7000 Series Zen 4 8-Core 4.2 GHz Socket AM5 - 100-100000910WOF'
+    }
   }
 };
 

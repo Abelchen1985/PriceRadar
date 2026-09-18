@@ -53,6 +53,43 @@ export function runComprehensiveSelfTest(): {
     results.push({ name, category, status: 'WARN', details, metadata });
   };
 
+  /**
+   * Asserts a deal link satisfies the link-integrity policy: it must point at
+   * the right retailer and be EITHER a verified direct product page (one on the
+   * hand-checked whitelist in retailerUrls.ts) OR that retailer's official
+   * catalog search. Anything else -- most importantly a plausible-looking but
+   * invented SKU -- is a failure, because it silently sends shoppers to an
+   * unrelated product or a dead page.
+   *
+   * Tests assert this policy rather than specific identifiers, so the suite can
+   * never again be made "green" by inventing an ID to match an expectation.
+   */
+  const assertDealLinkPolicy = (
+    label: string,
+    retailer: string,
+    domain: string,
+    title: string,
+    brand?: string,
+    model?: string
+  ) => {
+    const url = getRetailerDealUrl(retailer, title, undefined, brand, model);
+    if (!url.includes(domain)) {
+      fail(label, 'DEAL_LINKS', `Expected a ${retailer} (${domain}) URL, got: ${url}`);
+      return;
+    }
+    if (detectBrokenGuessedSlug(url)) {
+      fail(label, 'DEAL_LINKS', `Resolved to a guessed slug with no real product id: ${url}`);
+      return;
+    }
+    const isDirect = isVerifiedDirectProductUrl(url);
+    const isSearch = isOfficialSearchUrl(url);
+    if (!isDirect && !isSearch) {
+      fail(label, 'DEAL_LINKS', `URL is neither a verified direct product page nor an official search: ${url}`);
+      return;
+    }
+    pass(label, 'DEAL_LINKS', `${isDirect ? 'Verified direct product page' : 'Official catalog search'}: ${url}`);
+  };
+
   // ==========================================
   // SECTION 1: Tracked Items Integrity & Prices
   // ==========================================
@@ -155,37 +192,15 @@ export function runComprehensiveSelfTest(): {
   if (!samsungTv) {
     fail('Samsung S90D TV Entry', 'PRODUCT_MATCH', 'Could not find Samsung S90D TV in catalog');
   } else {
-    // Check Best Buy URL
-    const bbUrl = getRetailerDealUrl('Best Buy', samsungTv.title, undefined, samsungTv.brand, samsungTv.model);
-    if (!bbUrl.includes('6576624.p')) {
-      fail('Samsung S90D Best Buy Direct Link', 'DEAL_LINKS', `Expected SKU 6576624.p direct product URL, got: ${bbUrl}`);
-    } else {
-      pass('Samsung S90D Best Buy Direct Link', 'DEAL_LINKS', `Direct SKU product landing page: ${bbUrl}`);
-    }
-
-    // Check Amazon URL
-    const amzUrl = getRetailerDealUrl('Amazon', samsungTv.title, undefined, samsungTv.brand, samsungTv.model);
-    if (!amzUrl.includes('/dp/B0CV9XQ11F')) {
-      fail('Samsung S90D Amazon Direct Link', 'DEAL_LINKS', `Expected /dp/B0CV9XQ11F, got: ${amzUrl}`);
-    } else {
-      pass('Samsung S90D Amazon Direct Link', 'DEAL_LINKS', `Direct ASIN product landing page: ${amzUrl}`);
-    }
-
-    // Check Costco URL
-    const costcoUrl = getRetailerDealUrl('Costco', samsungTv.title, undefined, samsungTv.brand, samsungTv.model);
-    if (!costcoUrl.includes('4000257099.html')) {
-      fail('Samsung S90D Costco Direct Link', 'DEAL_LINKS', `Expected Costco direct product page, got: ${costcoUrl}`);
-    } else {
-      pass('Samsung S90D Costco Direct Link', 'DEAL_LINKS', `Direct product page: ${costcoUrl}`);
-    }
-
-    // Check Target URL
-    const tgtUrl = getRetailerDealUrl('Target', samsungTv.title, undefined, samsungTv.brand, samsungTv.model);
-    if (!tgtUrl.includes('A-91456910')) {
-      fail('Samsung S90D Target Direct Link', 'DEAL_LINKS', `Expected Target direct product page, got: ${tgtUrl}`);
-    } else {
-      pass('Samsung S90D Target Direct Link', 'DEAL_LINKS', `Direct product page: ${tgtUrl}`);
-    }
+    // The Best Buy / Amazon / Costco / Target identifiers previously asserted here
+    // (6576624.p, B0CV9XQ11F, 4000257099, A-91456910) were audited against the live
+    // sites: Best Buy's served a Tech21 iPhone case and Target's returned "item not
+    // available", so none of them are verified. This product now resolves to catalog
+    // searches on the exact model, which is what these assertions enforce.
+    assertDealLinkPolicy('Samsung S90D Best Buy Link', 'Best Buy', 'bestbuy.com', samsungTv.title, samsungTv.brand, samsungTv.model);
+    assertDealLinkPolicy('Samsung S90D Amazon Link', 'Amazon', 'amazon.com', samsungTv.title, samsungTv.brand, samsungTv.model);
+    assertDealLinkPolicy('Samsung S90D Costco Link', 'Costco', 'costco.com', samsungTv.title, samsungTv.brand, samsungTv.model);
+    assertDealLinkPolicy('Samsung S90D Target Link', 'Target', 'target.com', samsungTv.title, samsungTv.brand, samsungTv.model);
   }
 
   // 2.2 Jackery Explorer 1500 v2 Solar Generator Benchmark & Pricing
@@ -215,12 +230,11 @@ export function runComprehensiveSelfTest(): {
       pass('Jackery Amazon Deal Link', 'DEAL_LINKS', `Reliable Amazon deal link: ${jackeryAmzUrl}`);
     }
 
-    const jackeryDirectUrl = getRetailerDealUrl('Jackery', jackeryPreset.title, undefined, jackeryPreset.brand, jackeryPreset.model);
-    if (!jackeryDirectUrl.includes('jackery.com/products/jackery-solar-generator-1500-v2')) {
-      fail('Jackery Direct Manufacturer Link', 'DEAL_LINKS', `Expected direct Jackery manufacturer link, got: ${jackeryDirectUrl}`);
-    } else {
-      pass('Jackery Direct Manufacturer Link', 'DEAL_LINKS', `Direct Jackery product page: ${jackeryDirectUrl}`);
-    }
+    // Jackery is a brand storefront, not one of the configured retailers, and we
+    // have not verified a search endpoint on jackery.com -- so it falls back to
+    // Google Shopping, which always resolves. Better a working shopping search
+    // than an invented manufacturer URL.
+    assertDealLinkPolicy('Jackery Manufacturer Link', 'Jackery', 'google.com', jackeryPreset.title, jackeryPreset.brand, jackeryPreset.model);
 
     const jackeryHdUrl = getRetailerDealUrl('Home Depot', jackeryPreset.title, undefined, jackeryPreset.brand, jackeryPreset.model);
     if (!jackeryHdUrl.includes('homedepot.com') || !jackeryHdUrl.toLowerCase().includes('jackery')) {
@@ -235,12 +249,8 @@ export function runComprehensiveSelfTest(): {
   if (!uglyStikPreset) {
     fail('Ugly Stik Preset Entry', 'BENCHMARKS', 'Could not find Ugly Stik GX2 preset');
   } else {
-    const bassUrl = getRetailerDealUrl('Bass Pro Shops', uglyStikPreset.title);
-    if (!bassUrl.includes('/shop/en/ugly-stik-gx2-spinning-rod')) {
-      fail('Ugly Stik Bass Pro Shops Link', 'DEAL_LINKS', `Expected direct Bass Pro URL, got: ${bassUrl}`);
-    } else {
-      pass('Ugly Stik Bass Pro Shops Link', 'DEAL_LINKS', `Direct Bass Pro product page: ${bassUrl}`);
-    }
+    // /shop/en/ugly-stik-gx2-spinning-rod carries no product id and does not resolve.
+    assertDealLinkPolicy('Ugly Stik Bass Pro Shops Link', 'Bass Pro Shops', 'basspro.com', uglyStikPreset.title, uglyStikPreset.brand, uglyStikPreset.model);
   }
 
   // 2.4 Sony WH-1000XM5 Benchmark Direct Links
@@ -253,12 +263,9 @@ export function runComprehensiveSelfTest(): {
       pass('Sony WH-1000XM5 Best Buy Link', 'DEAL_LINKS', `Direct Best Buy product page: ${bbUrl}`);
     }
 
-    const amzUrl = getRetailerDealUrl('Amazon', sonyHeadphones.title, undefined, sonyHeadphones.brand, sonyHeadphones.model);
-    if (!amzUrl.includes('B09XS7JWHH')) {
-      fail('Sony WH-1000XM5 Amazon Link', 'DEAL_LINKS', `Expected Amazon ASIN B09XS7JWHH, got: ${amzUrl}`);
-    } else {
-      pass('Sony WH-1000XM5 Amazon Link', 'DEAL_LINKS', `Direct Amazon ASIN product page: ${amzUrl}`);
-    }
+    // Amazon ASINs cannot be verified (amazon.com disallows automated checking in
+    // robots.txt), so no ASIN is whitelisted and Amazon resolves to catalog search.
+    assertDealLinkPolicy('Sony WH-1000XM5 Amazon Link', 'Amazon', 'amazon.com', sonyHeadphones.title, sonyHeadphones.brand, sonyHeadphones.model);
   }
 
   // 2.5 AMD Ryzen 7 7800X3D Benchmark Direct Links
@@ -282,36 +289,16 @@ export function runComprehensiveSelfTest(): {
   // 2.6 DEWALT 20V MAX Combo Kit Direct Links
   const dewaltDrill = INITIAL_TRACKED_ITEMS.find(i => i.id === 'tools-dewalt-drill');
   if (dewaltDrill) {
-    const hdUrl = getRetailerDealUrl('Home Depot', dewaltDrill.title, undefined, dewaltDrill.brand, dewaltDrill.model);
-    if (!hdUrl.includes('204373168')) {
-      fail('DEWALT Drill Home Depot Link', 'DEAL_LINKS', `Expected Home Depot Internet ID 204373168, got: ${hdUrl}`);
-    } else {
-      pass('DEWALT Drill Home Depot Link', 'DEAL_LINKS', `Direct Home Depot product page: ${hdUrl}`);
-    }
+    assertDealLinkPolicy('DEWALT Drill Home Depot Link', 'Home Depot', 'homedepot.com', dewaltDrill.title, dewaltDrill.brand, dewaltDrill.model);
   }
 
   // 2.7 Anker SOLIX C1000 Portable Power Station Direct Links & Target Rejection
   const ankerTitle = 'Anker SOLIX C1000 Gen 2 Portable Power Station';
-  const ankerAmz = getRetailerDealUrl('Amazon', ankerTitle, undefined, 'Anker', 'A1761');
-  if (ankerAmz.includes('B0C4DBC65K')) {
-    pass('Anker SOLIX C1000 Amazon Link', 'DEAL_LINKS', `Verified Amazon ASIN B0C4DBC65K: ${ankerAmz}`);
-  } else {
-    fail('Anker SOLIX C1000 Amazon Link', 'DEAL_LINKS', `Expected ASIN B0C4DBC65K, got: ${ankerAmz}`);
-  }
+  assertDealLinkPolicy('Anker SOLIX C1000 Amazon Link', 'Amazon', 'amazon.com', ankerTitle, 'Anker', 'A1761');
 
-  const ankerBb = getRetailerDealUrl('Best Buy', ankerTitle, undefined, 'Anker', 'A1761');
-  if (ankerBb.includes('6561141')) {
-    pass('Anker SOLIX C1000 Best Buy Link', 'DEAL_LINKS', `Verified Best Buy SKU 6561141: ${ankerBb}`);
-  } else {
-    fail('Anker SOLIX C1000 Best Buy Link', 'DEAL_LINKS', `Expected Best Buy SKU 6561141, got: ${ankerBb}`);
-  }
+  assertDealLinkPolicy('Anker SOLIX C1000 Best Buy Link', 'Best Buy', 'bestbuy.com', ankerTitle, 'Anker', 'A1761');
 
-  const ankerHd = getRetailerDealUrl('Home Depot', ankerTitle, undefined, 'Anker', 'A1761');
-  if (ankerHd.includes('328221841')) {
-    pass('Anker SOLIX C1000 Home Depot Link', 'DEAL_LINKS', `Verified Home Depot ID 328221841: ${ankerHd}`);
-  } else {
-    fail('Anker SOLIX C1000 Home Depot Link', 'DEAL_LINKS', `Expected Home Depot ID 328221841, got: ${ankerHd}`);
-  }
+  assertDealLinkPolicy('Anker SOLIX C1000 Home Depot Link', 'Home Depot', 'homedepot.com', ankerTitle, 'Anker', 'A1761');
 
   // Verify Target rejection for Anker SOLIX C1000 (Target does NOT stock Anker SOLIX C1000)
   const isTargetSellingAnker = isRetailerSellingProduct('Target', ankerTitle, 'Anker', 'A1761');
@@ -432,9 +419,11 @@ export function runComprehensiveSelfTest(): {
   // ==========================================
   // SECTION 6: UI Link Details Badge & Action Logic
   // ==========================================
-  const directTest = getRetailerLinkDetails('Best Buy', 'Samsung 65" Class OLED S90D 4K Smart TV', undefined, 'Samsung', 'QN65S90D');
-  if (!directTest.isDirect || directTest.badgeLabel !== 'Direct' || !directTest.url.includes('6576624.p')) {
-    fail('LinkDetails Direct Resolution', 'DEAL_LINKS', `Failed direct link detection for Samsung S90D: ${JSON.stringify(directTest)}`);
+  // Uses the Sony WH-1000XM5 / Best Buy pair, one of the links confirmed against
+  // the live retailer page, so the Direct badge is exercised on real data.
+  const directTest = getRetailerLinkDetails('Best Buy', 'Sony WH-1000XM5 Wireless Noise-Canceling Headphones', undefined, 'Sony', 'WH1000XM5');
+  if (!directTest.isDirect || directTest.badgeLabel !== 'Direct' || !directTest.url.includes('6505727.p')) {
+    fail('LinkDetails Direct Resolution', 'DEAL_LINKS', `Failed direct link detection for Sony WH-1000XM5: ${JSON.stringify(directTest)}`);
   } else {
     pass('LinkDetails Direct Resolution', 'DEAL_LINKS', `Correctly flagged as Direct: "${directTest.actionText}" (${directTest.badgeLabel})`);
   }

@@ -38,7 +38,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-atmos-rei',
         retailerName: 'REI',
-        url: 'https://www.rei.com/product/218570/osprey-atmos-ag-65-pack-mens',
+        url: 'https://www.rei.com/search?q=Osprey%20Atmos%20AG%2065%20Backpack',
         price: 272.00,
         originalPrice: 340.00,
         inStock: true,
@@ -52,7 +52,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-atmos-bc',
         retailerName: 'Backcountry',
-        url: 'https://www.backcountry.com/osprey-packs-atmos-ag-65-backpack-3783-4150cu-in',
+        url: 'https://www.backcountry.com/Store/catalog/search.jsp?q=Osprey%20Atmos%20AG%2065%20Backpack',
         price: 289.00,
         originalPrice: 340.00,
         inStock: true,
@@ -66,7 +66,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-atmos-amz',
         retailerName: 'Amazon',
-        url: 'https://www.amazon.com/dp/B0B52B3C99',
+        url: 'https://www.amazon.com/s?k=Osprey%20Atmos%20AG%2065%20Backpack',
         price: 272.00,
         originalPrice: 340.00,
         inStock: true,
@@ -108,7 +108,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-stradic-tw',
         retailerName: 'Tackle Warehouse',
-        url: 'https://tacklewarehouse.com/shimano-stradic-fm',
+        url: 'https://www.tacklewarehouse.com/searchresults.html?search=Shimano%20Stradic%20FM%20Spinning%20Reel%20STC3000XGFM',
         price: 209.99,
         originalPrice: 239.99,
         inStock: true,
@@ -122,7 +122,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-stradic-bass',
         retailerName: 'Bass Pro Shops',
-        url: 'https://basspro.com/shop/en/shimano-stradic-fm-spinning-reel',
+        url: 'https://www.basspro.com/shop/en/SearchDisplay?searchTerm=Shimano%20Stradic%20FM%20Spinning%20Reel%20STC3000XGFM',
         price: 219.99,
         originalPrice: 239.99,
         inStock: true,
@@ -150,7 +150,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-stradic-amz',
         retailerName: 'Amazon',
-        url: 'https://www.amazon.com/dp/B0CFQ7W4K8',
+        url: 'https://www.amazon.com/s?k=Shimano%20Stradic%20FM%20Spinning%20Reel%20STC3000XGFM',
         price: 224.95,
         originalPrice: 239.99,
         inStock: true,
@@ -192,7 +192,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-inreach-rei',
         retailerName: 'REI',
-        url: 'https://rei.com/product/garmin-inreach-mini-2',
+        url: 'https://www.rei.com/search?q=Garmin%20inReach%20Mini%202%20Satellite%20Communicator',
         price: 349.99,
         originalPrice: 399.99,
         inStock: true,
@@ -206,7 +206,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-inreach-bass',
         retailerName: 'Bass Pro Shops',
-        url: 'https://basspro.com/shop/en/garmin-inreach-mini-2',
+        url: 'https://www.basspro.com/shop/en/SearchDisplay?searchTerm=Garmin%20inReach%20Mini%202%20Satellite%20Communicator',
         price: 349.99,
         originalPrice: 399.99,
         inStock: true,
@@ -234,7 +234,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-inreach-amz',
         retailerName: 'Amazon',
-        url: 'https://www.amazon.com/dp/B09PSKQ4N5',
+        url: 'https://www.amazon.com/s?k=Garmin%20inReach%20Mini%202%20Satellite%20Communicator',
         price: 349.99,
         originalPrice: 399.99,
         inStock: true,
@@ -276,7 +276,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-echomap-bass',
         retailerName: 'Bass Pro Shops',
-        url: 'https://basspro.com/shop/en/garmin-echomap-uhd2-53cv',
+        url: 'https://www.basspro.com/shop/en/SearchDisplay?searchTerm=Garmin%20ECHOMAP%20UHD2%2053cv%20Fish%20Finder%20with%20GT20-TM%20Transducer',
         price: 329.99,
         originalPrice: 399.99,
         inStock: true,
@@ -304,7 +304,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-echomap-amz',
         retailerName: 'Amazon',
-        url: 'https://www.amazon.com/dp/B0BHZZS8T1',
+        url: 'https://www.amazon.com/s?k=Garmin%20ECHOMAP%20UHD2%2053cv%20Fish%20Finder%20with%20GT20-TM%20Transducer',
         price: 349.99,
         originalPrice: 399.99,
         inStock: true,
@@ -346,7 +346,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-yeti-rei',
         retailerName: 'REI',
-        url: 'https://rei.com/product/yeti-tundra-45',
+        url: 'https://www.rei.com/search?q=YETI%20Tundra%2045%20Cooler',
         price: 275.00,
         originalPrice: 325.00,
         inStock: true,
@@ -360,7 +360,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-yeti-bass',
         retailerName: 'Bass Pro Shops',
-        url: 'https://basspro.com/shop/en/yeti-tundra-45-cooler',
+        url: 'https://www.basspro.com/shop/en/SearchDisplay?searchTerm=YETI%20Tundra%2045%20Cooler',
         price: 325.00,
         originalPrice: 325.00,
         inStock: true,
@@ -388,7 +388,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-yeti-amz',
         retailerName: 'Amazon',
-        url: 'https://www.amazon.com/dp/B004YIBWCS',
+        url: 'https://www.amazon.com/s?k=YETI%20Tundra%2045%20Cooler',
         price: 325.00,
         originalPrice: 325.00,
         inStock: true,
@@ -430,7 +430,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-xm5-amz',
         retailerName: 'Amazon',
-        url: 'https://www.amazon.com/dp/B09XS7JWHH',
+        url: 'https://www.amazon.com/s?k=Sony%20WH-1000XM5%20Wireless%20Noise-Canceling%20Headphones',
         price: 328.00,
         originalPrice: 399.99,
         inStock: true,
@@ -444,7 +444,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-xm5-bb',
         retailerName: 'Best Buy',
-        url: 'https://bestbuy.com/site/sony-wh-1000xm5',
+        url: 'https://www.bestbuy.com/site/sony-wh-1000xm5-wireless-noise-canceling-over-the-ear-headphones-black/6505727.p?skuId=6505727',
         price: 329.99,
         originalPrice: 399.99,
         inStock: true,
@@ -458,7 +458,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-xm5-wm',
         retailerName: 'Walmart',
-        url: 'https://walmart.com/ip/Sony-WH-1000XM5',
+        url: 'https://www.walmart.com/search?q=Sony%20WH-1000XM5%20Wireless%20Noise-Canceling%20Headphones',
         price: 328.00,
         originalPrice: 399.99,
         inStock: true,
@@ -472,7 +472,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-xm5-tgt',
         retailerName: 'Target',
-        url: 'https://target.com/p/sony-wh-1000xm5',
+        url: 'https://www.target.com/s?searchTerm=Sony%20WH-1000XM5%20Wireless%20Noise-Canceling%20Headphones',
         price: 349.99,
         originalPrice: 399.99,
         inStock: true,
@@ -486,7 +486,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-xm5-bh',
         retailerName: 'B&H Photo',
-        url: 'https://bhphotovideo.com/c/product/sony-wh-1000xm5',
+        url: 'https://www.bhphotovideo.com/c/search?Ntt=Sony%20WH-1000XM5%20Wireless%20Noise-Canceling%20Headphones',
         price: 338.00,
         originalPrice: 399.99,
         inStock: true,
@@ -528,7 +528,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-ps5-amz',
         retailerName: 'Amazon',
-        url: 'https://www.amazon.com/dp/B0CL5KNB9M',
+        url: 'https://www.amazon.com/s?k=Sony%20PlayStation%205%20Slim%201TB%20Digital%20Edition%20Console%20CFI-2000B01X',
         price: 449.00,
         originalPrice: 449.99,
         inStock: true,
@@ -542,7 +542,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-ps5-wm',
         retailerName: 'Walmart',
-        url: 'https://walmart.com/ip/PlayStation-5-Digital-Slim',
+        url: 'https://www.walmart.com/search?q=Sony%20PlayStation%205%20Slim%201TB%20Digital%20Edition%20Console%20CFI-2000B01X',
         price: 429.00,
         originalPrice: 449.99,
         inStock: true,
@@ -557,7 +557,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-ps5-bb',
         retailerName: 'Best Buy',
-        url: 'https://bestbuy.com/site/sony-playstation-5-digital',
+        url: 'https://www.bestbuy.com/site/searchpage.jsp?st=Sony%20PlayStation%205%20Slim%201TB%20Digital%20Edition%20Console%20CFI-2000B01X',
         price: 449.99,
         originalPrice: 449.99,
         inStock: true,
@@ -571,7 +571,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-ps5-tgt',
         retailerName: 'Target',
-        url: 'https://target.com/p/playstation-5-digital-edition',
+        url: 'https://www.target.com/s?searchTerm=Sony%20PlayStation%205%20Slim%201TB%20Digital%20Edition%20Console%20CFI-2000B01X',
         price: 449.99,
         originalPrice: 449.99,
         inStock: true,
@@ -613,7 +613,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-bv-amz',
         retailerName: 'Amazon',
-        url: 'https://www.amazon.com/dp/B078WMLXXG',
+        url: 'https://www.amazon.com/s?k=Breville%20Barista%20Touch%20Espresso%20Machine%20BES880BSS',
         price: 899.95,
         originalPrice: 999.95,
         inStock: true,
@@ -627,7 +627,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-bv-bb',
         retailerName: 'Best Buy',
-        url: 'https://www.bestbuy.com/site/breville-the-barista-touch-espresso-machine-with-steam-wand-stainless-steel/6112521.p?skuId=6112521',
+        url: 'https://www.bestbuy.com/site/searchpage.jsp?st=Breville%20Barista%20Touch%20Espresso%20Machine%20BES880BSS',
         price: 999.95,
         originalPrice: 999.95,
         inStock: true,
@@ -655,7 +655,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-bv-wm',
         retailerName: 'Walmart',
-        url: 'https://www.walmart.com/ip/Breville-Barista-Touch-Espresso-Machine-Stainless-Steel-BES880BSS/739198661',
+        url: 'https://www.walmart.com/search?q=Breville%20Barista%20Touch%20Espresso%20Machine%20BES880BSS',
         price: 899.95,
         originalPrice: 999.95,
         inStock: true,
@@ -696,7 +696,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-mba-bb',
         retailerName: 'Best Buy',
-        url: 'https://bestbuy.com/site/apple-macbook-air-15-m3',
+        url: 'https://www.bestbuy.com/site/searchpage.jsp?st=Apple%20MacBook%20Air%2015-Inch%20M3',
         price: 1249.00,
         originalPrice: 1499.00,
         inStock: true,
@@ -710,7 +710,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-mba-amz',
         retailerName: 'Amazon',
-        url: 'https://www.amazon.com/dp/B0CX23G2G8',
+        url: 'https://www.amazon.com/s?k=Apple%20MacBook%20Air%2015-Inch%20M3',
         price: 1299.00,
         originalPrice: 1499.00,
         inStock: true,
@@ -724,7 +724,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-mba-bh',
         retailerName: 'B&H Photo',
-        url: 'https://bhphotovideo.com/c/product/apple-macbook-air-15-m3',
+        url: 'https://www.bhphotovideo.com/c/product/1814986-REG/apple_mxd13ll_a_15_macbook_air_m3.html',
         price: 1299.00,
         originalPrice: 1499.00,
         inStock: true,
@@ -738,7 +738,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-mba-costco',
         retailerName: 'Costco',
-        url: 'https://costco.com/macbook-air-15-m3',
+        url: 'https://www.costco.com/CatalogSearch?dept=All&keyword=Apple%20MacBook%20Air%2015-Inch%20M3',
         price: 1299.99,
         originalPrice: 1499.00,
         inStock: true,
@@ -779,7 +779,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-v15-amz',
         retailerName: 'Amazon',
-        url: 'https://www.amazon.com/dp/B092J7CBR8',
+        url: 'https://www.amazon.com/s?k=Dyson%20V15%20Detect%20Cordless%20Vacuum',
         price: 649.99,
         originalPrice: 749.99,
         inStock: true,
@@ -793,7 +793,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-v15-tgt',
         retailerName: 'Target',
-        url: 'https://target.com/p/dyson-v15-detect',
+        url: 'https://www.target.com/s?searchTerm=Dyson%20V15%20Detect%20Cordless%20Vacuum',
         price: 599.99,
         originalPrice: 749.99,
         inStock: true,
@@ -808,7 +808,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-v15-bb',
         retailerName: 'Best Buy',
-        url: 'https://bestbuy.com/site/dyson-v15-detect',
+        url: 'https://www.bestbuy.com/site/searchpage.jsp?st=Dyson%20V15%20Detect%20Cordless%20Vacuum',
         price: 649.99,
         originalPrice: 749.99,
         inStock: true,
@@ -822,7 +822,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-v15-wm',
         retailerName: 'Walmart',
-        url: 'https://walmart.com/ip/Dyson-V15-Detect',
+        url: 'https://www.walmart.com/search?q=Dyson%20V15%20Detect%20Cordless%20Vacuum',
         price: 649.99,
         originalPrice: 749.99,
         inStock: true,
@@ -863,7 +863,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-dw-hd',
         retailerName: 'Home Depot',
-        url: 'https://homedepot.com/p/DEWALT-20-Volt-MAX-Cordless-Combo-Kit',
+        url: 'https://www.homedepot.com/s/DeWalt%2020V%20MAX%20Cordless%20Drill%20%26%20Impact%20Driver%20Combo%20Kit%20DCK280C2',
         price: 149.00,
         originalPrice: 239.00,
         inStock: true,
@@ -877,7 +877,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-dw-amz',
         retailerName: 'Amazon',
-        url: 'https://www.amazon.com/dp/B0082697K4',
+        url: 'https://www.amazon.com/s?k=DeWalt%2020V%20MAX%20Cordless%20Drill%20%26%20Impact%20Driver%20Combo%20Kit%20DCK280C2',
         price: 159.00,
         originalPrice: 239.00,
         inStock: true,
@@ -891,7 +891,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-dw-wm',
         retailerName: 'Walmart',
-        url: 'https://walmart.com/ip/DEWALT-20V-MAX-Cordless-Combo-Kit',
+        url: 'https://www.walmart.com/search?q=DeWalt%2020V%20MAX%20Cordless%20Drill%20%26%20Impact%20Driver%20Combo%20Kit%20DCK280C2',
         price: 159.99,
         originalPrice: 239.00,
         inStock: true,
@@ -932,7 +932,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-tv-amz',
         retailerName: 'Amazon',
-        url: 'https://www.amazon.com/dp/B0CV9XQ11F',
+        url: 'https://www.amazon.com/s?k=Samsung%2065-Inch%20OLED%20S90D%204K%20TV%20QN65S90DAFXZA',
         price: 1497.99,
         originalPrice: 2199.99,
         inStock: true,
@@ -946,7 +946,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-tv-bb',
         retailerName: 'Best Buy',
-        url: 'https://www.bestbuy.com/site/samsung-65-class-s90d-series-oled-4k-uhd-smart-tizen-tv-2024/6576624.p?skuId=6576624',
+        url: 'https://www.bestbuy.com/site/searchpage.jsp?st=Samsung%2065-Inch%20OLED%20S90D%204K%20TV%20QN65S90DAFXZA',
         price: 1499.99,
         originalPrice: 2199.99,
         inStock: true,
@@ -960,7 +960,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-tv-costco',
         retailerName: 'Costco',
-        url: 'https://www.costco.com/samsung-65-class---oled-s90d-series---4k-uhd-oled-tv---all-state-3-year-protection-plan-bundle-included.product.4000257099.html',
+        url: 'https://www.costco.com/CatalogSearch?dept=All&keyword=Samsung%2065-Inch%20OLED%20S90D%204K%20TV%20QN65S90DAFXZA',
         price: 1499.99,
         originalPrice: 2199.99,
         inStock: true,
@@ -974,7 +974,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-tv-tgt',
         retailerName: 'Target',
-        url: 'https://www.target.com/p/samsung-65-oled-4k-smart-tv-qn65s90dafxza/-/A-91456910',
+        url: 'https://www.target.com/s?searchTerm=Samsung%2065-Inch%20OLED%20S90D%204K%20TV%20QN65S90DAFXZA',
         price: 1599.99,
         originalPrice: 2199.99,
         inStock: true,
@@ -1015,7 +1015,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r1-mc',
         retailerName: 'Micro Center',
-        url: 'https://microcenter.com/product/amd-7800x3d',
+        url: 'https://www.microcenter.com/product/674503/amd-ryzen-7-7800x3d-raphael-am5-42ghz-8-core-boxed-processor-heatsink-not-included',
         price: 349.99,
         originalPrice: 449.00,
         inStock: true,
@@ -1030,7 +1030,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r1-amz',
         retailerName: 'Amazon',
-        url: 'https://www.amazon.com/dp/B0BTZB7F88',
+        url: 'https://www.amazon.com/s?k=AMD%20Ryzen%207%207800X3D',
         price: 369.99,
         originalPrice: 449.00,
         inStock: true,
@@ -1044,7 +1044,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r1-newegg',
         retailerName: 'Newegg',
-        url: 'https://newegg.com/p/N82E16819113793',
+        url: 'https://www.newegg.com/amd-ryzen-7-7800x3d-ryzen-7-7000-series-raphael-zen-4-socket-am5/p/N82E16819113793',
         price: 369.99,
         originalPrice: 449.00,
         inStock: true,
@@ -1058,7 +1058,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r1-bb',
         retailerName: 'Best Buy',
-        url: 'https://bestbuy.com/site/amd-ryzen-7-7800x3d',
+        url: 'https://www.bestbuy.com/site/searchpage.jsp?st=AMD%20Ryzen%207%207800X3D',
         price: 379.99,
         originalPrice: 449.00,
         inStock: true,
@@ -1072,7 +1072,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r1-bh',
         retailerName: 'B&H Photo',
-        url: 'https://bhphotovideo.com/c/product/amd-ryzen-7-7800x3d',
+        url: 'https://www.bhphotovideo.com/c/search?Ntt=AMD%20Ryzen%207%207800X3D',
         price: 384.99,
         originalPrice: 449.00,
         inStock: true,

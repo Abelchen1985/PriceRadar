@@ -51,386 +51,117 @@ export function cleanSearchQuery(title: string, brand?: string, model?: string):
     query = `${brand} ${query}`.trim();
   }
 
+  // Append the model number when it is a shopper-facing identifier that retailer
+  // search engines actually index (mixed letters + digits, e.g. WH1000XM5,
+  // QN65S90DAFXZA, DCK280C2). This is what makes a search link land on the exact
+  // product instead of a category page. Long internal MPNs and part numbers with
+  // slashes/spaces (e.g. 010-02679-00, MXD13LL/A) are skipped: retailers rarely
+  // index them and they only dilute the query.
+  if (model) {
+    const compactModel = model.trim();
+    const isSearchableModel =
+      /^[A-Za-z0-9-]{4,14}$/.test(compactModel) &&
+      /[A-Za-z]/.test(compactModel) &&
+      /[0-9]/.test(compactModel);
+    const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (isSearchableModel && !normalize(query).includes(normalize(compactModel))) {
+      query = `${query} ${compactModel}`.trim();
+    }
+  }
+
   return query;
 }
 
 /**
- * Direct product page registry for high-demand benchmark products.
- * Guarantees direct product page landings rather than search result lists.
+ * Verified direct product page registry.
+ *
+ * INTEGRITY RULE: a URL may only appear here after it has been loaded and
+ * confirmed to show the exact product it claims to represent. Every entry below
+ * carries the product title that the live retailer page actually returned when
+ * it was checked.
+ *
+ * Anything not on this list deliberately resolves to the retailer's official
+ * catalog search for the exact brand + model (see buildStorefrontSearchUrl).
+ * A search link always lands the shopper on the right product and degrades
+ * gracefully; a fabricated SKU does not -- it silently sends them to an
+ * unrelated item or a dead page, which is far worse than one extra click.
+ *
+ * Do NOT add an entry here from memory, from a pattern, or by guessing an ID
+ * off a product name. Load the page first.
  */
+interface VerifiedDirectLink {
+  /** Matches the requested product against title + model (both lowercased) */
+  matches: (title: string, model: string) => boolean;
+  /** Per-retailer verified product pages */
+  retailers: Array<{
+    matches: (retailer: string) => boolean;
+    url: string;
+    /** Product title the live page returned when this URL was verified */
+    verifiedAs: string;
+  }>;
+}
+
+const VERIFIED_DIRECT_LINKS: VerifiedDirectLink[] = [
+  {
+    // Sony WH-1000XM5 Wireless Noise-Canceling Headphones
+    matches: (t, m) => /wh-?1000xm5/.test(t) || /wh-?1000xm5/.test(m),
+    retailers: [
+      {
+        matches: (r) => r.includes('best buy') || r === 'bestbuy',
+        url: 'https://www.bestbuy.com/site/sony-wh-1000xm5-wireless-noise-canceling-over-the-ear-headphones-black/6505727.p?skuId=6505727',
+        verifiedAs: 'Sony - WH-1000XM5 Wireless Noise Cancelling Over-the-Ear Headphones - Black'
+      }
+    ]
+  },
+  {
+    // Apple MacBook Air 15" M3
+    matches: (t, m) => (t.includes('macbook air') && t.includes('15') && t.includes('m3')) || m.includes('mxd13ll'),
+    retailers: [
+      {
+        matches: (r) => r.includes('b&h') || r.includes('bh photo'),
+        url: 'https://www.bhphotovideo.com/c/product/1814986-REG/apple_mxd13ll_a_15_macbook_air_m3.html',
+        verifiedAs: 'Apple 15" MacBook Air (M3, Midnight)'
+      }
+    ]
+  },
+  {
+    // AMD Ryzen 7 7800X3D
+    matches: (t, m) => t.includes('7800x3d') || m.includes('7800x3d'),
+    retailers: [
+      {
+        matches: (r) => r.includes('micro center') || r.includes('microcenter'),
+        url: 'https://www.microcenter.com/product/674503/amd-ryzen-7-7800x3d-raphael-am5-42ghz-8-core-boxed-processor-heatsink-not-included',
+        verifiedAs: 'AMD Ryzen 7 7800X3D Raphael AM5 4.2GHz 8-Core Boxed Processor - Heatsink Not Included'
+      },
+      {
+        matches: (r) => r.includes('newegg'),
+        url: 'https://www.newegg.com/amd-ryzen-7-7800x3d-ryzen-7-7000-series-raphael-zen-4-socket-am5/p/N82E16819113793',
+        verifiedAs: 'AMD Ryzen 7 7800X3D - Ryzen 7 7000 Series Zen 4 8-Core 4.2 GHz Socket AM5 - 100-100000910WOF'
+      }
+    ]
+  },
+  {
+    // Breville Barista Touch (BES880)
+    matches: (t, m) => t.includes('barista touch') || m.includes('bes880'),
+    retailers: [
+      {
+        matches: (r) => r.includes('breville'),
+        url: 'https://www.breville.com/us/en/products/espresso/bes880.html',
+        verifiedAs: 'Barista Touch - Automatic Espresso Machine with Grinder'
+      }
+    ]
+  }
+];
+
 export function getDirectProductUrl(retailerName: string, title: string, model?: string): string | null {
   const t = (title || '').toLowerCase();
   const m = (model || '').toLowerCase();
   const r = (retailerName || '').toLowerCase().trim();
 
-  // 1. Samsung 65" Class OLED S90D 4K Smart TV (QN65S90DAFXZA / QN65S90D)
-  if ((t.includes('s90d') && (t.includes('samsung') || t.includes('oled'))) || m.includes('s90d') || m.includes('qn65s90d')) {
-    if (r.includes('best buy') || r === 'bestbuy') {
-      return 'https://www.bestbuy.com/site/samsung-65-class-s90d-series-oled-4k-uhd-smart-tizen-tv-2024/6576624.p?skuId=6576624';
-    }
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B0CV9XQ11F';
-    }
-    if (r.includes('costco')) {
-      return 'https://www.costco.com/samsung-65-class---oled-s90d-series---4k-uhd-oled-tv---all-state-3-year-protection-plan-bundle-included.product.4000257099.html';
-    }
-    if (r.includes('target')) {
-      return 'https://www.target.com/p/samsung-65-oled-4k-smart-tv-qn65s90dafxza/-/A-91456910';
-    }
-    if (r.includes('samsung')) {
-      return 'https://www.samsung.com/us/televisions-home-theater/tvs/oled-tvs/65-class-oled-s90d-qn65s90dafxza/';
-    }
-    if (r.includes('b&h') || r.includes('bh photo')) {
-      return 'https://www.bhphotovideo.com/c/product/1816568-REG/samsung_qn65s90dafxza_s90d_65_4k_oled.html';
-    }
-    if (r.includes('walmart')) {
-      return 'https://www.walmart.com/ip/Samsung-65-Class-S90D-OLED-4K-Smart-TV-QN65S90DAFXZA-2024/5377501865';
-    }
-  }
-
-  // 2. Jackery Explorer 1500 v2 Solar Generator with Solar Panel 100AIR
-  if (t.includes('jackery') && (t.includes('1500') || t.includes('solar generator'))) {
-    if (r.includes('jackery')) {
-      return 'https://www.jackery.com/products/jackery-solar-generator-1500-v2';
-    }
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B0CXPRV24N';
-    }
-    if (r.includes('home depot') || r === 'homedepot') {
-      return 'https://www.homedepot.com/p/Jackery-Solar-Generator-1500-PRO-Explorer-1500-PRO-Portable-Power-Station-SolarSaga-200W-Solar-Panel-Emergency-Power-Backup-1500-PRO-200W/324673859';
-    }
-    if (r.includes('best buy') || r === 'bestbuy') {
-      return 'https://www.bestbuy.com/site/jackery-explorer-1000-v2-portable-power-station-black/6584288.p?skuId=6584288';
-    }
-    if (r.includes('target')) {
-      return null; // Target does not stock heavy Jackery solar generators
-    }
-  }
-
-  // 3. Ugly Stik GX2 Spinning Rod & Reel Fishing Combo
-  if (t.includes('ugly stik') || t.includes('gx2')) {
-    if (r.includes('bass pro') || r === 'basspro') {
-      return 'https://www.basspro.com/shop/en/ugly-stik-gx2-spinning-rod';
-    }
-    if (r.includes('tackle warehouse') || r === 'tacklewarehouse') {
-      return 'https://www.tacklewarehouse.com/Shakespeare_Ugly_Stik_GX2_Spinning_Rods/descpage-UGX.html';
-    }
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B00F0KM1D4';
-    }
-    if (r.includes('walmart')) {
-      return 'https://www.walmart.com/ip/Ugly-Stik-GX2-Spinning-Fishing-Rod/29383344';
-    }
-    if (r.includes('cabela')) {
-      return 'https://www.cabelas.com/shop/en/ugly-stik-gx2-spinning-rod';
-    }
-  }
-
-  // 4. Sony WH-1000XM5 Wireless Headphones
-  if (t.includes('wh-1000xm5') || t.includes('1000xm5') || m.includes('wh1000xm5')) {
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B09XS7JWHH';
-    }
-    if (r.includes('best buy') || r === 'bestbuy') {
-      return 'https://www.bestbuy.com/site/sony-wh-1000xm5-wireless-noise-canceling-over-the-ear-headphones-black/6505727.p?skuId=6505727';
-    }
-    if (r.includes('target')) {
-      return 'https://www.target.com/p/sony-wh-1000xm5-wireless-noise-canceling-headphones/-/A-86282822';
-    }
-    if (r.includes('b&h') || r.includes('bh photo')) {
-      return 'https://www.bhphotovideo.com/c/product/1706692-REG/sony_wh1000xm5_b_wh_1000xm5_wireless_noise_canceling_headphones.html';
-    }
-    if (r.includes('walmart')) {
-      return 'https://www.walmart.com/ip/Sony-WH-1000XM5-Wireless-Noise-Canceling-Over-Ear-Headphones-Black/436669931';
-    }
-  }
-
-  // 5. PlayStation 5 Slim Digital Console
-  if (t.includes('playstation 5') || t.includes('ps5')) {
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B0CL5KNB9M';
-    }
-    if (r.includes('best buy') || r === 'bestbuy') {
-      return 'https://www.bestbuy.com/site/sony-playstation-5-digital-edition-slim-console-white/6564757.p?skuId=6564757';
-    }
-    if (r.includes('target')) {
-      return 'https://www.target.com/p/playstation-5-digital-edition-console-slim/-/A-89947888';
-    }
-    if (r.includes('walmart')) {
-      return 'https://www.walmart.com/ip/PlayStation-5-Digital-Edition-Slim/5113283173';
-    }
-  }
-
-  // 6. Apple MacBook Air 15" M3
-  if (t.includes('macbook air') && (t.includes('15') || t.includes('m3') || m.includes('mxd13ll/a'))) {
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B0CX23G2G8';
-    }
-    if (r.includes('best buy') || r === 'bestbuy') {
-      return 'https://www.bestbuy.com/site/apple-macbook-air-15-laptop-m3-chip-16gb-memory-512gb-ssd-midnight/6565842.p?skuId=6565842';
-    }
-    if (r.includes('b&h') || r.includes('bh photo')) {
-      return 'https://www.bhphotovideo.com/c/product/1814986-REG/apple_mxd13ll_a_15_macbook_air_m3.html';
-    }
-    if (r.includes('apple')) {
-      return 'https://www.apple.com/shop/buy-mac/macbook-air/15-inch-m3';
-    }
-  }
-
-  // 7. AMD Ryzen 7 7800X3D Desktop Processor
-  if (t.includes('7800x3d') || m.includes('7800x3d')) {
-    if (r.includes('micro center') || r.includes('microcenter')) {
-      return 'https://www.microcenter.com/product/674503/amd-ryzen-7-7800x3d-raphael-am5-42ghz-8-core-boxed-processor-heatsink-not-included';
-    }
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B0BTZB7F88';
-    }
-    if (r.includes('newegg')) {
-      return 'https://www.newegg.com/amd-ryzen-7-7800x3d-ryzen-7-7000-series-raphael-zen-4-socket-am5/p/N82E16819113793';
-    }
-    if (r.includes('best buy') || r === 'bestbuy') {
-      return 'https://www.bestbuy.com/site/amd-ryzen-7-7800x3d-8-core-16-thread-desktop-processor/6537004.p?skuId=6537004';
-    }
-    if (r.includes('b&h') || r.includes('bh photo')) {
-      return 'https://www.bhphotovideo.com/c/product/1758509-REG/amd_100_100000910wof_ryzen_7_7800x3d_4_2.html';
-    }
-  }
-
-  // 8. DEWALT 20V MAX Cordless Drill Combo Kit
-  if (t.includes('dewalt') && (t.includes('combo') || t.includes('drill') || t.includes('dck280') || t.includes('dck240') || m.includes('dck280') || m.includes('dck240'))) {
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B0082697K4';
-    }
-    if (r.includes('home depot') || r === 'homedepot') {
-      return 'https://www.homedepot.com/p/DEWALT-20V-MAX-Cordless-Drill-Impact-Combo-Kit-2-Tool-with-2-20V-1-3Ah-Batteries-Charger-and-Bag-DCK280C2/204253164';
-    }
-    if (r.includes('walmart')) {
-      return 'https://www.walmart.com/ip/DEWALT-DCK280C2-20V-MAX-Cordless-Lithium-Ion-Compact-Drill-Driver-and-Impact-Driver-Combo-Kit/23565860';
-    }
-  }
-
-  // 9. Dyson V15 Detect Cordless Vacuum
-  if (t.includes('dyson') && (t.includes('v15') || m.includes('368340-01'))) {
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B092J7CBR8';
-    }
-    if (r.includes('best buy') || r === 'bestbuy') {
-      return 'https://www.bestbuy.com/site/dyson-v15-detect-cordless-vacuum-yellow-iron/6451333.p?skuId=6451333';
-    }
-    if (r.includes('target')) {
-      return 'https://www.target.com/p/dyson-v15-detect-cordless-vacuum/-/A-82488478';
-    }
-    if (r.includes('walmart')) {
-      return 'https://www.walmart.com/ip/Dyson-V15-Detect-Cordless-Vacuum/593883466';
-    }
-  }
-
-  // 10. Garmin inReach Mini 2 Satellite Communicator
-  if (t.includes('inreach mini 2') || (t.includes('garmin') && t.includes('inreach'))) {
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B09PSKQ4N5';
-    }
-    if (r.includes('rei')) {
-      return 'https://www.rei.com/product/208264/garmin-inreach-mini-2';
-    }
-    if (r.includes('bass pro') || r === 'basspro') {
-      return 'https://www.basspro.com/shop/en/garmin-inreach-mini-2-satellite-communicator-101140026';
-    }
-    if (r.includes('cabela')) {
-      return 'https://www.cabelas.com/shop/en/garmin-inreach-mini-2-satellite-communicator-101140026';
-    }
-  }
-
-  // 11. Osprey Atmos AG 65 Expedition Backpack
-  if (t.includes('atmos ag 65') || (t.includes('osprey') && t.includes('atmos'))) {
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B0B52B3C99';
-    }
-    if (r.includes('rei')) {
-      return 'https://www.rei.com/product/218570/osprey-atmos-ag-65-pack-mens';
-    }
-    if (r.includes('backcountry')) {
-      return 'https://www.backcountry.com/osprey-packs-atmos-ag-65-backpack-3783-4150cu-in';
-    }
-    if (r.includes('moosejaw')) {
-      return 'https://www.moosejaw.com/product/osprey-men-s-atmos-ag-65-pack_10574046';
-    }
-    // Bass Pro Shops does NOT sell Osprey Atmos AG 65
-    if (r.includes('bass pro') || r.includes('cabela')) {
-      return null;
-    }
-  }
-
-  // 12. Breville Barista Touch Espresso Machine (BES880BSS)
-  if (t.includes('barista touch') || (t.includes('breville') && (t.includes('touch') || m.includes('bes880')))) {
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B078WMLXXG';
-    }
-    if (r.includes('best buy') || r === 'bestbuy') {
-      return 'https://www.bestbuy.com/site/breville-the-barista-touch-espresso-machine-with-steam-wand-stainless-steel/6112521.p?skuId=6112521';
-    }
-    if (r.includes('walmart')) {
-      return 'https://www.walmart.com/ip/Breville-Barista-Touch-Espresso-Machine-Stainless-Steel-BES880BSS/739198661';
-    }
-    if (r.includes('breville')) {
-      return 'https://www.breville.com/us/en/products/espresso/bes880.html';
-    }
-    // Target does NOT sell the $1,000 Breville Barista Touch
-    if (r.includes('target')) {
-      return null;
-    }
-  }
-
-  // 13. Garmin ECHOMAP UHD2 53cv Fish Finder
-  if (t.includes('echomap') && (t.includes('53cv') || t.includes('uhd2'))) {
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B0BHZZS8T1';
-    }
-    if (r.includes('bass pro') || r === 'basspro') {
-      return 'https://www.basspro.com/shop/en/garmin-echomap-uhd2-53cv-fishfinder-chartplotter-with-gt20-tm-transducer';
-    }
-    if (r.includes('cabela')) {
-      return 'https://www.cabelas.com/shop/en/garmin-echomap-uhd2-53cv-fishfinder-chartplotter-with-gt20-tm-transducer';
-    }
-  }
-
-  // 14. YETI Tundra 45 Cooler
-  if (t.includes('tundra 45') || (t.includes('yeti') && t.includes('tundra'))) {
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B004YIBWCS';
-    }
-    if (r.includes('rei')) {
-      return 'https://www.rei.com/product/878757/yeti-tundra-45-cooler';
-    }
-    if (r.includes('bass pro') || r === 'basspro') {
-      return 'https://www.basspro.com/shop/en/yeti-tundra-45-cooler';
-    }
-    if (r.includes('cabela')) {
-      return 'https://www.cabelas.com/shop/en/yeti-tundra-45-cooler';
-    }
-  }
-
-  // 15. Shimano Stradic FM Spinning Reel
-  if (t.includes('stradic') || (t.includes('shimano') && (t.includes('stradic') || m.includes('stc3000')))) {
-    if (r.includes('tackle warehouse') || r === 'tacklewarehouse') {
-      return 'https://www.tacklewarehouse.com/Shimano_Stradic_FM_Spinning_Reels/descpage-SSFM.html';
-    }
-    if (r.includes('bass pro') || r === 'basspro') {
-      return 'https://www.basspro.com/shop/en/shimano-stradic-fm-spinning-reel-101416738';
-    }
-    if (r.includes('cabela')) {
-      return 'https://www.cabelas.com/shop/en/shimano-stradic-fm-spinning-reel-101416738';
-    }
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B0CFQ7W4K8';
-    }
-  }
-
-  // 16. Anker SOLIX C1000 / C1000 Gen 2 Portable Power Station
-  if (
-    (t.includes('c1000') && (t.includes('anker') || t.includes('solix'))) ||
-    (t.includes('anker') && t.includes('solix')) ||
-    m.includes('c1000') ||
-    m.includes('a1761')
-  ) {
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B0C4DBC65K';
-    }
-    if (r.includes('best buy') || r === 'bestbuy') {
-      return 'https://www.bestbuy.com/site/anker-solix-c1000-portable-power-station-gray/6561141.p?skuId=6561141';
-    }
-    if (r.includes('home depot') || r === 'homedepot') {
-      return 'https://www.homedepot.com/p/Anker-SOLIX-C1000-Portable-Power-Station-1056Wh-Solar-Generator-A1761111/328221841';
-    }
-    if (r.includes('anker')) {
-      return 'https://www.anker.com/products/a1761';
-    }
-    if (r.includes('target')) {
-      return null; // Target does NOT sell the Anker SOLIX C1000
-    }
-  }
-
-  // 17. Big Agnes Copper Spur HV UL2 Tent
-  if (t.includes('copper spur') || (t.includes('big agnes') && t.includes('tent'))) {
-    if (r.includes('rei')) {
-      return 'https://www.rei.com/product/168433/big-agnes-copper-spur-hv-ul2-tent';
-    }
-    if (r.includes('backcountry')) {
-      return 'https://www.backcountry.com/big-agnes-copper-spur-hv-ul-tent-2-person-3-season';
-    }
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B082PXZLGY';
-    }
-  }
-
-  // 18. MSR PocketRocket 2 Backpacking Stove
-  if (t.includes('pocketrocket') || (t.includes('msr') && t.includes('stove'))) {
-    if (r.includes('rei')) {
-      return 'https://www.rei.com/product/114890/msr-pocketrocket-2-backpacking-stove';
-    }
-    if (r.includes('backcountry')) {
-      return 'https://www.backcountry.com/msr-pocket-rocket-2-stove';
-    }
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B01N5O7551';
-    }
-  }
-
-  // 19. Therm-a-Rest NeoAir XLite NXT Sleeping Pad
-  if (t.includes('neoair') || (t.includes('therm-a-rest') && (t.includes('pad') || t.includes('xlite')))) {
-    if (r.includes('rei')) {
-      return 'https://www.rei.com/product/216279/therm-a-rest-neoair-xlite-nxt-sleeping-pad';
-    }
-    if (r.includes('backcountry')) {
-      return 'https://www.backcountry.com/therm-a-rest-neoair-xlite-nxt-sleeping-pad';
-    }
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B0BLZXWZ9G';
-    }
-  }
-
-  // 20. Apple AirPods Pro (2nd Gen with USB-C)
-  if (t.includes('airpods pro') || (t.includes('apple') && t.includes('airpods'))) {
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B0CHWRXH8B';
-    }
-    if (r.includes('best buy') || r === 'bestbuy') {
-      return 'https://www.bestbuy.com/site/apple-airpods-pro-2nd-generation-with-magsafe-case-usbc-white/4900964.p?skuId=4900964';
-    }
-    if (r.includes('target')) {
-      return 'https://www.target.com/p/apple-airpods-pro-2nd-generation-with-magsafe-case-usbc/-/A-89419999';
-    }
-    if (r.includes('walmart')) {
-      return 'https://www.walmart.com/ip/Apple-AirPods-Pro-2nd-Gen-with-USB-C/5086053351';
-    }
-  }
-
-  // 21. KitchenAid Artisan Series 5-Quart Stand Mixer
-  if (t.includes('kitchenaid') && (t.includes('artisan') || t.includes('stand mixer') || m.includes('ksm150'))) {
-    if (r.includes('target')) {
-      return 'https://www.target.com/p/kitchenaid-artisan-series-5-quart-tilt-head-stand-mixer-ksm150ps/-/A-13658550';
-    }
-    if (r.includes('best buy') || r === 'bestbuy') {
-      return 'https://www.bestbuy.com/site/kitchenaid-artisan-series-5-quart-tilt-head-stand-mixer-empire-red/5078103.p?skuId=5078103';
-    }
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B00005UP2P';
-    }
-    if (r.includes('walmart')) {
-      return 'https://www.walmart.com/ip/KitchenAid-Artisan-Series-5-Quart-Tilt-Head-Stand-Mixer/14956324';
-    }
-  }
-
-  // 22. Sony Alpha a7 IV Mirrorless Camera
-  if (t.includes('a7 iv') || t.includes('a7iv') || (t.includes('sony') && t.includes('alpha') && t.includes('iv'))) {
-    if (r.includes('b&h') || r.includes('bh photo')) {
-      return 'https://www.bhphotovideo.com/c/product/1667800-REG/sony_ilce_7m4_b_alpha_a7_iv_mirrorless.html';
-    }
-    if (r.includes('best buy') || r === 'bestbuy') {
-      return 'https://www.bestbuy.com/site/sony-alpha-7-iv-full-frame-mirrorless-camera-body-only-black/6486163.p?skuId=6486163';
-    }
-    if (r.includes('amazon')) {
-      return 'https://www.amazon.com/dp/B09JZT6YK5';
+  for (const entry of VERIFIED_DIRECT_LINKS) {
+    if (!entry.matches(t, m)) continue;
+    for (const candidate of entry.retailers) {
+      if (candidate.matches(r)) return candidate.url;
     }
   }
 
@@ -490,8 +221,8 @@ export function isVerifiedDirectProductUrl(url: string): boolean {
   // Home Depot: /p/.../\d{6,12}
   if (/homedepot\.com\/p\/(?:[^/]+\/)?\d{6,12}/i.test(url)) return true;
 
-  // B&H Photo: /c/product/\d{6,10}-REG/ or /c/product/1814986-REG/...
-  if (/bhphotovideo\.com\/c\/product\/(?:\d{5,10}-REG|[a-zA-Z0-9_-]+)/i.test(url)) return true;
+  // B&H Photo: /c/product/<numeric id>-REG/... (a bare slug is NOT a product id)
+  if (/bhphotovideo\.com\/c\/product\/\d{5,10}-REG\//i.test(url)) return true;
 
   // Costco: .product.\d{6,12}.html
   if (/costco\.com\/.*\.product\.\d{6,12}\.html/i.test(url)) return true;
@@ -511,8 +242,11 @@ export function isVerifiedDirectProductUrl(url: string): boolean {
   // Tackle Warehouse: /descpage-...html
   if (/tacklewarehouse\.com\/.*descpage-[A-Z0-9_-]+\.html/i.test(url)) return true;
 
-  // Bass Pro / Cabela's: product SKU at end of slug or known direct product pages
-  if (/(?:basspro|cabelas)\.com\/(?:shop\/en\/[a-z0-9_-]+-\d{6,12}|shop\/en\/ugly-stik-gx2-spinning-rod|shop\/en\/garmin-echomap-uhd2-53cv|shop\/en\/yeti-tundra-45-cooler)/i.test(url)) return true;
+  // Bass Pro / Cabela's: only a slug carrying a real numeric product id counts.
+  // The previously whitelisted literal slugs (ugly-stik-gx2-spinning-rod,
+  // garmin-echomap-uhd2-53cv, yeti-tundra-45-cooler) were verified against the
+  // live sites and none of them resolve to a product page.
+  if (/(?:basspro|cabelas)\.com\/shop\/en\/[a-z0-9_-]+-\d{6,12}/i.test(url)) return true;
 
   // Official direct brand sites
   if (/samsung\.com\/us\/.*\/[a-z0-9_-]+\/?$/i.test(url)) return true;
@@ -772,6 +506,8 @@ export function isOfficialSearchUrl(url: string): boolean {
     url.includes('/s?k=') ||
     url.includes('/s?searchTerm=') ||
     url.includes('/p/pl?d=') ||
+    // Home Depot's catalog search lives at /s/<query>, not /search
+    /homedepot\.com\/s\//i.test(url) ||
     url.includes('google.com/search?tbm=shop')
   );
 }
