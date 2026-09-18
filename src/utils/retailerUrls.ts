@@ -169,12 +169,58 @@ export function getDirectProductUrl(retailerName: string, title: string, model?:
 }
 
 /**
+ * URLs that were loaded during a link audit and proven NOT to be the product
+ * they were attached to. They are structurally perfect -- real SKU formats, real
+ * domains -- which is exactly why they survived every format-based check for so
+ * long. Structure cannot tell a correct identifier from an invented one, so
+ * these are named explicitly and can never be served again, no matter where
+ * they arrive from (seed data, a stale browser cache, or a saved watchlist).
+ */
+const QUARANTINED_URL_FRAGMENTS = [
+  '6576624',      // claimed Samsung S90D OLED -> serves a Tech21 iPhone 15 Pro case
+  '6112521',      // claimed Breville Barista Touch -> serves a Lenovo ThinkPad W530
+  '6451333',      // claimed Dyson V15 Detect -> serves a Best Buy TV wall mount
+  '6537004',      // claimed AMD 7800X3D -> serves an Insignia iPad bumper case
+  '6565842',      // claimed MacBook Air 15" M3 -> serves the 13" model
+  '6564757',      // claimed PS5 Slim Digital -> dead
+  '1706692-REG',  // claimed Sony WH-1000XM5 -> serves an Alfatron speaker
+  '1758509-REG',  // claimed AMD 7800X3D -> serves a book about GitHub Pages
+  '/product/218570/', // claimed Osprey Atmos AG 65 -> serves Osprey HydraJet 12 Kids'
+  '/product/208264/', // claimed Garmin inReach Mini 2 -> serves SMRT Tent HD Brackets
+  '/product/878757/', // claimed YETI Tundra 45 -> serves a North Face women's jacket
+  '/product/202159/', // claimed Osprey Atmos AG 65 -> dead
+  '23565860',     // claimed DEWALT DCK280C2 -> serves a Briggs & Stratton air filter
+  'A-91456910',   // claimed Samsung S90D -> item not available
+  'A-82488478',   // claimed Dyson V15 -> item not available
+  'A-86282822',   // claimed Sony WH-1000XM5 -> item not available
+  'A-89947888',   // claimed PS5 Slim Digital -> unconfirmed
+  '593883466',    // claimed Dyson V15 (Walmart) -> dead
+  '436669931',    // claimed Sony WH-1000XM5 (Walmart) -> dead
+  '739198661',    // claimed Breville Barista Touch (Walmart) -> dead
+  '204253164',    // claimed DEWALT combo kit (Home Depot) -> dead
+  '5113283173',   // claimed PS5 Slim Digital (Walmart) -> unconfirmed
+  '4000257099',   // claimed Samsung S90D (Costco) -> unconfirmed
+  'osprey-packs-atmos-ag-65-backpack-3783-4150cu-in' // claimed Osprey Atmos AG 65 -> dead
+];
+
+/**
+ * True when a URL is on the quarantine list above.
+ */
+export function isQuarantinedProductUrl(url: string): boolean {
+  if (!url || typeof url !== 'string') return false;
+  return QUARANTINED_URL_FRAGMENTS.some((fragment) => url.includes(fragment));
+}
+
+/**
  * Validates whether a URL points to a legitimate direct product page
  * containing the retailer's genuine product identifier (e.g. ASIN, SKU, TCIN, etc.).
  * Guessed slugs that lack these identifiers (and produce 404s) return false.
  */
 export function isVerifiedDirectProductUrl(url: string): boolean {
   if (!url || typeof url !== 'string' || !url.startsWith('http')) return false;
+
+  // Proven wrong against the live site: never direct, whatever its shape.
+  if (isQuarantinedProductUrl(url)) return false;
 
   // 1. Explicit search paths are never direct product pages
   if (
@@ -642,17 +688,23 @@ export function getRetailerDealUrl(
     return directRegisteredUrl;
   }
 
-  // Step 2: Preserve any valid direct product URL that was already supplied with authentic IDs
-  if (existingUrl && isVerifiedDirectProductUrl(existingUrl)) {
-    return existingUrl;
-  }
-
-  // Step 3: Preserve official store search URLs if already correctly populated
+  // Step 2: Preserve official store search URLs -- a search makes no claim that
+  // can be wrong, so it is always safe to keep.
   if (existingUrl && isOfficialSearchUrl(existingUrl)) {
     return existingUrl;
   }
 
-  // Step 4: Discard broken guessed slugs and fallback to high-precision search
+  // Step 3: Everything else becomes a catalog search.
+  //
+  // NOTE: this deliberately does NOT preserve an arbitrary "looks like a product
+  // page" URL, which is what an earlier version did. That check only proves a
+  // URL has the right SHAPE -- the right number of digits in the right slot --
+  // and every fabricated link found in the audit passed it. Worse, preserving
+  // them meant the fix to the seed catalog never reached anyone who had already
+  // loaded the app: their browser replayed the old URLs from localStorage and
+  // this function handed them straight back, so a wrong link survived the fix
+  // indefinitely. A URL is served as a product page only if getDirectProductUrl
+  // vouched for it in step 1.
   return buildStorefrontSearchUrl(retailerName, productTitle, brand, model);
 }
 

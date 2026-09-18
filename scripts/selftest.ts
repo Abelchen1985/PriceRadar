@@ -26,6 +26,7 @@ import { verifyRetailerPrice } from '../src/services/priceVerifier';
 import { isRetailerEligibleForProduct, checkRetailerEligibility } from '../src/services/retailerRegistry';
 import { RetailerCandidate } from '../src/types';
 import { parseJsonLdProducts, compareStructuredProduct } from '../src/services/structuredDataVerifier';
+import { isQuarantinedProductUrl } from '../src/utils/retailerUrls';
 
 export interface TestResult {
   name: string;
@@ -700,6 +701,70 @@ export function runComprehensiveSelfTest(): {
     fail('Structured Match (insufficient data)', 'DEAL_LINKS', `Thin structured data must not produce a verdict: ${JSON.stringify(thin)}`);
   } else {
     pass('Structured Match (insufficient data)', 'DEAL_LINKS', 'Insufficient structured data correctly left unverified');
+  }
+
+  // ==========================================
+  // SECTION 9: Stored-URL Regression Guard
+  // ==========================================
+  // The catalog fix alone did not reach anyone who had already used the app:
+  // their browser replayed the old URLs from localStorage and the resolver
+  // handed them straight back, because they LOOKED like valid product pages.
+  // These checks make sure a proven-wrong URL cannot survive by being
+  // well-formed, no matter where it is supplied from.
+
+  const provenWrongStoredUrls = [
+    { retailer: 'Best Buy', title: 'Samsung 65" Class OLED S90D 4K Smart TV', brand: 'Samsung', model: 'QN65S90DAFXZA', url: 'https://www.bestbuy.com/site/samsung-65-class-s90d-series-oled-4k-uhd-smart-tizen-tv-2024/6576624.p?skuId=6576624', serves: 'a Tech21 iPhone case' },
+    { retailer: 'B&H Photo', title: 'Sony WH-1000XM5 Wireless Noise-Canceling Headphones', brand: 'Sony', model: 'WH1000XM5/B', url: 'https://www.bhphotovideo.com/c/product/1706692-REG/sony_wh1000xm5_b_wh_1000xm5_wireless_noise_canceling_headphones.html', serves: 'an Alfatron speaker' },
+    { retailer: 'REI', title: "Osprey Atmos AG 65 Men's Expedition Backpack", brand: 'Osprey', model: 'Atmos AG 65 (L/XL)', url: 'https://www.rei.com/product/218570/osprey-atmos-ag-65-pack-mens', serves: "an Osprey HydraJet 12 Kids' pack" },
+    { retailer: 'Walmart', title: 'DeWalt 20V MAX Cordless Drill & Impact Driver Combo Kit', brand: 'DeWalt', model: 'DCK280C2', url: 'https://www.walmart.com/ip/DEWALT-DCK280C2-20V-MAX-Cordless-Lithium-Ion-Compact-Drill-Driver-and-Impact-Driver-Combo-Kit/23565860', serves: 'a Briggs & Stratton air filter' }
+  ];
+
+  for (const stored of provenWrongStoredUrls) {
+    if (!isQuarantinedProductUrl(stored.url)) {
+      fail(`Quarantine [${stored.retailer}]`, 'DEAL_LINKS', `Known-bad URL is not quarantined: ${stored.url}`);
+      continue;
+    }
+    if (isVerifiedDirectProductUrl(stored.url)) {
+      fail(`Quarantine Direct Check [${stored.retailer}]`, 'DEAL_LINKS', `Known-bad URL still passes as a direct product page: ${stored.url}`);
+      continue;
+    }
+    const resolved = getRetailerDealUrl(stored.retailer, stored.title, stored.url, stored.brand, stored.model);
+    if (resolved === stored.url) {
+      fail(`Stored URL Repair [${stored.retailer}]`, 'DEAL_LINKS', `Resolver handed a known-bad stored URL straight back: ${resolved}`);
+    } else if (!isOfficialSearchUrl(resolved) && !isVerifiedDirectProductUrl(resolved)) {
+      fail(`Stored URL Repair [${stored.retailer}]`, 'DEAL_LINKS', `Repaired URL is neither verified nor an official search: ${resolved}`);
+    } else {
+      pass(`Stored URL Repair [${stored.retailer}]`, 'DEAL_LINKS', `Replaced a link that served ${stored.serves}: ${resolved}`);
+    }
+  }
+
+  // An unproven-but-plausible URL must also not be served as a product page:
+  // "correctly shaped" was never evidence of "correct".
+  const plausibleButUnproven = getRetailerDealUrl(
+    'Target',
+    'Dyson V15 Detect Cordless Vacuum Cleaner',
+    'https://www.target.com/p/dyson-v15-detect-cordless-vacuum/-/A-99999999',
+    'Dyson',
+    '368340-01'
+  );
+  if (!isOfficialSearchUrl(plausibleButUnproven)) {
+    fail('Unproven Stored URL Not Trusted', 'DEAL_LINKS', `A well-formed but unverified URL was kept as direct: ${plausibleButUnproven}`);
+  } else {
+    pass('Unproven Stored URL Not Trusted', 'DEAL_LINKS', `Well-formed but unverified URL correctly downgraded to search: ${plausibleButUnproven}`);
+  }
+
+  // A whitelisted link must still survive the stricter resolver.
+  const verifiedSurvives = getRetailerDealUrl(
+    'Best Buy',
+    'Sony WH-1000XM5 Wireless Noise-Canceling Headphones',
+    'https://www.bestbuy.com/site/sony-wh-1000xm5-wireless-noise-canceling-over-the-ear-headphones-black/6505727.p?skuId=6505727',
+    'Sony',
+    'WH1000XM5'
+  );
+  if (!verifiedSurvives.includes('6505727.p')) {
+    fail('Verified Link Survives', 'DEAL_LINKS', `Whitelisted verified link was lost: ${verifiedSurvives}`);
+  } else {
+    pass('Verified Link Survives', 'DEAL_LINKS', `Confirmed link preserved: ${verifiedSurvives}`);
   }
 
   // Summary calculation

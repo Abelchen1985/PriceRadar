@@ -46,6 +46,17 @@ export default function App() {
             if (sanitized.alertEmails) {
               sanitized.alertEmails = sanitized.alertEmails.map(e => e.includes('abelchen') ? 'alerts@example.com' : e);
             }
+            // Re-resolve every stored retailer URL through the link policy.
+            // A watchlist saved before a link was found to be wrong would
+            // otherwise keep replaying it out of localStorage forever -- and
+            // this stored value is what the email alert links to, so repairing
+            // it at render time alone is not enough.
+            if (Array.isArray(sanitized.retailers)) {
+              sanitized.retailers = sanitized.retailers.map(r => ({
+                ...r,
+                url: getRetailerDealUrl(r.retailerName, sanitized.title, r.url, sanitized.brand, sanitized.model)
+              }));
+            }
             return sanitized;
           });
         }
