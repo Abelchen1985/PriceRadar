@@ -494,17 +494,25 @@ export async function verifyProductUrl(url: string, identity: ProductIdentity): 
 
   const { product, comparison } = best;
   const inStock = product.availability ? /InStock|LimitedAvailability|PreOrder|BackOrder/i.test(product.availability) : null;
+  const identified = comparison.confidence >= 88 && !comparison.contradicted;
   const shared = {
     httpStatus: status,
     product,
     matchedIdentifiers: comparison.matchedIdentifiers,
     mismatches: comparison.mismatches,
     confidence: comparison.confidence,
-    observedPrice: product.price ?? null,
-    inStock
+    // A price is only reported when the node it came from was positively
+    // identified as our product. Retailer pages routinely embed JSON-LD for
+    // recommendations, bundles and accessories, so the highest-confidence node
+    // on the page can still belong to something else -- a live audit surfaced a
+    // $999.95 "price" for a CPU that way. An unattributed number is worse than
+    // no number, and shipping one would repeat the mistake this engine exists
+    // to prevent.
+    observedPrice: identified ? product.price ?? null : null,
+    inStock: identified ? inStock : null
   };
 
-  if (comparison.confidence >= 88 && !comparison.contradicted) {
+  if (identified) {
     return result(url, 'verified_match', `Confirmed "${product.name || 'product'}" via ${comparison.matchedIdentifiers.join(', ')}`, shared);
   }
   if (comparison.contradicted) {
