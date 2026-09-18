@@ -202,31 +202,42 @@ export default function App() {
         })
       });
       const json = await res.json();
-      if (json.data && json.data.retailers) {
+      const incoming: any[] = (json.data && Array.isArray(json.data.retailers)) ? json.data.retailers : [];
+      // Only trust retailer updates that carry an actual verified price (> 0).
+      // The backend returns price: 0 for candidates it could not verify, and an
+      // empty/all-zero response must never overwrite prices we already have.
+      const verifiedIncoming = incoming.filter((r: any) => r && typeof r.price === 'number' && r.price > 0);
+
+      if (verifiedIncoming.length > 0) {
         setItems(prev => prev.map(it => {
           if (it.id !== item.id) return it;
+          const updatedRetailers = it.retailers.map((existing: any) => {
+            const match = verifiedIncoming.find((r: any) => r.retailerName.toLowerCase() === existing.retailerName.toLowerCase());
+            return match ? { ...existing, ...match, url: match.url || existing.url } : existing;
+          });
+          // Include any newly-discovered retailers that weren't already tracked for this item
+          verifiedIncoming.forEach((r: any) => {
+            if (!updatedRetailers.some((ex: any) => ex.retailerName.toLowerCase() === r.retailerName.toLowerCase())) {
+              updatedRetailers.push(r);
+            }
+          });
           return {
             ...it,
-            retailers: json.data.retailers.map((r: any) => {
-              const existing = it.retailers.find((ex: any) => ex.retailerName.toLowerCase() === r.retailerName.toLowerCase());
-              return {
-                ...existing,
-                ...r,
-                url: r.url || existing?.url || '',
-                price: typeof r.price === 'number' ? r.price : (existing?.price || 0),
-                inStock: r.inStock !== undefined ? r.inStock : (existing?.inStock ?? true),
-                stockMessage: r.stockMessage || (existing?.stockMessage || 'In Stock'),
-                isBestPrice: r.isBestPrice ?? false
-              };
-            }),
+            retailers: updatedRetailers,
             lastUpdated: 'Just now'
           };
         }));
         showToast("Live Prices Verified", `Updated real-time storefront quotes for ${item.title.slice(0, 24)}...`);
+      } else {
+        showToast(
+          "No Verified Listings Found",
+          json.data?.marketAnalysis || `Kept existing prices for ${item.title.slice(0, 24)}... — no verified live listing found.`,
+          "info"
+        );
       }
     } catch (e) {
       console.error(e);
-      showToast("Scrape Notice", "Refreshed prices with verified live market estimates", "info");
+      showToast("Scrape Notice", "Couldn't reach the live price engine — kept existing prices.", "info");
     } finally {
       setScrapingItemIds(prev => prev.filter(id => id !== item.id));
     }
@@ -242,6 +253,10 @@ export default function App() {
   };
 
   const handleSendAlert = async (item: TrackedItem, emailToUse?: string | string[]) => {
+    if (!item.retailers || item.retailers.length === 0) {
+      showToast("No Store Data Yet", `${item.title.slice(0, 30)}... has no verified retailer prices to alert on.`, "info");
+      return;
+    }
     const minPrice = Math.min(...item.retailers.map(r => r.price));
     const lowestRetailer = item.retailers.find(r => r.price === minPrice) || item.retailers[0];
     const isAllTimeLow = minPrice <= item.allTimeLow;
@@ -300,6 +315,12 @@ export default function App() {
     showToast("Item Removed", "Removed item from tracking list", "info");
   };
 
+  // Safe min-price helper: items can legitimately have zero retailers (newly
+  // added, or a refresh found no verified listing) and Math.min() on an empty
+  // array returns Infinity, which used to corrupt sorting and "all-time low" math.
+  const getMinPrice = (item: TrackedItem) =>
+    item.retailers.length > 0 ? Math.min(...item.retailers.map(r => r.price)) : item.msrp;
+
   // Filter & Sort
   const defaultCategories = [
     'Hiking & Backpacking',
@@ -326,8 +347,8 @@ export default function App() {
   });
 
   const sortedItems = [...filteredItems].sort((a, b) => {
-    const aMin = Math.min(...a.retailers.map(r => r.price));
-    const bMin = Math.min(...b.retailers.map(r => r.price));
+    const aMin = getMinPrice(a);
+    const bMin = getMinPrice(b);
     const aSavings = a.msrp - aMin;
     const bSavings = b.msrp - bMin;
 
@@ -343,7 +364,8 @@ export default function App() {
 
   // Calculate high-level stats
   const allTimeLowItems = items.filter(it => {
-    const minPrice = Math.min(...it.retailers.map(r => r.price));
+    if (it.retailers.length === 0) return false;
+    const minPrice = getMinPrice(it);
     return minPrice <= it.allTimeLow;
   });
 
