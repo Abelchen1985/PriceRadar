@@ -146,8 +146,9 @@ export interface DebugTrace {
 export interface RetailerPrice {
   id: string;
   retailerName: CommonRetailer;
+  title?: string;
   url: string;
-  price: number;
+  price: number | null;
   originalPrice?: number;
   inStock: boolean;
   stockMessage: string;
@@ -155,8 +156,8 @@ export interface RetailerPrice {
   shippingCost: number;
   promoCode?: string;
   rebate?: number;
-  rating: number;
-  reviewCount: number;
+  rating?: number | null;
+  reviewCount?: number | null;
   isBestPrice?: boolean;
   productMatchVerified?: boolean;
   matchStatus?: ProductMatchStatus;

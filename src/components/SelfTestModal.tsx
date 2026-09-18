@@ -211,7 +211,8 @@ export const SelfTestModal: React.FC<SelfTestModalProps> = ({ isOpen, onClose })
             <a
               href="https://www.bestbuy.com/site/samsung-65-class-s90d-series-oled-4k-uhd-smart-tizen-tv-2024/6576624.p?skuId=6576624"
               target="_blank"
-              rel="noopener noreferrer"
+              rel="nofollow noopener noreferrer"
+              referrerPolicy="no-referrer"
               onClick={() => setVerifiedClickCount(c => c + 1)}
               className="px-2.5 py-1 bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 rounded-lg flex items-center space-x-1 transition font-mono text-[11px]"
             >
@@ -221,7 +222,8 @@ export const SelfTestModal: React.FC<SelfTestModalProps> = ({ isOpen, onClose })
             <a
               href="https://www.jackery.com/products/jackery-solar-generator-1500-v2"
               target="_blank"
-              rel="noopener noreferrer"
+              rel="nofollow noopener noreferrer"
+              referrerPolicy="no-referrer"
               onClick={() => setVerifiedClickCount(c => c + 1)}
               className="px-2.5 py-1 bg-amber-600/30 hover:bg-amber-600/50 text-amber-200 border border-amber-500/40 rounded-lg flex items-center space-x-1 transition font-mono text-[11px]"
             >
@@ -231,7 +233,8 @@ export const SelfTestModal: React.FC<SelfTestModalProps> = ({ isOpen, onClose })
             <a
               href="https://www.basspro.com/shop/en/ugly-stik-gx2-spinning-rod"
               target="_blank"
-              rel="noopener noreferrer"
+              rel="nofollow noopener noreferrer"
+              referrerPolicy="no-referrer"
               onClick={() => setVerifiedClickCount(c => c + 1)}
               className="px-2.5 py-1 bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-200 border border-emerald-500/40 rounded-lg flex items-center space-x-1 transition font-mono text-[11px]"
             >
@@ -276,7 +279,8 @@ export const SelfTestModal: React.FC<SelfTestModalProps> = ({ isOpen, onClose })
                   <a
                     href={r.details.split('https://')[1] ? `https://${r.details.split('https://')[1].split(' ')[0].replace(/[,)]$/, '')}` : '#'}
                     target="_blank"
-                    rel="noopener noreferrer"
+                    rel="nofollow noopener noreferrer"
+                    referrerPolicy="no-referrer"
                     onClick={() => setVerifiedClickCount(c => c + 1)}
                     className="shrink-0 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-blue-400 hover:text-blue-300 border border-slate-700 text-[11px] flex items-center space-x-1 transition cursor-pointer"
                     title="Open deal link in new tab to verify landing page"

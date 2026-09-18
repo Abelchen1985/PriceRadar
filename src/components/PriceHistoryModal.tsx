@@ -12,7 +12,10 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ item, onCl
 
   if (!item) return null;
 
-  const currentLowest = Math.min(...item.retailers.map(r => r.price));
+  const verifiedPrices = item.retailers
+    .filter(r => typeof r.price === 'number' && r.price > 0)
+    .map(r => r.price as number);
+  const currentLowest = verifiedPrices.length > 0 ? Math.min(...verifiedPrices) : item.targetPrice;
   const isAtAllTimeLow = currentLowest <= item.allTimeLow;
   const highestHistorical = Math.max(item.msrp, ...item.priceHistory.map(p => p.lowest));
   const avgPrice = Number(

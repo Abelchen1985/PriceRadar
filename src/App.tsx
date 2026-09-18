@@ -257,7 +257,8 @@ export default function App() {
       showToast("No Store Data Yet", `${item.title.slice(0, 30)}... has no verified retailer prices to alert on.`, "info");
       return;
     }
-    const minPrice = Math.min(...item.retailers.map(r => r.price));
+    const validPrices = item.retailers.filter(r => typeof r.price === 'number' && r.price > 0).map(r => r.price as number);
+    const minPrice = validPrices.length > 0 ? Math.min(...validPrices) : item.msrp;
     const lowestRetailer = item.retailers.find(r => r.price === minPrice) || item.retailers[0];
     const isAllTimeLow = minPrice <= item.allTimeLow;
 
@@ -315,12 +316,6 @@ export default function App() {
     showToast("Item Removed", "Removed item from tracking list", "info");
   };
 
-  // Safe min-price helper: items can legitimately have zero retailers (newly
-  // added, or a refresh found no verified listing) and Math.min() on an empty
-  // array returns Infinity, which used to corrupt sorting and "all-time low" math.
-  const getMinPrice = (item: TrackedItem) =>
-    item.retailers.length > 0 ? Math.min(...item.retailers.map(r => r.price)) : item.msrp;
-
   // Filter & Sort
   const defaultCategories = [
     'Hiking & Backpacking',
@@ -346,9 +341,14 @@ export default function App() {
     return matchesSearch && matchesCategory;
   });
 
+  const getItemMinPrice = (it: TrackedItem) => {
+    const valid = it.retailers.filter(r => typeof r.price === 'number' && r.price > 0).map(r => r.price as number);
+    return valid.length > 0 ? Math.min(...valid) : it.msrp;
+  };
+
   const sortedItems = [...filteredItems].sort((a, b) => {
-    const aMin = getMinPrice(a);
-    const bMin = getMinPrice(b);
+    const aMin = getItemMinPrice(a);
+    const bMin = getItemMinPrice(b);
     const aSavings = a.msrp - aMin;
     const bSavings = b.msrp - bMin;
 
@@ -364,8 +364,9 @@ export default function App() {
 
   // Calculate high-level stats
   const allTimeLowItems = items.filter(it => {
-    if (it.retailers.length === 0) return false;
-    const minPrice = getMinPrice(it);
+    const valid = it.retailers.filter(r => typeof r.price === 'number' && r.price > 0).map(r => r.price as number);
+    if (valid.length === 0) return false;
+    const minPrice = Math.min(...valid);
     return minPrice <= it.allTimeLow;
   });
 
@@ -420,7 +421,7 @@ export default function App() {
                 Universal Multi-Store Price Tracker: Outdoor Gear, Fishing, Hiking &amp; Tech
               </h1>
               <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                Check for price drops to <strong>all-time lowest in history</strong>, dispatch instant email alerts to <span className="font-mono text-amber-300 font-semibold">{userEmail}</span>, and compute the <strong>best multi-merchant bundle deal</strong> across REI, Bass Pro Shops, Cabela's, Tackle Warehouse, Amazon, Walmart, and more.
+                Check for price drops to <strong>all-time lowest in history</strong>, dispatch instant email alerts on price drops, and compute the <strong>best multi-merchant bundle deal</strong> across REI, Bass Pro Shops, Cabela's, Tackle Warehouse, Amazon, Walmart, and more.
               </p>
             </div>
 
@@ -642,7 +643,7 @@ export default function App() {
               onClick={() => setIsAlertsModalOpen(true)}
               className="text-slate-400 hover:text-white"
             >
-              Email Alerts ({userEmail})
+              Email Alerts
             </button>
           </div>
         </div>

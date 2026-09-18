@@ -188,16 +188,17 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
         retailers = validScraped.map((r: any, idx: number) => ({
           id: `r-cust-${Date.now()}-${idx}`,
           retailerName: r.retailerName,
-          url: getRetailerDealUrl(r.retailerName, title, r.url || productUrl, brand || matchedPreset?.brand, model || matchedPreset?.model),
-          price: r.price,
+          title: r.title || scrapedPreview.identity?.productName || title,
+          url: getRetailerDealUrl(r.retailerName, r.title || title, r.url || productUrl, brand || matchedPreset?.brand, model || matchedPreset?.model),
+          price: typeof r.price === 'number' ? r.price : null,
           originalPrice: r.originalPrice || msrpNum,
           inStock: r.inStock ?? true,
           stockMessage: r.stockMessage || 'In Stock',
           shipping: r.shipping || 'Free Shipping',
           shippingCost: r.shippingCost || 0,
           promoCode: r.promoCode,
-          rating: r.rating || 4.8,
-          reviewCount: r.reviewCount || 650,
+          rating: r.rating ?? null,
+          reviewCount: r.reviewCount ?? null,
           isBestPrice: r.isBestPrice
         }));
 
@@ -266,7 +267,13 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
         { date: '90d ago', lowest: msrpNum },
         { date: '60d ago', lowest: Number((msrpNum * 0.96).toFixed(2)) },
         { date: '30d ago', lowest: Number((msrpNum * 0.94).toFixed(2)) },
-        { date: 'Today', lowest: Math.min(...retailers.map(r => r.price)) }
+        {
+          date: 'Today',
+          lowest: (() => {
+            const valid = retailers.filter(r => typeof r.price === 'number' && r.price > 0).map(r => r.price as number);
+            return valid.length > 0 ? Math.min(...valid) : msrpNum;
+          })()
+        }
       ],
       isCustom: true
     });
@@ -709,17 +716,38 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
 
               {/* Scraped Preview Card */}
               {scrapedPreview && (
-                <div className="p-3 bg-slate-950 border border-emerald-500/40 rounded-xl text-xs space-y-2">
+                <div className="p-3.5 bg-slate-950 border border-emerald-500/40 rounded-xl text-xs space-y-2.5">
                   <div className="font-bold text-emerald-400 flex items-center justify-between">
-                    <span>Live Store Prices Detected:</span>
+                    <span>Live Store Prices Detected ({scrapedPreview.retailers?.length || 0} Stores):</span>
                     <span>All-Time Low: ${scrapedPreview.allTimeLow}</span>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {scrapedPreview.retailers?.map((r: any, i: number) => (
-                      <span key={i} className="px-2 py-1 bg-slate-800 rounded border border-slate-700 text-slate-200">
-                        {r.retailerName}: <strong>${r.price}</strong>
-                      </span>
-                    ))}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {scrapedPreview.retailers?.map((r: any, i: number) => {
+                      const displayTitle = r.title || scrapedPreview.identity?.productName || title;
+                      return (
+                        <div key={i} className="p-2.5 bg-slate-900/90 rounded-lg border border-slate-800 flex flex-col justify-between space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-white text-xs">{r.retailerName}</span>
+                            <span className="font-black text-emerald-400">
+                              {typeof r.price === 'number' ? `$${r.price.toFixed(2)}` : 'Unconfirmed'}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-300 font-medium line-clamp-1" title={displayTitle}>
+                            {displayTitle}
+                          </div>
+                          <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
+                            <span className={r.inStock ? 'text-emerald-400' : 'text-rose-400'}>
+                              {r.stockMessage || (r.inStock ? 'In Stock' : 'Out of Stock')}
+                            </span>
+                            {r.linkType === 'verified_product' ? (
+                              <span className="text-emerald-400 font-semibold">✓ Verified Page</span>
+                            ) : (
+                              <span className="text-sky-400">Store Search</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}

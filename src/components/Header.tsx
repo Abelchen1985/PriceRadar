@@ -30,13 +30,16 @@ export const Header: React.FC<HeaderProps> = ({
   // Calculate aggregate metrics
   const totalMsrp = items.reduce((acc, it) => acc + it.msrp, 0);
   const totalCurrentBest = items.reduce((acc, it) => {
-    const minPrice = Math.min(...it.retailers.map(r => r.price));
+    const valid = it.retailers.filter(r => typeof r.price === 'number' && r.price > 0).map(r => r.price as number);
+    const minPrice = valid.length > 0 ? Math.min(...valid) : it.msrp;
     return acc + (minPrice !== Infinity ? minPrice : it.msrp);
   }, 0);
   const totalSavings = Math.max(0, totalMsrp - totalCurrentBest);
   const activeAlertsCount = items.filter(it => it.emailAlertEnabled).length;
   const allTimeLowHits = items.filter(it => {
-    const minPrice = Math.min(...it.retailers.map(r => r.price));
+    const valid = it.retailers.filter(r => typeof r.price === 'number' && r.price > 0).map(r => r.price as number);
+    if (valid.length === 0) return false;
+    const minPrice = Math.min(...valid);
     return minPrice <= it.allTimeLow;
   }).length;
 
@@ -130,7 +133,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               id="open-alerts-btn"
               onClick={onOpenAlertsModal}
-              title={`Manage email alerts (${userEmail})`}
+              title="Manage price drop email alerts"
               className="relative p-2 sm:px-3 sm:py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center space-x-1.5 text-xs font-semibold"
             >
               <Bell className="w-4 h-4 text-amber-400" />

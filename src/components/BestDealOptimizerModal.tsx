@@ -41,11 +41,11 @@ export const BestDealOptimizerModal: React.FC<BestDealOptimizerModalProps> = ({ 
 
     items.forEach(item => {
       const isSelling = isRetailerSellingProduct(store, item.title, item.brand, item.model);
-      const match = isSelling ? item.retailers.find(r => r.retailerName === store && r.inStock) : undefined;
-      if (match) {
+      const match = isSelling ? item.retailers.find(r => r.retailerName === store && r.inStock && typeof r.price === 'number') : undefined;
+      if (match && typeof match.price === 'number') {
         sum += match.price;
         count++;
-        storeItems.push({ title: item.title, price: match.price });
+        storeItems.push({ title: match.title || item.title, price: match.price });
       }
     });
 
@@ -63,17 +63,20 @@ export const BestDealOptimizerModal: React.FC<BestDealOptimizerModalProps> = ({ 
 
   // 2. Optimal Multi-Merchant Combo: For every item, pick the retailer with the lowest in-stock price that actually sells it
   const optimalItems = items.map(item => {
-    const inStock = item.retailers.filter(r => r.inStock && isRetailerSellingProduct(r.retailerName, item.title, item.brand, item.model));
-    const eligibleRetailers = item.retailers.filter(r => isRetailerSellingProduct(r.retailerName, item.title, item.brand, item.model));
-    const bestRetailer = inStock.reduce((min, r) => (r.price < min.price ? r : min), inStock[0] || eligibleRetailers[0] || item.retailers[0]);
+    const inStock = item.retailers.filter(r => r.inStock && typeof r.price === 'number' && isRetailerSellingProduct(r.retailerName, item.title, item.brand, item.model));
+    const eligibleRetailers = item.retailers.filter(r => typeof r.price === 'number' && isRetailerSellingProduct(r.retailerName, item.title, item.brand, item.model));
+    const bestRetailer = inStock.reduce((min, r) => ((r.price as number) < (min.price as number) ? r : min), inStock[0] || eligibleRetailers[0] || item.retailers[0]);
+    const finalPrice = bestRetailer && typeof bestRetailer.price === 'number' ? bestRetailer.price : item.msrp;
+    const finalTitle = bestRetailer?.title || item.title;
     return {
       item,
+      matchedTitle: finalTitle,
       retailer: bestRetailer,
-      price: bestRetailer ? bestRetailer.price : item.msrp,
+      price: finalPrice,
       storeName: bestRetailer ? bestRetailer.retailerName : 'Unknown',
       shipping: bestRetailer?.shipping || 'Free Shipping',
       url: bestRetailer 
-        ? getRetailerDealUrl(bestRetailer.retailerName, item.title, bestRetailer.url, item.brand, item.model) 
+        ? getRetailerDealUrl(bestRetailer.retailerName, finalTitle, bestRetailer.url, item.brand, item.model) 
         : '#'
     };
   });
@@ -241,7 +244,8 @@ ${Object.entries(groupedByRetailer).map(([store, list]) =>
                       <a
                         href={getRetailerDealUrl(storeName, storeItemsList[0]?.item.title || storeName)}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="nofollow noopener noreferrer"
+                        referrerPolicy="no-referrer"
                         className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1"
                       >
                         <span>Open Store</span>
@@ -252,7 +256,7 @@ ${Object.entries(groupedByRetailer).map(([store, list]) =>
 
                   {/* Items list for this retailer */}
                   <div className="divide-y divide-slate-700/60 p-2">
-                    {storeItemsList.map(({ item, price, url, shipping }) => (
+                    {storeItemsList.map(({ item, matchedTitle, price, url, shipping }) => (
                       <div key={item.id} className="p-2.5 px-3 flex items-center justify-between">
                         <div className="flex items-center space-x-3 min-w-0 flex-1">
                           <img 
@@ -262,9 +266,14 @@ ${Object.entries(groupedByRetailer).map(([store, list]) =>
                             referrerPolicy="no-referrer"
                           />
                           <div className="min-w-0 flex-1">
-                            <div className="text-xs font-bold text-white truncate">
-                              {item.title}
+                            <div className="text-xs font-bold text-white truncate" title={matchedTitle || item.title}>
+                              {matchedTitle || item.title}
                             </div>
+                            {matchedTitle && matchedTitle !== item.title && (
+                              <div className="text-[10px] text-slate-400 truncate">
+                                Tracked: {item.title}
+                              </div>
+                            )}
                             <div className="text-[11px] text-slate-400 flex items-center space-x-2">
                               <span>MSRP: ${item.msrp.toFixed(2)}</span>
                               <span>&bull;</span>
@@ -291,7 +300,8 @@ ${Object.entries(groupedByRetailer).map(([store, list]) =>
                               <a
                                 href={linkDetails.url}
                                 target="_blank"
-                                rel="noreferrer"
+                                rel="nofollow noopener noreferrer"
+                                referrerPolicy="no-referrer"
                                 title={linkDetails.tooltip}
                                 className={`px-2 py-1 rounded-lg text-xs font-semibold flex items-center space-x-1 transition ${
                                   linkDetails.isDirect 
