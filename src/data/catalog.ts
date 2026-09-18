@@ -66,7 +66,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-atmos-amz',
         retailerName: 'Amazon',
-        url: 'https://amazon.com/dp/B0B52B3C99',
+        url: 'https://www.amazon.com/dp/B0B52B3C99',
         price: 272.00,
         originalPrice: 340.00,
         inStock: true,
@@ -150,7 +150,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-stradic-amz',
         retailerName: 'Amazon',
-        url: 'https://amazon.com/dp/B0CFQ7W4K8',
+        url: 'https://www.amazon.com/dp/B0CFQ7W4K8',
         price: 224.95,
         originalPrice: 239.99,
         inStock: true,
@@ -234,7 +234,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-inreach-amz',
         retailerName: 'Amazon',
-        url: 'https://amazon.com/dp/B09PSKQ4N5',
+        url: 'https://www.amazon.com/dp/B09PSKQ4N5',
         price: 349.99,
         originalPrice: 399.99,
         inStock: true,
@@ -304,7 +304,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-echomap-amz',
         retailerName: 'Amazon',
-        url: 'https://amazon.com/dp/B0BHZZS8T1',
+        url: 'https://www.amazon.com/dp/B0BHZZS8T1',
         price: 349.99,
         originalPrice: 399.99,
         inStock: true,
@@ -388,7 +388,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-yeti-amz',
         retailerName: 'Amazon',
-        url: 'https://amazon.com/dp/B004YIBWCS',
+        url: 'https://www.amazon.com/dp/B004YIBWCS',
         price: 325.00,
         originalPrice: 325.00,
         inStock: true,
@@ -430,7 +430,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-xm5-amz',
         retailerName: 'Amazon',
-        url: 'https://amazon.com/dp/B09XS7JWHH',
+        url: 'https://www.amazon.com/dp/B09XS7JWHH',
         price: 328.00,
         originalPrice: 399.99,
         inStock: true,
@@ -528,7 +528,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-ps5-amz',
         retailerName: 'Amazon',
-        url: 'https://amazon.com/dp/B0CL5KNB9M',
+        url: 'https://www.amazon.com/dp/B0CL5KNB9M',
         price: 449.00,
         originalPrice: 449.99,
         inStock: true,
@@ -613,7 +613,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-bv-amz',
         retailerName: 'Amazon',
-        url: 'https://amazon.com/dp/B078WMLXXG',
+        url: 'https://www.amazon.com/dp/B078WMLXXG',
         price: 899.95,
         originalPrice: 999.95,
         inStock: true,
@@ -710,7 +710,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-mba-amz',
         retailerName: 'Amazon',
-        url: 'https://amazon.com/dp/B0CX23G2G8',
+        url: 'https://www.amazon.com/dp/B0CX23G2G8',
         price: 1299.00,
         originalPrice: 1499.00,
         inStock: true,
@@ -779,7 +779,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-v15-amz',
         retailerName: 'Amazon',
-        url: 'https://amazon.com/dp/B092J7CBR8',
+        url: 'https://www.amazon.com/dp/B092J7CBR8',
         price: 649.99,
         originalPrice: 749.99,
         inStock: true,
@@ -877,7 +877,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-dw-amz',
         retailerName: 'Amazon',
-        url: 'https://amazon.com/dp/B0082697K4',
+        url: 'https://www.amazon.com/dp/B0082697K4',
         price: 159.00,
         originalPrice: 239.00,
         inStock: true,
@@ -932,7 +932,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r-tv-amz',
         retailerName: 'Amazon',
-        url: 'https://amazon.com/dp/B0CV9XQ11F',
+        url: 'https://www.amazon.com/dp/B0CV9XQ11F',
         price: 1497.99,
         originalPrice: 2199.99,
         inStock: true,
@@ -1030,7 +1030,7 @@ const RAW_INITIAL_TRACKED_ITEMS: TrackedItem[] = [
       {
         id: 'r1-amz',
         retailerName: 'Amazon',
-        url: 'https://amazon.com/dp/B0BTZB7F88',
+        url: 'https://www.amazon.com/dp/B0BTZB7F88',
         price: 369.99,
         originalPrice: 449.00,
         inStock: true,

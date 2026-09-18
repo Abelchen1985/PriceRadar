@@ -241,7 +241,8 @@ ${Object.entries(groupedByRetailer).map(([store, list]) =>
                       <a
                         href={getRetailerDealUrl(storeName, storeItemsList[0]?.item.title || storeName)}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="nofollow noopener noreferrer"
+                        referrerPolicy="no-referrer"
                         className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1"
                       >
                         <span>Open Store</span>
@@ -291,7 +292,8 @@ ${Object.entries(groupedByRetailer).map(([store, list]) =>
                               <a
                                 href={linkDetails.url}
                                 target="_blank"
-                                rel="noreferrer"
+                                rel="nofollow noopener noreferrer"
+                                referrerPolicy="no-referrer"
                                 title={linkDetails.tooltip}
                                 className={`px-2 py-1 rounded-lg text-xs font-semibold flex items-center space-x-1 transition ${
                                   linkDetails.isDirect 

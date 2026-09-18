@@ -228,7 +228,8 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
                     <a 
                       href={linkDetails.url}
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="nofollow noopener noreferrer"
+                      referrerPolicy="no-referrer"
                       title={linkDetails.tooltip}
                       className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center space-x-1.5 transition ${
                         isBest

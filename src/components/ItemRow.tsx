@@ -155,7 +155,8 @@ export const ItemRow: React.FC<ItemRowProps> = ({
                 <a
                   href={getRetailerDealUrl(item.allTimeLowStore, item.title, undefined, item.brand, item.model)}
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="nofollow noopener noreferrer"
+                  referrerPolicy="no-referrer"
                   title={`Open record low storefront: ${item.allTimeLowStore}`}
                   className="text-slate-400 hover:text-emerald-300 text-[11px] underline decoration-slate-600 hover:decoration-emerald-400 transition ml-0.5"
                 >
@@ -291,7 +292,8 @@ export const ItemRow: React.FC<ItemRowProps> = ({
                   key={retailer.id}
                   href={linkDetails.url}
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="nofollow noopener noreferrer"
+                  referrerPolicy="no-referrer"
                   title={`${retailer.retailerName}: $${retailer.price.toFixed(2)} (${retailer.stockMessage}) • ${linkDetails.tooltip}`}
                   className={`px-2.5 py-1.5 rounded-xl text-xs font-medium border flex items-center space-x-1.5 transition ${
                     isBest 

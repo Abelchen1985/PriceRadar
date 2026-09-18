@@ -596,7 +596,7 @@ jobs:
                       <span>Option A: Via Google Cloud Console (Browser UI)</span>
                     </div>
                     <ol className="list-decimal list-inside space-y-1.5 text-slate-300 leading-relaxed">
-                      <li>Go to <a href="https://console.cloud.google.com/run" target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">console.cloud.google.com/run</a>.</li>
+                      <li>Go to <a href="https://console.cloud.google.com/run" target="_blank" rel="nofollow noopener noreferrer" referrerPolicy="no-referrer" className="text-blue-400 hover:underline">console.cloud.google.com/run</a>.</li>
                       <li>Click the blue <strong>"Create Service"</strong> button at the top.</li>
                       <li>Select <strong>"Continuously deploy from a repository"</strong> &rarr; Link your GitHub account and pick your <code>PriceRadar</code> repo.</li>
                       <li>Build Type: Select <strong>Dockerfile</strong> (our repo already includes the multi-stage Dockerfile).</li>
@@ -641,7 +641,7 @@ jobs:
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-slate-300">
                   <div className="p-2.5 bg-slate-900/80 rounded-lg border border-slate-800">
                     <strong className="text-white block mb-0.5">1. Connect Repo</strong>
-                    Sign in to <a href="https://render.com" target="_blank" rel="noreferrer" className="text-purple-400 hover:underline">render.com</a> with GitHub and click <strong>New &rarr; Web Service</strong>.
+                    Sign in to <a href="https://render.com" target="_blank" rel="nofollow noopener noreferrer" referrerPolicy="no-referrer" className="text-purple-400 hover:underline">render.com</a> with GitHub and click <strong>New &rarr; Web Service</strong>.
                   </div>
                   <div className="p-2.5 bg-slate-900/80 rounded-lg border border-slate-800">
                     <strong className="text-white block mb-0.5">2. Commands</strong>

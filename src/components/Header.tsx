@@ -130,7 +130,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               id="open-alerts-btn"
               onClick={onOpenAlertsModal}
-              title={`Manage email alerts (${userEmail})`}
+              title="Manage price drop email alerts"
               className="relative p-2 sm:px-3 sm:py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center space-x-1.5 text-xs font-semibold"
             >
               <Bell className="w-4 h-4 text-amber-400" />

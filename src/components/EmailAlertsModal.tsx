@@ -621,7 +621,8 @@ export const EmailAlertsModal: React.FC<EmailAlertsModalProps> = ({
                     <a
                       href={getGmailComposeUrl(previewAlert)}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="nofollow noopener noreferrer"
+                      referrerPolicy="no-referrer"
                       className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-sm"
                       title="Open pre-filled deal alert directly in Gmail"
                     >

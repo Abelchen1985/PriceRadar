@@ -398,7 +398,7 @@ export default function App() {
                 Universal Multi-Store Price Tracker: Outdoor Gear, Fishing, Hiking &amp; Tech
               </h1>
               <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                Check for price drops to <strong>all-time lowest in history</strong>, dispatch instant email alerts to <span className="font-mono text-amber-300 font-semibold">{userEmail}</span>, and compute the <strong>best multi-merchant bundle deal</strong> across REI, Bass Pro Shops, Cabela's, Tackle Warehouse, Amazon, Walmart, and more.
+                Check for price drops to <strong>all-time lowest in history</strong>, dispatch instant email alerts on price drops, and compute the <strong>best multi-merchant bundle deal</strong> across REI, Bass Pro Shops, Cabela's, Tackle Warehouse, Amazon, Walmart, and more.
               </p>
             </div>
 
@@ -620,7 +620,7 @@ export default function App() {
               onClick={() => setIsAlertsModalOpen(true)}
               className="text-slate-400 hover:text-white"
             >
-              Email Alerts ({userEmail})
+              Email Alerts
             </button>
           </div>
         </div>
