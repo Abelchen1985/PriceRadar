@@ -242,7 +242,8 @@ export default function App() {
   };
 
   const handleSendAlert = async (item: TrackedItem, emailToUse?: string | string[]) => {
-    const minPrice = Math.min(...item.retailers.map(r => r.price));
+    const validPrices = item.retailers.filter(r => typeof r.price === 'number' && r.price > 0).map(r => r.price as number);
+    const minPrice = validPrices.length > 0 ? Math.min(...validPrices) : item.msrp;
     const lowestRetailer = item.retailers.find(r => r.price === minPrice) || item.retailers[0];
     const isAllTimeLow = minPrice <= item.allTimeLow;
 
@@ -325,9 +326,14 @@ export default function App() {
     return matchesSearch && matchesCategory;
   });
 
+  const getItemMinPrice = (it: TrackedItem) => {
+    const valid = it.retailers.filter(r => typeof r.price === 'number' && r.price > 0).map(r => r.price as number);
+    return valid.length > 0 ? Math.min(...valid) : it.msrp;
+  };
+
   const sortedItems = [...filteredItems].sort((a, b) => {
-    const aMin = Math.min(...a.retailers.map(r => r.price));
-    const bMin = Math.min(...b.retailers.map(r => r.price));
+    const aMin = getItemMinPrice(a);
+    const bMin = getItemMinPrice(b);
     const aSavings = a.msrp - aMin;
     const bSavings = b.msrp - bMin;
 
@@ -343,7 +349,9 @@ export default function App() {
 
   // Calculate high-level stats
   const allTimeLowItems = items.filter(it => {
-    const minPrice = Math.min(...it.retailers.map(r => r.price));
+    const valid = it.retailers.filter(r => typeof r.price === 'number' && r.price > 0).map(r => r.price as number);
+    if (valid.length === 0) return false;
+    const minPrice = Math.min(...valid);
     return minPrice <= it.allTimeLow;
   });
 

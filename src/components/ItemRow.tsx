@@ -55,18 +55,18 @@ export const ItemRow: React.FC<ItemRowProps> = ({
   );
 
   // Find lowest price among retailers
-  const availableRetailers = displayRetailers.filter(r => r.inStock);
+  const availableRetailers = displayRetailers.filter(r => r.inStock && typeof r.price === 'number' && r.price > 0);
   let lowestRetailer: RetailerPrice | null = null;
   for (const r of availableRetailers) {
-    if (!lowestRetailer || r.price < lowestRetailer.price) {
+    if (!lowestRetailer || (typeof r.price === 'number' && typeof lowestRetailer.price === 'number' && r.price < lowestRetailer.price)) {
       lowestRetailer = r;
     }
   }
   if (!lowestRetailer && displayRetailers.length > 0) {
-    lowestRetailer = displayRetailers[0];
+    lowestRetailer = displayRetailers.find(r => typeof r.price === 'number' && r.price > 0) || displayRetailers[0];
   }
 
-  const currentPrice = lowestRetailer ? lowestRetailer.price : item.msrp;
+  const currentPrice = lowestRetailer && typeof lowestRetailer.price === 'number' ? lowestRetailer.price : item.msrp;
   const savedVsMsrp = Math.max(0, item.msrp - currentPrice);
   const percentSaved = item.msrp > 0 ? (savedVsMsrp / item.msrp) * 100 : 0;
   const isAllTimeLow = currentPrice <= item.allTimeLow;
@@ -279,13 +279,20 @@ export const ItemRow: React.FC<ItemRowProps> = ({
           <div className="flex flex-wrap items-center gap-1.5">
             {displayRetailers.map((retailer) => {
               const isBest = lowestRetailer && retailer.id === lowestRetailer.id;
+              const cardTitle = retailer.title || item.title;
               const linkDetails = getRetailerLinkDetails(
                 retailer.retailerName,
-                item.title,
+                cardTitle,
                 retailer.url,
                 item.brand,
                 item.model
               );
+              const priceLabel = typeof retailer.price === 'number' 
+                ? `$${retailer.price.toFixed(0)}` 
+                : 'Check';
+              const priceDetail = typeof retailer.price === 'number' 
+                ? `$${retailer.price.toFixed(2)}` 
+                : 'Catalog Check';
 
               return (
                 <a
@@ -294,7 +301,7 @@ export const ItemRow: React.FC<ItemRowProps> = ({
                   target="_blank"
                   rel="nofollow noopener noreferrer"
                   referrerPolicy="no-referrer"
-                  title={`${retailer.retailerName}: $${retailer.price.toFixed(2)} (${retailer.stockMessage}) • ${linkDetails.tooltip}`}
+                  title={`${retailer.retailerName}: ${cardTitle} • ${priceDetail} (${retailer.stockMessage}) • ${linkDetails.tooltip}`}
                   className={`px-2.5 py-1.5 rounded-xl text-xs font-medium border flex items-center space-x-1.5 transition ${
                     isBest 
                       ? 'bg-emerald-950/80 border-emerald-500 text-emerald-300 font-bold shadow-sm shadow-emerald-900/50 hover:bg-emerald-900/80' 
@@ -304,7 +311,7 @@ export const ItemRow: React.FC<ItemRowProps> = ({
                   }`}
                 >
                   <span className="font-semibold">{retailer.retailerName}</span>
-                  <span className="font-bold">${retailer.price.toFixed(0)}</span>
+                  <span className="font-bold">{priceLabel}</span>
                   {linkDetails.isDirect ? (
                     <span className="text-[9px] uppercase tracking-wider px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
                       Direct

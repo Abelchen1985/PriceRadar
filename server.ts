@@ -749,8 +749,17 @@ Note if the listing is an exact standalone product, a bundle (e.g. includes sola
           candidate: cand
         });
 
-        // If candidate is a search results page or not confirmed
-        if (verified.productMatch.status === 'wrong_product' || verified.productMatch.status === 'not_found') {
+        // Only surface results the verifier actually stands behind. Previously this
+        // only excluded 'wrong_product' and 'not_found', which let 'probable' (60-74
+        // confidence, never marked priceVerified) and 'search_only' (catalog search
+        // pages, not real product pages) through as if they were normal deal cards.
+        if (
+          !verified.productVerified ||
+          verified.productMatch.status === 'wrong_product' ||
+          verified.productMatch.status === 'not_found' ||
+          verified.productMatch.status === 'search_only' ||
+          verified.productMatch.status === 'probable'
+        ) {
           continue;
         }
 
@@ -762,20 +771,28 @@ Note if the listing is an exact standalone product, a bundle (e.g. includes sola
         verifiedList.push({
           id: `r-${cand.retailer.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`,
           retailerName: cand.retailer,
+          // FIX: use the title the verifier actually matched at this retailer,
+          // never the original search query's product name. This is the field
+          // that was missing entirely before, and is the direct cause of names
+          // and deals not matching on the results page.
+          title: verified.evidence?.title || cand.title,
           url: verified.url,
-          price: priceVal !== null ? priceVal : 0,
+          // FIX: never fabricate a $0 price. If price isn't verified, this branch
+          // is unreachable now (we `continue` above), but keep this guard as a
+          // second line of defense in case the status list above changes later.
+          price: verified.priceVerified ? verified.price : null,
           originalPrice: itemMsrp || pricingEstimate.suggestedMsrp,
           inStock: verified.inStock ?? true,
-          stockMessage: verified.stockMessage || (verified.priceVerified ? 'Verified In Stock' : 'Check Store Catalog'),
-          shipping: verified.shipping || 'Free Shipping',
-          shippingCost: verified.shippingCost || 0,
-          rating: 4.8,
-          reviewCount: 850,
+          stockMessage: verified.stockMessage,
+          shipping: verified.shipping,
+          shippingCost: verified.shippingCost,
+          rating: null,        // FIX: remove hardcoded fake rating (4.8 for every retailer)
+          reviewCount: null,   // FIX: remove hardcoded fake review count (850 for every retailer)
           isBestPrice: false,
           productMatchVerified: verified.productVerified,
           priceVerified: verified.priceVerified,
           matchStatus: verified.productVerified ? 'verified_exact' : 'unverified_search',
-          urlType: verified.linkType === 'verified_product' ? 'direct_product' : 'catalog_search',
+          urlType: verified.linkType,
           linkType: verified.linkType,
           matchStatusDetailed: verified.productMatch.status,
           confidence: verified.productMatch.confidence,
@@ -788,14 +805,14 @@ Note if the listing is an exact standalone product, a bundle (e.g. includes sola
       // Mark best price among verified prices
       if (lowestVerifiedPrice < Infinity) {
         verifiedList.forEach(r => {
-          if (r.priceVerified && Math.abs(r.price - lowestVerifiedPrice) < 0.01) {
+          if (r.priceVerified && typeof r.price === 'number' && Math.abs(r.price - lowestVerifiedPrice) < 0.01) {
             r.isBestPrice = true;
           }
         });
       }
 
       // If no verified prices could be confirmed, preserve integrity: DO NOT invent fake prices
-      const hasVerifiedOffers = verifiedList.some(r => r.priceVerified && r.price > 0);
+      const hasVerifiedOffers = verifiedList.some(r => r.priceVerified && typeof r.price === 'number' && r.price > 0);
 
       const marketNote = hasVerifiedOffers
         ? `Verified pricing active across ${verifiedList.filter(r => r.priceVerified).length} retailer storefront(s).`

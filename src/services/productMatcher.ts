@@ -8,6 +8,15 @@
  * 4. Never invent GTIN, UPC, ASIN, SKU, or MPN.
  * 5. Bundles (e.g. + solar panel, + lens) must NEVER silently match standalone products.
  * 6. Generational mismatches (Gen 1 vs Gen 2, M3 vs M4) must be classified as wrong_product.
+ *
+ * PATCH NOTES (fixes applied):
+ * - Brand check no longer silently skips when `requested.brand` is missing: it now
+ *   falls back to extracting a brand token from `requested.productName` so a
+ *   different-brand candidate can't slip through with zero brand protection.
+ * - Generation/capacity checks now fall back to extracting these fields from
+ *   `requested.productName` when `requested.generation` / `requested.capacity`
+ *   weren't already populated upstream, so the Gen 1 vs Gen 2 / 1000Wh vs 2000Wh
+ *   safeguards actually fire even when upstream identity extraction missed them.
  */
 
 import { ProductIdentity, RetailerCandidate, ProductMatchResult, LinkType } from '../types';
@@ -52,6 +61,8 @@ export function matchCandidateProduct(
   let isBundleMismatch = false;
   let isGenerationMismatch = false;
   let isCapacityMismatch = false;
+
+  const requestedNameLower = (requested.productName || '').toLowerCase();
 
   // 1. GTIN / UPC / EAN Check (Highest Priority)
   if (requested.gtin && candidate.gtin) {
@@ -121,62 +132,71 @@ export function matchCandidateProduct(
   }
 
   // 4. Generation Compatibility Check (Gen 1 vs Gen 2, M3 vs M4)
+  // PATCH: fall back to extracting generation from the product name itself when
+  // `requested.generation` wasn't populated upstream, so this check can't be
+  // silently bypassed by missing metadata.
+  const reqGen = requested.generation || extractGenerationFromText(requestedNameLower);
   const candGen = candidateIdentity?.generation || extractGenerationFromText(candTitle);
-  if (requested.generation && candGen) {
-    if (!areGenerationsCompatible(requested.generation, candGen)) {
+  if (reqGen && candGen) {
+    if (!areGenerationsCompatible(reqGen, candGen)) {
       isGenerationMismatch = true;
-      mismatches.push(`Generation mismatch: requested ${requested.generation} vs found ${candGen}`);
+      mismatches.push(`Generation mismatch: requested ${reqGen} vs found ${candGen}`);
       return {
         status: 'wrong_product',
         confidence: 15,
-        reasons: [`✗ Generation mismatch: requested ${requested.generation} vs found ${candGen}`],
+        reasons: [`✗ Generation mismatch: requested ${reqGen} vs found ${candGen}`],
         matchedIdentifiers,
         mismatches,
         isGenerationMismatch: true
       };
     } else {
-      matchedIdentifiers.push(`Generation: ${requested.generation}`);
-      reasons.push(`✓ Generation matches (${requested.generation})`);
+      matchedIdentifiers.push(`Generation: ${reqGen}`);
+      reasons.push(`✓ Generation matches (${reqGen})`);
     }
   }
 
   // 5. Capacity / Size Compatibility Check (1000Wh vs 2000Wh, 13" vs 15")
+  // PATCH: same fallback as generation above.
+  const reqCap = requested.capacity || extractCapacityFromText(requestedNameLower);
   const candCap = candidateIdentity?.capacity || extractCapacityFromText(candTitle);
-  if (requested.capacity && candCap) {
-    if (!areCapacitiesCompatible(requested.capacity, candCap)) {
+  if (reqCap && candCap) {
+    if (!areCapacitiesCompatible(reqCap, candCap)) {
       isCapacityMismatch = true;
-      mismatches.push(`Capacity mismatch: requested ${requested.capacity} vs found ${candCap}`);
+      mismatches.push(`Capacity mismatch: requested ${reqCap} vs found ${candCap}`);
       return {
         status: 'wrong_product',
         confidence: 18,
-        reasons: [`✗ Capacity/Size mismatch: requested ${requested.capacity} vs found ${candCap}`],
+        reasons: [`✗ Capacity/Size mismatch: requested ${reqCap} vs found ${candCap}`],
         matchedIdentifiers,
         mismatches,
         isCapacityMismatch: true
       };
     } else {
-      matchedIdentifiers.push(`Capacity: ${requested.capacity}`);
-      reasons.push(`✓ Capacity matches (${requested.capacity})`);
+      matchedIdentifiers.push(`Capacity: ${reqCap}`);
+      reasons.push(`✓ Capacity matches (${reqCap})`);
     }
   }
 
   // 6. Brand Matching
-  if (requested.brand) {
+  // PATCH: fall back to a brand token parsed from the product name when
+  // `requested.brand` is missing, instead of skipping brand protection entirely.
+  const effectiveBrand = requested.brand || (requestedNameLower.split(/\s+/)[0] || '');
+  if (effectiveBrand) {
     const candBrand = candidate.brand || candidateIdentity?.brand || '';
-    if (candBrand && candBrand.toLowerCase() === requested.brand.toLowerCase()) {
-      matchedIdentifiers.push(`Brand: ${requested.brand}`);
-      reasons.push(`✓ Brand matches (${requested.brand})`);
+    if (candBrand && candBrand.toLowerCase() === effectiveBrand.toLowerCase()) {
+      matchedIdentifiers.push(`Brand: ${effectiveBrand}`);
+      reasons.push(`✓ Brand matches (${effectiveBrand})`);
       confidence += 15;
-    } else if (candTitle.includes(requested.brand.toLowerCase())) {
-      matchedIdentifiers.push(`Brand in title: ${requested.brand}`);
-      reasons.push(`✓ Brand present in title (${requested.brand})`);
+    } else if (candTitle.includes(effectiveBrand.toLowerCase())) {
+      matchedIdentifiers.push(`Brand in title: ${effectiveBrand}`);
+      reasons.push(`✓ Brand present in title (${effectiveBrand})`);
       confidence += 10;
     } else {
-      mismatches.push(`Brand mismatch: requested ${requested.brand}`);
+      mismatches.push(`Brand mismatch: requested ${effectiveBrand}`);
       return {
         status: 'wrong_product',
         confidence: 10,
-        reasons: [`✗ Brand mismatch: requested ${requested.brand}`],
+        reasons: [`✗ Brand mismatch: requested ${effectiveBrand}`],
         matchedIdentifiers,
         mismatches
       };
@@ -193,8 +213,10 @@ export function matchCandidateProduct(
       confidence += 25;
       status = confidence >= 90 ? 'exact' : 'strong';
     } else {
-      // Check partial model tokens
-      const modelTokens = requested.model.toLowerCase().split(/[\s-]+/).filter(t => t.length >= 3);
+      // Check partial model tokens. PATCH: raised minimum token length from 3 to 4
+      // characters to reduce false positives from short, generic tokens (e.g.
+      // "Pro", "128GB" fragments, color names) matching unrelated products.
+      const modelTokens = requested.model.toLowerCase().split(/[\s-]+/).filter(t => t.length >= 4);
       const allTokensPresent = modelTokens.length > 0 && modelTokens.every(tok => cleanCandTitle.includes(tok));
       if (allTokensPresent) {
         matchedIdentifiers.push(`Model tokens: ${requested.model}`);

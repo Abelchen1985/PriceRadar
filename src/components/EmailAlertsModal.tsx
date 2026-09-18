@@ -530,11 +530,15 @@ export const EmailAlertsModal: React.FC<EmailAlertsModalProps> = ({
                     onChange={(e) => setSelectedItemForTest(e.target.value)}
                     className="w-full px-3 py-2 bg-slate-900 border border-slate-700 text-white rounded-xl text-xs font-medium focus:outline-none focus:border-amber-500"
                   >
-                    {items.map((it) => (
-                      <option key={it.id} value={it.id}>
-                        {it.title} (${Math.min(...it.retailers.map(r => r.price)).toFixed(2)})
-                      </option>
-                    ))}
+                    {items.map((it) => {
+                      const valid = it.retailers.filter(r => typeof r.price === 'number' && r.price > 0).map(r => r.price as number);
+                      const priceStr = valid.length > 0 ? `$${Math.min(...valid).toFixed(2)}` : `$${it.msrp.toFixed(2)}`;
+                      return (
+                        <option key={it.id} value={it.id}>
+                          {it.title} ({priceStr})
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 

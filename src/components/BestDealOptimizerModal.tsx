@@ -41,11 +41,11 @@ export const BestDealOptimizerModal: React.FC<BestDealOptimizerModalProps> = ({ 
 
     items.forEach(item => {
       const isSelling = isRetailerSellingProduct(store, item.title, item.brand, item.model);
-      const match = isSelling ? item.retailers.find(r => r.retailerName === store && r.inStock) : undefined;
-      if (match) {
+      const match = isSelling ? item.retailers.find(r => r.retailerName === store && r.inStock && typeof r.price === 'number') : undefined;
+      if (match && typeof match.price === 'number') {
         sum += match.price;
         count++;
-        storeItems.push({ title: item.title, price: match.price });
+        storeItems.push({ title: match.title || item.title, price: match.price });
       }
     });
 
@@ -63,17 +63,19 @@ export const BestDealOptimizerModal: React.FC<BestDealOptimizerModalProps> = ({ 
 
   // 2. Optimal Multi-Merchant Combo: For every item, pick the retailer with the lowest in-stock price that actually sells it
   const optimalItems = items.map(item => {
-    const inStock = item.retailers.filter(r => r.inStock && isRetailerSellingProduct(r.retailerName, item.title, item.brand, item.model));
-    const eligibleRetailers = item.retailers.filter(r => isRetailerSellingProduct(r.retailerName, item.title, item.brand, item.model));
-    const bestRetailer = inStock.reduce((min, r) => (r.price < min.price ? r : min), inStock[0] || eligibleRetailers[0] || item.retailers[0]);
+    const inStock = item.retailers.filter(r => r.inStock && typeof r.price === 'number' && isRetailerSellingProduct(r.retailerName, item.title, item.brand, item.model));
+    const eligibleRetailers = item.retailers.filter(r => typeof r.price === 'number' && isRetailerSellingProduct(r.retailerName, item.title, item.brand, item.model));
+    const bestRetailer = inStock.reduce((min, r) => ((r.price as number) < (min.price as number) ? r : min), inStock[0] || eligibleRetailers[0] || item.retailers[0]);
+    const finalPrice = bestRetailer && typeof bestRetailer.price === 'number' ? bestRetailer.price : item.msrp;
+    const finalTitle = bestRetailer?.title || item.title;
     return {
       item,
       retailer: bestRetailer,
-      price: bestRetailer ? bestRetailer.price : item.msrp,
+      price: finalPrice,
       storeName: bestRetailer ? bestRetailer.retailerName : 'Unknown',
       shipping: bestRetailer?.shipping || 'Free Shipping',
       url: bestRetailer 
-        ? getRetailerDealUrl(bestRetailer.retailerName, item.title, bestRetailer.url, item.brand, item.model) 
+        ? getRetailerDealUrl(bestRetailer.retailerName, finalTitle, bestRetailer.url, item.brand, item.model) 
         : '#'
     };
   });

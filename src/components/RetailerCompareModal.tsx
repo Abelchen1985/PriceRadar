@@ -31,15 +31,20 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
     isRetailerSellingProduct(r.retailerName, item.title, item.brand, item.model)
   );
 
-  // Sort retailers by price ascending (in-stock first)
+  // Sort retailers by price ascending (in-stock first, verified price first)
   const sortedRetailers = [...eligibleRetailers].sort((a, b) => {
     if (a.inStock && !b.inStock) return -1;
     if (!a.inStock && b.inStock) return 1;
-    return a.price - b.price;
+    const aPrice = typeof a.price === 'number' ? a.price : Infinity;
+    const bPrice = typeof b.price === 'number' ? b.price : Infinity;
+    return aPrice - bPrice;
   });
 
-  const lowestPrice = eligibleRetailers.length > 0 
-    ? Math.min(...eligibleRetailers.map(r => r.price))
+  const verifiedPrices = eligibleRetailers
+    .filter(r => typeof r.price === 'number' && r.price > 0)
+    .map(r => r.price as number);
+  const lowestPrice = verifiedPrices.length > 0 
+    ? Math.min(...verifiedPrices)
     : item.targetPrice;
 
   return (
@@ -116,11 +121,12 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
 
           <div className="space-y-3">
             {sortedRetailers.map((retailer) => {
-              const isBest = retailer.price === lowestPrice && retailer.inStock;
-              const diffFromBest = retailer.price - lowestPrice;
+              const isBest = typeof retailer.price === 'number' && retailer.price === lowestPrice && retailer.inStock;
+              const diffFromBest = typeof retailer.price === 'number' ? retailer.price - lowestPrice : 0;
+              const displayTitle = retailer.title || item.title;
               const linkDetails = getRetailerLinkDetails(
                 retailer.retailerName,
-                item.title,
+                displayTitle,
                 retailer.url,
                 item.brand,
                 item.model
@@ -142,7 +148,7 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
                     <div className="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center font-black text-xs text-white uppercase tracking-wider shrink-0">
                       {retailer.retailerName.slice(0, 3)}
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-bold text-white text-base">
                           {retailer.retailerName}
@@ -168,15 +174,22 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
                         )}
                       </div>
 
+                      {/* Matched product title per retailer card */}
+                      <div className="text-xs text-slate-300 font-medium line-clamp-1 mt-0.5 max-w-md" title={displayTitle}>
+                        {displayTitle}
+                      </div>
+
                       <div className="flex flex-wrap items-center gap-x-3 text-xs text-slate-400 mt-1">
                         <span className="flex items-center space-x-1">
                           <Truck className="w-3.5 h-3.5 text-slate-400" />
                           <span>{retailer.shipping}</span>
                         </span>
-                        <span className="flex items-center space-x-1">
-                          <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                          <span>{retailer.rating} ({retailer.reviewCount.toLocaleString()} reviews)</span>
-                        </span>
+                        {retailer.rating !== null && retailer.rating !== undefined && retailer.reviewCount !== null && retailer.reviewCount !== undefined && (
+                          <span className="flex items-center space-x-1">
+                            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                            <span>{retailer.rating} ({retailer.reviewCount.toLocaleString()} reviews)</span>
+                          </span>
+                        )}
                         <span className={retailer.inStock ? 'text-emerald-400 font-medium' : 'text-slate-500'}>
                           {retailer.stockMessage}
                         </span>
@@ -194,7 +207,7 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
                   {/* Price & Direct Purchase Action */}
                   <div className="flex items-center justify-between md:justify-end space-x-4 sm:space-x-5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-700/60">
                     {/* Saved vs MSRP for this retailer */}
-                    {item.msrp > retailer.price && (
+                    {typeof retailer.price === 'number' && item.msrp > retailer.price && (
                       <div className="hidden sm:flex flex-col text-right">
                         <div className="text-[10px] uppercase font-bold text-slate-400">Saved vs MSRP</div>
                         <div className={`text-xs font-bold ${
@@ -210,17 +223,21 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
 
                     <div className="text-left md:text-right">
                       <div className="text-2xl font-black text-white">
-                        ${retailer.price.toFixed(2)}
+                        {typeof retailer.price === 'number' ? `$${retailer.price.toFixed(2)}` : 'Unconfirmed'}
                       </div>
                       <div className="text-xs">
-                        {isBest ? (
-                          <span className="text-emerald-400 font-semibold">
-                            {retailer.price <= item.allTimeLow ? 'Record Low Available' : 'Best Available'}
-                          </span>
+                        {typeof retailer.price === 'number' ? (
+                          isBest ? (
+                            <span className="text-emerald-400 font-semibold">
+                              {retailer.price <= item.allTimeLow ? 'Record Low Available' : 'Best Available'}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400">
+                              +${diffFromBest.toFixed(2)} ({lowestPrice > 0 ? ((diffFromBest / lowestPrice) * 100).toFixed(0) : 0}% more)
+                            </span>
+                          )
                         ) : (
-                          <span className="text-slate-400">
-                            +${diffFromBest.toFixed(2)} ({((diffFromBest / lowestPrice) * 100).toFixed(0)}% more)
-                          </span>
+                          <span className="text-slate-500">Visit store catalog</span>
                         )}
                       </div>
                     </div>
