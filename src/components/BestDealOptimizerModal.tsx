@@ -70,6 +70,7 @@ export const BestDealOptimizerModal: React.FC<BestDealOptimizerModalProps> = ({ 
     const finalTitle = bestRetailer?.title || item.title;
     return {
       item,
+      matchedTitle: finalTitle,
       retailer: bestRetailer,
       price: finalPrice,
       storeName: bestRetailer ? bestRetailer.retailerName : 'Unknown',
@@ -255,7 +256,7 @@ ${Object.entries(groupedByRetailer).map(([store, list]) =>
 
                   {/* Items list for this retailer */}
                   <div className="divide-y divide-slate-700/60 p-2">
-                    {storeItemsList.map(({ item, price, url, shipping }) => (
+                    {storeItemsList.map(({ item, matchedTitle, price, url, shipping }) => (
                       <div key={item.id} className="p-2.5 px-3 flex items-center justify-between">
                         <div className="flex items-center space-x-3 min-w-0 flex-1">
                           <img 
@@ -265,9 +266,14 @@ ${Object.entries(groupedByRetailer).map(([store, list]) =>
                             referrerPolicy="no-referrer"
                           />
                           <div className="min-w-0 flex-1">
-                            <div className="text-xs font-bold text-white truncate">
-                              {item.title}
+                            <div className="text-xs font-bold text-white truncate" title={matchedTitle || item.title}>
+                              {matchedTitle || item.title}
                             </div>
+                            {matchedTitle && matchedTitle !== item.title && (
+                              <div className="text-[10px] text-slate-400 truncate">
+                                Tracked: {item.title}
+                              </div>
+                            )}
                             <div className="text-[11px] text-slate-400 flex items-center space-x-2">
                               <span>MSRP: ${item.msrp.toFixed(2)}</span>
                               <span>&bull;</span>

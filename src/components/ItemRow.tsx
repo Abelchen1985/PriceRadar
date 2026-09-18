@@ -143,6 +143,11 @@ export const ItemRow: React.FC<ItemRowProps> = ({
             <h3 className="text-base sm:text-lg font-bold text-white leading-snug line-clamp-2 hover:line-clamp-none transition-all">
               {item.title}
             </h3>
+            {lowestRetailer?.title && lowestRetailer.title !== item.title && (
+              <div className="text-xs text-slate-400 mt-0.5 line-clamp-1" title={`Matched at ${lowestRetailer.retailerName}: ${lowestRetailer.title}`}>
+                Matched at {lowestRetailer.retailerName}: <span className="text-slate-300 font-medium">{lowestRetailer.title}</span>
+              </div>
+            )}
 
             {/* Historical comparison footer */}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-slate-400">
