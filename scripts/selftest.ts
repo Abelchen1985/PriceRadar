@@ -27,6 +27,7 @@ import { isRetailerEligibleForProduct, checkRetailerEligibility } from '../src/s
 import { RetailerCandidate } from '../src/types';
 import { parseJsonLdProducts, compareStructuredProduct } from '../src/services/structuredDataVerifier';
 import { isQuarantinedProductUrl } from '../src/utils/retailerUrls';
+import { computeDealPlan } from '../src/utils/dealOptimizer';
 
 export interface TestResult {
   name: string;
@@ -765,6 +766,98 @@ export function runComprehensiveSelfTest(): {
     fail('Verified Link Survives', 'DEAL_LINKS', `Whitelisted verified link was lost: ${verifiedSurvives}`);
   } else {
     pass('Verified Link Survives', 'DEAL_LINKS', `Confirmed link preserved: ${verifiedSurvives}`);
+  }
+
+  // ==========================================
+  // SECTION 10: Deal Optimizer (shipping-aware, pre-tax)
+  // ==========================================
+  // The optimizer used to sum item prices only, so it would recommend splitting
+  // a basket across nine stores to save a few dollars while treating nine
+  // deliveries as free. Sales tax is deliberately out of scope -- it depends on
+  // the buyer's jurisdiction -- so totals are pre-tax and labelled as such.
+
+  const mkItem = (id: string, msrp: number, offers: Array<[string, number, boolean?]>): any => ({
+    id,
+    title: `Acme Widget ${id}`,
+    brand: 'Acme',
+    model: `AW-${id}`,
+    category: 'Electronics',
+    msrp,
+    allTimeLow: msrp * 0.8,
+    retailers: offers.map(([retailerName, price, inStock], i) => ({
+      id: `r-${id}-${i}`,
+      retailerName,
+      url: `https://www.${retailerName.toLowerCase().replace(/[^a-z]/g, '')}.com/s?k=widget`,
+      price,
+      inStock: inStock !== false,
+      stockMessage: 'In Stock',
+      shipping: 'Standard',
+      shippingCost: 0,
+      rating: 0,
+      reviewCount: 0
+    }))
+  });
+
+  // Splitting saves $20 on prices but adds one shipment.
+  const twoItems = [
+    mkItem('A', 100, [['Amazon', 100], ['Walmart', 90]]),
+    mkItem('B', 100, [['Amazon', 100], ['Walmart', 110]])
+  ];
+
+  const cheapShipping = computeDealPlan(twoItems, { shippingPerShipment: 5 });
+  if (cheapShipping.itemsSubtotal !== 190) {
+    fail('Optimizer Picks Cheapest', 'BENCHMARKS', `Expected items subtotal 190, got ${cheapShipping.itemsSubtotal}`);
+  } else if (cheapShipping.estimatedShipping !== 10 || cheapShipping.splitTotal !== 200) {
+    fail('Optimizer Counts Shipping', 'BENCHMARKS', `Expected 2 shipments at $5 (total 200), got shipping ${cheapShipping.estimatedShipping}, total ${cheapShipping.splitTotal}`);
+  } else if (cheapShipping.verdict !== 'split_wins') {
+    fail('Optimizer Verdict (cheap shipping)', 'BENCHMARKS', `Expected split_wins, got ${cheapShipping.verdict} (net ${cheapShipping.netSavings})`);
+  } else {
+    pass('Optimizer Counts Shipping', 'BENCHMARKS', `Split $200 (items $190 + $10 shipping) beats Amazon $205; net +$${cheapShipping.netSavings.toFixed(2)}`);
+  }
+
+  // Same basket, expensive shipping: the split must now LOSE.
+  const dearShipping = computeDealPlan(twoItems, { shippingPerShipment: 25 });
+  if (dearShipping.verdict !== 'single_store_wins' || dearShipping.netSavings >= 0) {
+    fail('Optimizer Rejects Costly Split', 'BENCHMARKS', `A split adding a $25 shipment to save $10 must lose; got ${dearShipping.verdict} net ${dearShipping.netSavings}`);
+  } else {
+    pass('Optimizer Rejects Costly Split', 'BENCHMARKS', `Correctly prefers one store when shipping is $25 (net $${dearShipping.netSavings.toFixed(2)})`);
+  }
+
+  // Break-even must be the per-shipment price where the split stops paying.
+  if (cheapShipping.breakEvenShipping === null || Math.abs(cheapShipping.breakEvenShipping - 10) > 0.01) {
+    fail('Optimizer Break-Even', 'BENCHMARKS', `Expected break-even of $10.00 per extra shipment, got ${cheapShipping.breakEvenShipping}`);
+  } else {
+    pass('Optimizer Break-Even', 'BENCHMARKS', `Break-even correctly $${cheapShipping.breakEvenShipping.toFixed(2)} per extra shipment`);
+  }
+
+  // An item with no in-stock price must be excluded, never valued at MSRP.
+  const withUnpriced = computeDealPlan([
+    mkItem('C', 100, [['Amazon', 80]]),
+    mkItem('D', 500, [['Amazon', 450, false]])
+  ], { shippingPerShipment: 0 });
+  if (withUnpriced.unpriced.length !== 1 || withUnpriced.itemsSubtotal !== 80) {
+    fail('Optimizer Excludes Unpriced', 'BENCHMARKS', `Out-of-stock item must be excluded, not valued at MSRP. Subtotal ${withUnpriced.itemsSubtotal}, unpriced ${withUnpriced.unpriced.length}`);
+  } else {
+    pass('Optimizer Excludes Unpriced', 'BENCHMARKS', `Out-of-stock item excluded from totals and reported separately`);
+  }
+
+  // No single store carries everything -> no bogus baseline comparison.
+  const noFullCoverage = computeDealPlan([
+    mkItem('E', 100, [['Amazon', 90]]),
+    mkItem('F', 100, [['Walmart', 90]])
+  ], { shippingPerShipment: 5 });
+  if (noFullCoverage.baseline !== null || noFullCoverage.verdict !== 'split_required') {
+    fail('Optimizer Baseline Honesty', 'BENCHMARKS', `With no full-coverage store there must be no baseline; got ${JSON.stringify(noFullCoverage.baseline)} / ${noFullCoverage.verdict}`);
+  } else {
+    pass('Optimizer Baseline Honesty', 'BENCHMARKS', 'No single-store total invented when no store carries the whole basket');
+  }
+
+  // Coverage must be reported so partial baskets are never compared as equals.
+  const partial = noFullCoverage.storeCoverage.find(c => c.storeName === 'Amazon');
+  if (!partial || partial.fullCoverage || partial.itemsCovered !== 1 || partial.totalWithShipping !== null) {
+    fail('Optimizer Coverage Reporting', 'BENCHMARKS', `Partial-coverage store must be flagged: ${JSON.stringify(partial)}`);
+  } else {
+    pass('Optimizer Coverage Reporting', 'BENCHMARKS', `Partial store flagged as ${partial.itemsCovered}/${partial.itemsNeeded} with no comparable total`);
   }
 
   // Summary calculation

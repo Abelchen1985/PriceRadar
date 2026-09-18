@@ -553,9 +553,14 @@ export default function App() {
 
         {/* Tracked Items List */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs text-slate-400 px-1 font-medium">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 px-1 font-medium">
             <span>Showing {sortedItems.length} of {items.length} items</span>
-            <span>Hover store pills for direct prices</span>
+            <span className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300 font-semibold">
+                Pre-tax
+              </span>
+              <span>Prices exclude sales tax &bull; hover store pills for details</span>
+            </span>
           </div>
 
           {sortedItems.length === 0 ? (
