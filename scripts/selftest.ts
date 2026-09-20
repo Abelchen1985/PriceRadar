@@ -25,7 +25,7 @@ import { matchCandidateProduct, determineLinkType } from '../src/services/produc
 import { verifyRetailerPrice } from '../src/services/priceVerifier';
 import { isRetailerEligibleForProduct, checkRetailerEligibility } from '../src/services/retailerRegistry';
 import { RetailerCandidate } from '../src/types';
-import { parseJsonLdProducts, compareStructuredProduct } from '../src/services/structuredDataVerifier';
+import { parseJsonLdProducts, compareStructuredProduct, selectMostIdentifiableProduct } from '../src/services/structuredDataVerifier';
 import { isQuarantinedProductUrl } from '../src/utils/retailerUrls';
 import { computeDealPlan } from '../src/utils/dealOptimizer';
 import {
@@ -948,6 +948,49 @@ export function runComprehensiveSelfTest(): {
     pass('Observation Stats', 'PRICE_ACCURACY', `All-time low $${stats.allTimeLow.price} from ${stats.observationCount} observations; short history correctly flagged as not yet meaningful`);
   }
   resetObservations();
+
+  // ==========================================
+  // SECTION 12: Browser Capture Selection
+  // ==========================================
+  // A capture arrives with no requested identity -- it is whatever page the user
+  // was on -- so the node has to be chosen on its own merits. Retailer pages
+  // embed JSON-LD for recommendations and accessories next to the real listing,
+  // so "first node" and "cheapest node" are both wrong answers.
+
+  const pageWithDistractors = parseJsonLdProducts(`
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"Product","name":"Recommended: Screen Wipes",
+     "offers":{"@type":"Offer","price":"9.99","priceCurrency":"USD"}}
+    </script>
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"Product","name":"Sony WH-1000XM5 Headphones",
+     "sku":"6505727","mpn":"WH1000XM5/B","gtin13":"0027242924291",
+     "brand":{"@type":"Brand","name":"Sony"},
+     "offers":{"@type":"Offer","price":"328.00","priceCurrency":"USD","availability":"https://schema.org/InStock"}}
+    </script>
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"Product","name":"Extended Warranty",
+     "offers":{"@type":"Offer","price":"49.99","priceCurrency":"USD"}}
+    </script>`);
+
+  const chosen = selectMostIdentifiableProduct(pageWithDistractors);
+  if (pageWithDistractors.length !== 3) {
+    fail('Capture Parses All Nodes', 'DEAL_LINKS', `Expected 3 product nodes, got ${pageWithDistractors.length}`);
+  } else if (!chosen || chosen.price !== 328) {
+    fail('Capture Node Selection', 'DEAL_LINKS', `Expected the identified product at $328, got ${JSON.stringify(chosen)}`);
+  } else if (chosen.gtin !== '0027242924291') {
+    fail('Capture Node Selection', 'DEAL_LINKS', `Chose a node without the GTIN: ${JSON.stringify(chosen)}`);
+  } else {
+    pass('Capture Node Selection', 'DEAL_LINKS', `Picked the GTIN-bearing listing ($328) over an accessory ($9.99) and a warranty ($49.99)`);
+  }
+
+  if (selectMostIdentifiableProduct([]) !== null) {
+    fail('Capture Empty Page', 'DEAL_LINKS', 'A page with no products must yield null, not a guess');
+  } else if (selectMostIdentifiableProduct([{ name: 'No price here' }]) !== null) {
+    fail('Capture Priceless Node', 'DEAL_LINKS', 'A product node with no price must yield null');
+  } else {
+    pass('Capture Empty Page', 'DEAL_LINKS', 'Pages with no product or no price record nothing rather than guessing');
+  }
 
   // Summary calculation
   const durationMs = Date.now() - startTime;

@@ -192,6 +192,27 @@ export function parseJsonLdProducts(html: string): StructuredProduct[] {
   return products;
 }
 
+/**
+ * Picks the node most likely to BE the page's product, for the case where we
+ * have no requested identity to compare against (a browser capture: whatever
+ * page the user is on).
+ *
+ * Retailer pages routinely embed JSON-LD for recommendations, accessories and
+ * bundles alongside the real listing, so "the first node" and "the cheapest
+ * node" are both wrong. Strong identifiers are the signal: a node carrying a
+ * GTIN or MPN is describing a specific product, not a carousel entry. Returns
+ * null when nothing on the page carries a usable price.
+ */
+export function selectMostIdentifiableProduct(products: StructuredProduct[]): StructuredProduct | null {
+  const priced = (products || []).filter(p => p && typeof p.price === 'number' && (p.price as number) > 0);
+  if (priced.length === 0) return null;
+
+  const score = (p: StructuredProduct) =>
+    (p.gtin ? 4 : 0) + (p.mpn ? 2 : 0) + (p.sku ? 1 : 0) + (p.brand ? 1 : 0);
+
+  return priced.reduce((best, p) => (score(p) > score(best) ? p : best), priced[0]);
+}
+
 /* ------------------------------------------------------------------ *
  * Identity comparison (pure, unit-testable)
  * ------------------------------------------------------------------ */

@@ -11,7 +11,7 @@ import { isRetailerEligibleForProduct, getRetailerConfig, extractSkuFromUrl, RET
 import { matchCandidateProduct, determineLinkType, isUrlSearchPage } from "./src/services/productMatcher";
 import { verifyRetailerPrice, isDealAlertTriggered } from "./src/services/priceVerifier";
 import { discoverCandidatesForProduct, VERIFIED_DIRECT_REGISTRY } from "./src/services/productDiscovery";
-import { verifyProductUrl, verifyProductUrls, LinkVerification } from "./src/services/structuredDataVerifier";
+import { verifyProductUrl, verifyProductUrls, LinkVerification, parseJsonLdProducts, selectMostIdentifiableProduct } from "./src/services/structuredDataVerifier";
 import { buildStorefrontSearchUrl, isVerifiedDirectProductUrl } from "./src/utils/retailerUrls";
 import { INITIAL_TRACKED_ITEMS } from "./src/data/catalog";
 import {
@@ -720,6 +720,173 @@ async function startServer() {
       return res.json({ success: true, report: null, message: "No audit has run yet. POST to this endpoint to run one." });
     }
     res.json({ success: true, report: lastLinkHealthReport });
+  });
+
+  // ==========================================================================
+  // Browser capture
+  // ==========================================================================
+  //
+  // The server cannot read most retailer product pages: Best Buy and Breville
+  // return 403 to this host, Newegg's robots.txt disallows it, and B&H publishes
+  // no structured data. A live audit confirmed 0 of 5 links were verifiable from
+  // here. The user's own browser has no such problem -- it is a real session on
+  // a page that renders normally.
+  //
+  // So the browser does the reading and this endpoint does the parsing, reusing
+  // the same tested extractor the server-side verifier uses. What crosses the
+  // wire is the page's schema.org JSON-LD and its URL, nothing else: no cookies,
+  // no page text, no account details.
+
+  const captureToken = process.env.CAPTURE_TOKEN || '';
+
+  /** Maps a page hostname onto a known retailer name. */
+  function retailerFromUrl(rawUrl: string): string {
+    try {
+      const host = new URL(rawUrl).hostname.toLowerCase().replace(/^www\./, '');
+      for (const [name, cfg] of Object.entries(RETAILER_CONFIGS)) {
+        if (host.includes(cfg.domain)) return name;
+      }
+      const base = host.split('.')[0];
+      return base ? base.charAt(0).toUpperCase() + base.slice(1) : 'Unknown';
+    } catch {
+      return 'Unknown';
+    }
+  }
+
+  // A bookmarklet runs on the retailer's origin, so this endpoint is
+  // cross-origin by nature and needs permissive CORS. That makes it publicly
+  // writable, which is why a token is mandatory: without one, anyone could
+  // poison the price history this app is supposed to make trustworthy.
+  const captureCors = (_req: express.Request, res: express.Response, next: express.NextFunction) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Capture-Token');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Vary', 'Origin');
+    next();
+  };
+
+  app.options("/api/capture", captureCors, (_req, res) => res.sendStatus(204));
+
+  app.post("/api/capture", captureCors, (req, res) => {
+    if (!captureToken) {
+      return res.status(503).json({
+        success: false,
+        error: 'Capture is not configured. Set a CAPTURE_TOKEN environment variable on the server, then rebuild the bookmarklet with the same value.'
+      });
+    }
+    if (req.header('X-Capture-Token') !== captureToken) {
+      return res.status(401).json({ success: false, error: 'Invalid or missing capture token' });
+    }
+
+    const { url, jsonLd } = req.body || {};
+    if (!url || !Array.isArray(jsonLd) || jsonLd.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'This page published no schema.org product data, so there is no price to read. Nothing was recorded.'
+      });
+    }
+
+    // Wrap the raw blocks back into script tags so the existing, tested parser
+    // handles them exactly as it would a fetched page.
+    const html = jsonLd
+      .filter((block: any) => typeof block === 'string')
+      .map((block: string) => '<script type="application/ld+json">' + block + '</script>')
+      .join('\n');
+
+    const products = parseJsonLdProducts(html);
+    const best = selectMostIdentifiableProduct(products);
+    if (!best || typeof best.price !== 'number') {
+      return res.status(422).json({
+        success: false,
+        error: 'Found structured data but no product price in it. Nothing was recorded.',
+        productsFound: products.length
+      });
+    }
+
+    const identity = normalizeProductIdentity({
+      title: best.name || '',
+      brand: best.brand,
+      mpn: best.mpn,
+      gtin: best.gtin
+    });
+
+    const retailer = retailerFromUrl(String(url));
+    const result = recordObservation({
+      productKey: buildProductKey(identity),
+      retailer,
+      price: best.price,
+      currency: best.currency || 'USD',
+      inStock: best.availability ? /InStock|LimitedAvailability|PreOrder|BackOrder/i.test(best.availability) : null,
+      url: String(url),
+      source: 'browser_capture',
+      verified: Boolean(best.gtin || best.mpn || best.sku)
+    });
+
+    res.json({
+      success: true,
+      recorded: result.recorded,
+      reason: result.reason,
+      retailer,
+      product: best.name,
+      price: best.price,
+      productKey: buildProductKey(identity),
+      stats: getStats(buildProductKey(identity)),
+      historyIsDurable: isDurable()
+    });
+  });
+
+  // Setup page for the bookmarklet. The token is never served by this page --
+  // it is typed in by the user and spliced into the link in their own browser,
+  // so the page itself stays safe to expose.
+  app.get("/capture-setup", (_req, res) => {
+    const appUrl = process.env.APP_URL || '';
+    const page = [
+      '<!doctype html><html><head><meta charset="utf-8">',
+      '<meta name="viewport" content="width=device-width,initial-scale=1">',
+      '<title>PriceRadar Capture Setup</title>',
+      '<style>',
+      'body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;margin:0;padding:2.5rem 1.25rem;line-height:1.6}',
+      '.wrap{max-width:46rem;margin:0 auto}h1{font-size:1.5rem;margin:0 0 .25rem}',
+      'p{color:#94a3b8;font-size:.95rem}code{background:#1e293b;padding:.15rem .4rem;border-radius:.25rem;font-size:.85em}',
+      'input{width:100%;padding:.6rem .75rem;background:#020617;border:1px solid #334155;border-radius:.5rem;color:#fff;font-size:.95rem}',
+      '.bm{display:inline-block;margin-top:1rem;padding:.7rem 1.4rem;background:#2563eb;color:#fff;text-decoration:none;border-radius:.6rem;font-weight:700}',
+      '.bm.off{background:#334155;color:#64748b;pointer-events:none}',
+      'ol{color:#cbd5e1;font-size:.95rem}li{margin:.4rem 0}',
+      '.note{margin-top:2rem;padding:.9rem 1rem;background:#1e293b;border:1px solid #334155;border-radius:.6rem;font-size:.85rem;color:#94a3b8}',
+      '</style></head><body><div class="wrap">',
+      '<h1>Capture a price from any store</h1>',
+      '<p>Your server cannot read most retailer pages &mdash; they block automated requests. Your browser can. This bookmarklet reads the structured product data on whatever page you are viewing and sends just that, plus the page address, to your tracker.</p>',
+      '<ol>',
+      '<li>Paste the same value you set as <code>CAPTURE_TOKEN</code> on the server.</li>',
+      '<li>Drag the blue button to your bookmarks bar.</li>',
+      '<li>On any product page, click it.</li>',
+      '</ol>',
+      '<input id="t" type="password" placeholder="Your capture token" autocomplete="off">',
+      '<a id="bm" class="bm off" href="#">PriceRadar: Capture</a>',
+      '<div class="note">Only the page&rsquo;s schema.org product data and its address are sent. No cookies, no page text, no account details. The token stays in this browser &mdash; this page never sends it anywhere.</div>',
+      '</div><script>',
+      'var BASE=' + JSON.stringify(appUrl) + '||location.origin;',
+      'var t=document.getElementById("t"),bm=document.getElementById("bm");',
+      'function build(){',
+      '  var tok=t.value.trim();',
+      '  if(!tok){bm.className="bm off";bm.href="#";return;}',
+      '  var src="(function(){"',
+      '   +"var b=[].slice.call(document.getElementsByTagName(\'script\')).filter(function(s){return (s.type||\'\').indexOf(\'ld+json\')>-1;}).map(function(s){return s.textContent;});"',
+      '   +"var u=location.origin+location.pathname;"',
+      '   +"function toast(m,ok){var d=document.createElement(\'div\');d.textContent=m;d.style.cssText=\'position:fixed;z-index:2147483647;left:50%;top:20px;transform:translateX(-50%);padding:12px 18px;border-radius:10px;font:600 14px system-ui;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.35);background:\'+(ok?\'#059669\':\'#b91c1c\');document.body.appendChild(d);setTimeout(function(){d.remove();},4500);}"',
+      '   +"if(!b.length){toast(\'No product data on this page - nothing recorded\',false);return;}"',
+      '   +"fetch(\'"+BASE+"/api/capture\',{method:\'POST\',headers:{\'Content-Type\':\'application/json\',\'X-Capture-Token\':\'"+tok+"\'},body:JSON.stringify({url:u,jsonLd:b})})"',
+      '   +".then(function(r){return r.json();})"',
+      '   +".then(function(j){toast(j.success?((j.recorded?\'Recorded \':\'Already have \')+(j.retailer||\'\')+\' $\'+j.price):(j.error||\'Capture failed\'),!!j.success);})"',
+      '   +".catch(function(e){toast(\'Could not reach PriceRadar\',false);});"',
+      '  +"})();";',
+      '  bm.href="javascript:"+encodeURIComponent(src);',
+      '  bm.className="bm";',
+      '}',
+      't.addEventListener("input",build);',
+      '</script></body></html>'
+    ].join('\n');
+    res.type('html').send(page);
   });
 
   // ==========================================================================
