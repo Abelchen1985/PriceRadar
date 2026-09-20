@@ -14,6 +14,15 @@ import { discoverCandidatesForProduct, VERIFIED_DIRECT_REGISTRY } from "./src/se
 import { verifyProductUrl, verifyProductUrls, LinkVerification } from "./src/services/structuredDataVerifier";
 import { buildStorefrontSearchUrl, isVerifiedDirectProductUrl } from "./src/utils/retailerUrls";
 import { INITIAL_TRACKED_ITEMS } from "./src/data/catalog";
+import {
+  buildProductKey,
+  recordObservation,
+  getObservations,
+  getStats,
+  getTrackedProductKeys,
+  isDurable,
+  MEANINGFUL_HISTORY_DAYS
+} from "./src/services/observationStore";
 import { ProductIdentity, RetailerCandidate, VerifiedPrice, DebugTrace, ProductMatchResult } from "./src/types";
 
 interface AlertRecord {
@@ -50,7 +59,7 @@ const alertLogs: AlertRecord[] = [
     status: "delivered",
     emailHtml: `<div style="font-family: sans-serif; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
       <h2 style="color: #059669;">🔥 All-Time Lowest Price Alert!</h2>
-      <p>Hi Abel,</p>
+      <p>Hi there,</p>
       <p>Great news! An item on your PCPartPicker Watchlist has just reached its <strong>All-Time Lowest Price in History</strong>:</p>
       <div style="background: #f8fafc; padding: 16px; border-radius: 6px; margin: 16px 0;">
         <h3 style="margin-top:0;">AMD Ryzen 7 7800X3D</h3>
@@ -509,7 +518,8 @@ async function startServer() {
         });
 
         await transporter.verify();
-        smtpDiag = { verified: true, message: `Connected to SMTP (${cleanUser})` };
+        // Deliberately does not echo the mailbox: this endpoint is public.
+        smtpDiag = { verified: true, message: 'Connected to the configured SMTP server' };
       } catch (err: any) {
         let errDesc = err.message || "Connection failed";
         if (errDesc.includes("534") || errDesc.includes("Application-specific password required")) {
@@ -524,7 +534,9 @@ async function startServer() {
       provider: hasResend ? "Resend" : hasSmtp ? "SMTP" : "Simulator (Sandbox)",
       resend: hasResend,
       smtp: hasSmtp,
-      smtpUser: process.env.SMTP_USER || null,
+      // The address itself is intentionally withheld -- callers only need to know
+      // whether sending is configured, not which mailbox sends it.
+      smtpUserConfigured: Boolean(process.env.SMTP_USER),
       smtpDiag,
       instructions: "To receive live alerts in your inbox, use an authorized Google App Password (16 characters) or RESEND_API_KEY."
     });
@@ -562,6 +574,10 @@ async function startServer() {
   }
 
   interface LinkHealthReport {
+    /** Confirmed prices written to the observation store during this audit. */
+    observationsRecorded: number;
+    /** False when this host loses recorded history on redeploy. */
+    historyIsDurable: boolean;
     checkedAt: string;
     durationMs: number;
     totalChecked: number;
@@ -609,6 +625,27 @@ async function startServer() {
 
     const verifications = await verifyProductUrls(targets.map(t => ({ url: t.url, identity: t.identity })));
 
+    // Every confirmed price becomes a recorded observation. This is the only way
+    // an all-time low ever becomes a fact rather than a calculation -- it has to
+    // be seen and written down first.
+    let observationsRecorded = 0;
+    verifications.forEach((v, i) => {
+      const target = targets[i];
+      if (!target || v.verdict !== 'verified_match' || typeof v.observedPrice !== 'number') return;
+      const result = recordObservation({
+        productKey: buildProductKey(target.identity),
+        retailer: target.retailer,
+        price: v.observedPrice,
+        currency: 'USD',
+        inStock: v.inStock,
+        url: v.url,
+        source: 'structured_data',
+        verified: true,
+        observedAt: v.checkedAt
+      });
+      if (result.recorded) observationsRecorded++;
+    });
+
     const entries: LinkHealthEntry[] = targets.map((target, i) => {
       const v = verifications[i] || { verdict: 'unreachable', conclusive: false, confidence: 0, matchedIdentifiers: [], mismatches: [], notes: 'No result', url: target.url } as LinkVerification;
       const isBad = v.verdict === 'mismatch' || v.verdict === 'not_found';
@@ -637,6 +674,8 @@ async function startServer() {
     });
 
     const report: LinkHealthReport = {
+      observationsRecorded,
+      historyIsDurable: isDurable(),
       checkedAt: new Date().toISOString(),
       durationMs: Date.now() - started,
       totalChecked: entries.length,
@@ -681,6 +720,62 @@ async function startServer() {
       return res.json({ success: true, report: null, message: "No audit has run yet. POST to this endpoint to run one." });
     }
     res.json({ success: true, report: lastLinkHealthReport });
+  });
+
+  // ==========================================================================
+  // Observations: the record of prices this app has actually seen
+  // ==========================================================================
+  //
+  // An observation is about a product at a retailer. It carries no user id, no
+  // email and no session -- see the privacy invariant in observationStore.ts.
+  // Incoming payloads are whitelisted, so extra fields are dropped rather than
+  // stored.
+
+  app.post("/api/observations", (req, res) => {
+    const body = req.body || {};
+    const productKey = body.productKey || buildProductKey(
+      normalizeProductIdentity({
+        title: body.title || '',
+        brand: body.brand,
+        model: body.model,
+        mpn: body.mpn,
+        gtin: body.gtin || body.upc
+      })
+    );
+
+    const result = recordObservation({ ...body, productKey });
+    if (!result.recorded && !result.observation) {
+      return res.status(400).json({ success: false, error: result.reason });
+    }
+
+    res.json({
+      success: true,
+      recorded: result.recorded,
+      reason: result.reason,
+      observation: result.observation,
+      stats: getStats(productKey),
+      historyIsDurable: isDurable()
+    });
+  });
+
+  app.get("/api/observations", (req, res) => {
+    const key = req.query.key ? String(req.query.key) : undefined;
+    if (!key) {
+      return res.json({
+        success: true,
+        productKeys: getTrackedProductKeys(),
+        historyIsDurable: isDurable(),
+        meaningfulHistoryDays: MEANINGFUL_HISTORY_DAYS
+      });
+    }
+    res.json({
+      success: true,
+      productKey: key,
+      observations: getObservations(key),
+      stats: getStats(key),
+      historyIsDurable: isDurable(),
+      meaningfulHistoryDays: MEANINGFUL_HISTORY_DAYS
+    });
   });
 
   // Automated self-test & link integrity suite

@@ -6,3 +6,6 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Recorded price observations (regenerated at runtime)
+data/

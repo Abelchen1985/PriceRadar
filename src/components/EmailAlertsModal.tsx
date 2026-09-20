@@ -485,7 +485,7 @@ export const EmailAlertsModal: React.FC<EmailAlertsModalProps> = ({
                         : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
                     }`}>
                       {emailStatus?.smtpDiag?.verified 
-                        ? `🟢 Gmail SMTP Connected (${emailStatus?.smtpUser || userEmail})` 
+                        ? '🟢 Gmail SMTP Connected' 
                         : emailStatus?.resend 
                         ? '🟢 Resend API Connected'
                         : '🟡 Action Needed for Gmail SMTP'}

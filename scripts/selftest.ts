@@ -28,6 +28,13 @@ import { RetailerCandidate } from '../src/types';
 import { parseJsonLdProducts, compareStructuredProduct } from '../src/services/structuredDataVerifier';
 import { isQuarantinedProductUrl } from '../src/utils/retailerUrls';
 import { computeDealPlan } from '../src/utils/dealOptimizer';
+import {
+  buildProductKey,
+  sanitizeObservation,
+  recordObservation,
+  getStats,
+  __resetForTests as resetObservations
+} from '../src/services/observationStore';
 
 export interface TestResult {
   name: string;
@@ -859,6 +866,88 @@ export function runComprehensiveSelfTest(): {
   } else {
     pass('Optimizer Coverage Reporting', 'BENCHMARKS', `Partial store flagged as ${partial.itemsCovered}/${partial.itemsNeeded} with no comparable total`);
   }
+
+  // ==========================================
+  // SECTION 11: Observation Store
+  // ==========================================
+  // The record of prices actually seen. An all-time low is only true once it has
+  // been observed and written down -- everything before this was arithmetic on
+  // MSRP. These checks also pin the privacy invariant: an observation describes
+  // a product at a retailer and carries nothing that identifies a person.
+
+  if (buildProductKey({ gtin: '0027242924291', mpn: 'WH1000XM5', brand: 'Sony' }) !== 'gtin:0027242924291') {
+    fail('Product Key Precedence', 'PRODUCT_MATCH', 'A GTIN must take precedence over weaker identifiers');
+  } else if (buildProductKey({ gtin: '0027242924291' }) !== buildProductKey({ gtin: '00-2724 292 4291' })) {
+    fail('Product Key Stability', 'PRODUCT_MATCH', 'The same GTIN formatted differently must produce the same key');
+  } else {
+    pass('Product Key Precedence', 'PRODUCT_MATCH', 'Keys prefer GTIN, then MPN, then brand+model, and ignore formatting');
+  }
+
+  // PRIVACY: anything identifying a person must be dropped before storage.
+  const sanitized: any = sanitizeObservation({
+    productKey: 'gtin:0027242924291',
+    retailer: 'Best Buy',
+    price: 328,
+    source: 'structured_data',
+    url: 'https://www.bestbuy.com/site/x/6505727.p?skuId=6505727&sessionId=abc&uid=someone@example.com',
+    email: 'someone@example.com',
+    userId: 'u-42',
+    ipAddress: '10.0.0.1',
+    deviceId: 'device-1'
+  });
+  const allowedKeys = ['currency', 'inStock', 'observedAt', 'price', 'productKey', 'retailer', 'source', 'url', 'verified'];
+  const actualKeys = sanitized ? Object.keys(sanitized).sort() : [];
+  if (!sanitized) {
+    fail('Observation Privacy Whitelist', 'PRODUCT_MATCH', 'A valid observation was rejected');
+  } else if (JSON.stringify(actualKeys) !== JSON.stringify(allowedKeys)) {
+    fail('Observation Privacy Whitelist', 'PRODUCT_MATCH', `Unexpected fields stored: ${actualKeys.join(', ')}`);
+  } else if (sanitized.url !== 'https://www.bestbuy.com/site/x/6505727.p') {
+    fail('Observation URL Scrubbing', 'PRODUCT_MATCH', `Query string must be stripped (session/affiliate tokens): ${sanitized.url}`);
+  } else {
+    pass('Observation Privacy Whitelist', 'PRODUCT_MATCH', 'Email, user id, IP and device fields dropped; URL query string stripped');
+  }
+
+  if (sanitizeObservation({ productKey: 'k', retailer: 'A', price: 0 }) !== null) {
+    fail('Observation Rejects Bad Price', 'PRICE_ACCURACY', 'A non-positive price must not be recorded');
+  } else {
+    pass('Observation Rejects Bad Price', 'PRICE_ACCURACY', 'Zero and negative prices rejected');
+  }
+
+  const futureStamped = sanitizeObservation({ productKey: 'k', retailer: 'A', price: 10, observedAt: '2099-01-01T00:00:00Z' });
+  if (!futureStamped || Date.parse(futureStamped.observedAt) > Date.now() + 1000) {
+    fail('Observation Clamps Future Timestamps', 'PRICE_ACCURACY', 'A future observedAt would poison "latest price"');
+  } else {
+    pass('Observation Clamps Future Timestamps', 'PRICE_ACCURACY', 'Caller-supplied future timestamps clamped to now');
+  }
+
+  resetObservations();
+  const sample = { productKey: 'selftest-p', retailer: 'Amazon', price: 100, source: 'structured_data' as const, url: 'https://www.amazon.com/dp/X' };
+  const firstWrite = recordObservation(sample).recorded;
+  const duplicateWrite = recordObservation(sample).recorded;
+  const changedWrite = recordObservation({ ...sample, price: 90 }).recorded;
+  if (!firstWrite || duplicateWrite || !changedWrite) {
+    fail('Observation Dedupe', 'PRICE_ACCURACY', `Expected record/skip/record, got ${firstWrite}/${duplicateWrite}/${changedWrite}`);
+  } else {
+    pass('Observation Dedupe', 'PRICE_ACCURACY', 'Repeated identical prices collapse; a changed price records');
+  }
+
+  resetObservations();
+  const twoHoursAgo = new Date(Date.now() - 7200000).toISOString();
+  const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
+  recordObservation({ productKey: 'stats-p', retailer: 'Amazon', price: 200, source: 'structured_data', url: 'https://a.com/p', observedAt: twoHoursAgo });
+  recordObservation({ productKey: 'stats-p', retailer: 'Amazon', price: 150, source: 'structured_data', url: 'https://a.com/p', observedAt: oneHourAgo });
+  recordObservation({ productKey: 'stats-p', retailer: 'Walmart', price: 180, source: 'structured_data', url: 'https://w.com/p', observedAt: oneHourAgo });
+  const stats = getStats('stats-p');
+  if (stats.allTimeLow?.price !== 150) {
+    fail('Observation All-Time Low', 'PRICE_ACCURACY', `Expected recorded low of 150, got ${stats.allTimeLow?.price}`);
+  } else if (stats.currentBest?.price !== 150 || stats.currentBest?.retailer !== 'Amazon') {
+    fail('Observation Current Best', 'PRICE_ACCURACY', `Current best must come from each retailer's LATEST price, got ${JSON.stringify(stats.currentBest)}`);
+  } else if (stats.hasMeaningfulHistory !== false) {
+    fail('Observation History Honesty', 'PRICE_ACCURACY', 'Three points over two hours must not count as meaningful history');
+  } else {
+    pass('Observation Stats', 'PRICE_ACCURACY', `All-time low $${stats.allTimeLow.price} from ${stats.observationCount} observations; short history correctly flagged as not yet meaningful`);
+  }
+  resetObservations();
 
   // Summary calculation
   const durationMs = Date.now() - startTime;
