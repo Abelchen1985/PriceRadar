@@ -10,7 +10,8 @@
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "test:self": "tsx scripts/run-selftest.ts",
-    "check:bookmarklet": "node scripts/check-bookmarklet.cjs"
+    "check:bookmarklet": "node scripts/check-bookmarklet.cjs",
+    "check:client": "node scripts/check-client-bundle.cjs"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

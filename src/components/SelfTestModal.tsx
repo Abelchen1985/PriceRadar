@@ -4,7 +4,12 @@ import {
   ExternalLink, Search, RefreshCw, Zap, Sparkles, Filter, 
   Tag, Check
 } from 'lucide-react';
-import { runComprehensiveSelfTest, TestResult } from '../../scripts/selftest';
+// Intentionally NOT importing scripts/selftest: that pulls the whole Node-side
+// suite -- and anything it imports -- into the browser bundle. It did exactly
+// that once, dragging in a module that reads process.env at import time, which
+// threw before React could mount and left the page blank. The suite runs on the
+// server, where it belongs, and this modal reads the result.
+import type { TestResult } from '../../scripts/selftest';
 import { INITIAL_TRACKED_ITEMS } from '../data/catalog';
 import { getRetailerDealUrl } from '../utils/retailerUrls';
 
@@ -31,18 +36,23 @@ export const SelfTestModal: React.FC<SelfTestModalProps> = ({ isOpen, onClose })
     }
   }, [isOpen]);
 
-  const handleRunTest = () => {
+  const [runError, setRunError] = useState<string | null>(null);
+
+  const handleRunTest = async () => {
     setIsRunning(true);
-    setTimeout(() => {
-      try {
-        const res = runComprehensiveSelfTest();
-        setReport(res);
-      } catch (e: any) {
-        console.error('Self-test error:', e);
-      } finally {
-        setIsRunning(false);
-      }
-    }, 150);
+    setRunError(null);
+    try {
+      const res = await fetch('/api/selftest');
+      if (!res.ok) throw new Error(`Self-test endpoint returned ${res.status}`);
+      const data = await res.json();
+      if (!data || !data.summary) throw new Error('Self-test returned an unexpected response');
+      setReport(data);
+    } catch (e: any) {
+      console.error('Self-test error:', e);
+      setRunError(e?.message || 'Could not reach the self-test endpoint');
+    } finally {
+      setIsRunning(false);
+    }
   };
 
   if (!isOpen) return null;

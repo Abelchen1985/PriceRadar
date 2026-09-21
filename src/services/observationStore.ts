@@ -62,8 +62,37 @@ export interface PriceStats {
   hasMeaningfulHistory: boolean;
 }
 
-const DATA_DIR = process.env.PRICE_DATA_DIR || path.join(process.cwd(), 'data');
-const DATA_FILE = path.join(DATA_DIR, 'observations.json');
+/**
+ * Resolved lazily and defensively. Reading process.env at module scope meant
+ * that merely importing this file in a browser threw "process is not defined"
+ * before anything could catch it -- which is precisely what happened when the
+ * test suite (which imports this) was bundled into the client. Nothing here
+ * touches Node globals until a storage call is actually made, and in an
+ * environment without them the store degrades to memory-only.
+ */
+const hasNodeFs = (): boolean => {
+  try {
+    return typeof process !== 'undefined' && !!process.versions?.node && typeof fs?.existsSync === 'function';
+  } catch {
+    return false;
+  }
+};
+
+function dataDir(): string {
+  try {
+    return process.env.PRICE_DATA_DIR || path.join(process.cwd(), 'data');
+  } catch {
+    return 'data';
+  }
+}
+
+function dataFile(): string {
+  try {
+    return path.join(dataDir(), 'observations.json');
+  } catch {
+    return 'data/observations.json';
+  }
+}
 
 /** Below this many days of data, an "all-time low" is not worth the name. */
 export const MEANINGFUL_HISTORY_DAYS = 14;
@@ -101,13 +130,18 @@ export function buildProductKey(identity: Partial<ProductIdentity>): string {
 function load(): void {
   if (loaded) return;
   loaded = true;
+  if (!hasNodeFs()) {
+    durable = false;
+    return;
+  }
   try {
-    if (fs.existsSync(DATA_FILE)) {
-      const parsed = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+    const file = dataFile();
+    if (fs.existsSync(file)) {
+      const parsed = JSON.parse(fs.readFileSync(file, 'utf-8'));
       if (Array.isArray(parsed)) observations = parsed.filter(Boolean);
     }
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-    fs.accessSync(DATA_DIR, fs.constants.W_OK);
+    fs.mkdirSync(dataDir(), { recursive: true });
+    fs.accessSync(dataDir(), fs.constants.W_OK);
     durable = true;
   } catch {
     // Read-only or unavailable filesystem: keep serving from memory and report
@@ -117,11 +151,12 @@ function load(): void {
 }
 
 function persist(): void {
-  if (!durable) return;
+  if (!durable || !hasNodeFs()) return;
   try {
-    const tmp = `${DATA_FILE}.tmp`;
+    const file = dataFile();
+    const tmp = `${file}.tmp`;
     fs.writeFileSync(tmp, JSON.stringify(observations), 'utf-8');
-    fs.renameSync(tmp, DATA_FILE);
+    fs.renameSync(tmp, file);
   } catch {
     durable = false;
   }
