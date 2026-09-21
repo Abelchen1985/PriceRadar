@@ -223,26 +223,29 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
       }
     }
 
-    // Fallback to verified category-appropriate storefronts
+    // Fallback: category-appropriate storefronts as catalog-search links.
+    //
+    // These carry NO price. An earlier version filled them in as 92%, 94%, 96%
+    // and 98% of MSRP, which put four invented prices on screen and marked the
+    // cheapest one "Best Deal Available" -- numbers no store ever quoted. A
+    // search link with an honest "Check" beats a fabricated price every time.
     if (retailers.length === 0) {
-      retailers = rules.defaultRetailers.map((storeName, idx) => {
-        const discounts = [0.92, 0.94, 0.96, 0.98];
-        const discountRate = discounts[idx] || 0.95;
-        return {
-          id: `r-cust-${Date.now()}-${idx}`,
-          retailerName: storeName,
-          url: getRetailerDealUrl(storeName, title, productUrl, brand || matchedPreset?.brand, model || matchedPreset?.model),
-          price: Number((msrpNum * discountRate).toFixed(2)),
-          originalPrice: msrpNum,
-          inStock: true,
-          stockMessage: idx === 0 ? 'In Stock - Best Deal Available' : 'In Stock - Fast Delivery',
-          shipping: 'Free Shipping',
-          shippingCost: 0,
-          rating: 4.8,
-          reviewCount: 750 + idx * 180,
-          isBestPrice: idx === 0
-        };
-      });
+      retailers = rules.defaultRetailers.map((storeName, idx) => ({
+        id: `r-cust-${Date.now()}-${idx}`,
+        retailerName: storeName,
+        url: getRetailerDealUrl(storeName, title, productUrl, brand || matchedPreset?.brand, model || matchedPreset?.model),
+        price: null,
+        originalPrice: msrpNum,
+        inStock: true,
+        stockMessage: 'Check store catalog',
+        shipping: 'Shipping varies',
+        shippingCost: 0,
+        rating: null,
+        reviewCount: null,
+        isBestPrice: false,
+        priceVerified: false,
+        matchStatus: 'unverified_search' as const
+      }));
     }
 
     const newItem: TrackedItem = sanitizeTrackedItem({

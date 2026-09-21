@@ -1195,16 +1195,19 @@ Note if the listing is an exact standalone product, a bundle (e.g. includes sola
           candidate: cand
         });
 
-        // Only surface results the verifier actually stands behind. Previously this
-        // only excluded 'wrong_product' and 'not_found', which let 'probable' (60-74
-        // confidence, never marked priceVerified) and 'search_only' (catalog search
-        // pages, not real product pages) through as if they were normal deal cards.
+        // Drop only the candidates that are genuinely wrong or absent. An
+        // unverified candidate is still a useful catalog-search link -- it just
+        // has no price attached, which the fields below make explicit.
+        //
+        // A stricter earlier version skipped everything that was not
+        // productVerified, which meant any product outside the tiny verified
+        // registry came back with ZERO retailers. Adding an Ugly Stik GX2 gave a
+        // watchlist entry with no links at all. "I could not confirm a price" is
+        // not the same statement as "no store sells this", and collapsing the two
+        // threw away the honest, useful half of the answer.
         if (
-          !verified.productVerified ||
           verified.productMatch.status === 'wrong_product' ||
-          verified.productMatch.status === 'not_found' ||
-          verified.productMatch.status === 'search_only' ||
-          verified.productMatch.status === 'probable'
+          verified.productMatch.status === 'not_found'
         ) {
           continue;
         }
@@ -1260,9 +1263,12 @@ Note if the listing is an exact standalone product, a bundle (e.g. includes sola
       // If no verified prices could be confirmed, preserve integrity: DO NOT invent fake prices
       const hasVerifiedOffers = verifiedList.some(r => r.priceVerified && typeof r.price === 'number' && r.price > 0);
 
+      const searchOnlyCount = verifiedList.filter(r => !r.priceVerified).length;
       const marketNote = hasVerifiedOffers
         ? `Verified pricing active across ${verifiedList.filter(r => r.priceVerified).length} retailer storefront(s).`
-        : `No verified direct merchant listings found for "${identity.productName}". Store catalog searches available to verify local stock.`;
+        : searchOnlyCount > 0
+          ? `No price could be verified for "${identity.productName}". ${searchOnlyCount} store catalog search link(s) provided instead -- prices shown as "Check" have not been observed.`
+          : `No retailer in the catalog is eligible to sell "${identity.productName}".`;
 
       return res.json({
         success: true,
