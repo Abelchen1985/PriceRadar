@@ -19,7 +19,7 @@ import {
   extractDirectProductSku,
   isRetailerSellingProduct
 } from '../src/utils/retailerUrls';
-import { detectProductCategory, estimateHistoricalPricing } from '../src/utils/productClassifier';
+import { detectProductCategory, estimateHistoricalPricing, sanitizeTrackedItem } from '../src/utils/productClassifier';
 import { normalizeProductIdentity } from '../src/services/productIdentity';
 import { matchCandidateProduct, determineLinkType } from '../src/services/productMatcher';
 import { verifyRetailerPrice } from '../src/services/priceVerifier';
@@ -1039,6 +1039,71 @@ export function runComprehensiveSelfTest(): {
     fail('Preset Cross-Contamination', 'PRODUCT_MATCH', 'Ugly Stik matched the Jackery preset -- the original bug is back');
   } else {
     pass('Preset Cross-Contamination', 'PRODUCT_MATCH', `Ugly Stik resolves to "${uglyMatch?.brand}" not Jackery`);
+  }
+
+  // ==========================================
+  // SECTION 14: Every Item Has Somewhere To Shop
+  // ==========================================
+  // A tracked item with an empty "Store Deals" row is useless, and because
+  // sanitizeTrackedItem re-runs on every load, an item that once lost its
+  // retailers stayed broken permanently. It now refills from the category's own
+  // storefronts, so a watchlist saved by any earlier build heals itself.
+
+  const strandedItem: any = {
+    id: 'stranded',
+    title: 'Ugly Stik GX2 Spinning Rod',
+    brand: 'Ugly Stik',
+    model: 'Model-X',
+    category: 'Fishing & Angling',
+    imageUrl: '',
+    msrp: 59.99,
+    allTimeLow: 47.5,
+    allTimeLowDate: 'Nov 2024',
+    allTimeLowStore: 'Bass Pro Shops',
+    targetPrice: 47.5,
+    emailAlertEnabled: true,
+    userEmail: 'alerts@example.com',
+    alertCondition: 'below_target',
+    retailers: [],          // the broken state
+    priceHistory: [],
+    lastUpdated: 'Just now',
+    isCustom: true
+  };
+
+  const healed = sanitizeTrackedItem(strandedItem);
+  if (!healed.retailers || healed.retailers.length === 0) {
+    fail('Stranded Item Healing', 'DEAL_LINKS', 'An item with no retailers must be given catalog-search links, not left empty');
+  } else if (healed.retailers.some(r => typeof r.price === 'number' && r.price > 0)) {
+    fail('Stranded Item Healing', 'DEAL_LINKS', 'Healed retailers must carry no price -- nothing was observed');
+  } else {
+    const allUsable = healed.retailers.every(r => isOfficialSearchUrl(r.url) || isVerifiedDirectProductUrl(r.url));
+    if (!allUsable) {
+      fail('Stranded Item Healing', 'DEAL_LINKS', `Healed links must be real URLs: ${healed.retailers.map(r => r.url).join(', ')}`);
+    } else {
+      pass('Stranded Item Healing', 'DEAL_LINKS', `Empty item refilled with ${healed.retailers.length} priceless catalog links (${healed.retailers.map(r => r.retailerName).join(', ')})`);
+    }
+  }
+
+  // Healing must not disturb an item that already has retailers.
+  const healthyItem = { ...strandedItem, id: 'healthy', retailers: [{
+    id: 'r1', retailerName: 'Bass Pro Shops', url: 'https://www.basspro.com/shop/en/SearchDisplay?searchTerm=ugly%20stik',
+    price: 44.98, inStock: true, stockMessage: 'In Stock', shipping: 'Free', shippingCost: 0,
+    rating: null, reviewCount: null, isBestPrice: true
+  }] } as any;
+  const untouched = sanitizeTrackedItem(healthyItem);
+  if (untouched.retailers.length !== 1 || untouched.retailers[0].price !== 44.98) {
+    fail('Healing Leaves Good Data Alone', 'DEAL_LINKS', `An item with real retailers must be preserved: ${JSON.stringify(untouched.retailers.map(r => ({ n: r.retailerName, p: r.price })))}`);
+  } else {
+    pass('Healing Leaves Good Data Alone', 'DEAL_LINKS', 'An item that already has a priced retailer is left untouched');
+  }
+
+  // Every seeded catalog item must survive sanitising with links intact.
+  const strippedSeed = INITIAL_TRACKED_ITEMS.map(i => sanitizeTrackedItem({ ...i, retailers: [] } as any))
+    .filter(i => !i.retailers || i.retailers.length === 0);
+  if (strippedSeed.length > 0) {
+    fail('All Catalog Items Recoverable', 'DEAL_LINKS', `These items cannot be healed: ${strippedSeed.map(i => i.title).join(', ')}`);
+  } else {
+    pass('All Catalog Items Recoverable', 'DEAL_LINKS', `All ${INITIAL_TRACKED_ITEMS.length} catalog items regain store links if their retailer list is ever emptied`);
   }
 
   // Summary calculation

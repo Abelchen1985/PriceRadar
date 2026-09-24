@@ -426,6 +426,35 @@ export function sanitizeTrackedItem(item: TrackedItem): TrackedItem {
     return !isForbidden && isStoreSelling;
   });
 
+  // Last line of defence: never leave an item with no way to shop it.
+  //
+  // The filter above purges stores that do not carry the product, and until now
+  // the only path that refilled an emptied list was the Anker special case
+  // below. Every other item that arrived here with no retailers -- however it
+  // got that way, including from a build no longer in the tree -- kept an empty
+  // "Store Deals" row forever, because this function re-runs on every load and
+  // had nothing to put back. A tracked item with zero links is useless, and the
+  // category's own storefronts are always a valid answer: they are catalog
+  // searches, so they make no claim about price or stock that could be wrong.
+  if (validRetailers.length === 0 && rules.defaultRetailers.length > 0) {
+    validRetailers = rules.defaultRetailers.map((storeName, idx) => ({
+      id: `r-heal-${idx}-${storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+      retailerName: storeName,
+      url: getRetailerDealUrl(storeName, item.title, undefined, item.brand, item.model),
+      price: null,
+      originalPrice: msrp,
+      inStock: true,
+      stockMessage: 'Check store catalog',
+      shipping: 'Shipping varies',
+      shippingCost: 0,
+      rating: null,
+      reviewCount: null,
+      isBestPrice: false,
+      priceVerified: false,
+      matchStatus: 'unverified_search'
+    })) as RetailerPrice[];
+  }
+
   // Authentic benchmark storefronts for verified benchmark products
   if (isAnkerSolixC1000 && (validRetailers.length === 0 || validRetailers.some(r => r.retailerName.toLowerCase().includes('target')))) {
     const amzDetails = getRetailerLinkDetails('Amazon', item.title, 'https://www.amazon.com/dp/B0C4DBC65K', 'Anker', 'A1761');
