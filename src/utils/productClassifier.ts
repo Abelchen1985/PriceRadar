@@ -1,5 +1,6 @@
 import { ItemCategory, TrackedItem, RetailerPrice, CommonRetailer } from '../types';
 import { getRetailerDealUrl, getRetailerLinkDetails, isRetailerSellingProduct } from './retailerUrls';
+import { KNOWN_BRANDS } from '../services/productIdentity';
 
 /**
  * Intelligent Category Detector based on product title and brand
@@ -357,6 +358,17 @@ export function sanitizeTrackedItem(item: TrackedItem): TrackedItem {
     category = detectedCat;
   }
 
+  // Correct a brand the title contradicts. Items saved before the preset matcher
+  // was fixed carry another product's brand (an Ugly Stik rod branded Jackery),
+  // which is wrong on the card and poison inside a search query.
+  const escapeToken = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const brandInTitle = KNOWN_BRANDS.find(known =>
+    new RegExp(`\\b${escapeToken(known)}\\b`, 'i').test(item.title)
+  );
+  const brand = brandInTitle && (!item.brand || brandInTitle.toLowerCase() !== item.brand.toLowerCase())
+    ? brandInTitle
+    : item.brand;
+
   const rules = getCategoryStoreRules(category, item.title);
 
   // 1.5 Auto-correct known benchmarks (Jackery Explorer 1500 v2 & Anker SOLIX C1000 Gen 2)
@@ -415,14 +427,14 @@ export function sanitizeTrackedItem(item: TrackedItem): TrackedItem {
   if (!imageUrl || 
       (imageUrl.includes(cpuImageMarker) && category !== 'PC Components') ||
       (imageUrl.includes(scubaImageMarker) && category === 'Fishing & Angling')) {
-    imageUrl = getProductImageUrl(item.title, category, item.brand);
+    imageUrl = getProductImageUrl(item.title, category, brand);
   }
 
   // 4. Validate retailers list (purge stores that don't carry this product)
   let validRetailers = (item.retailers || []).filter(r => {
     const rName = (r.retailerName || '').toLowerCase();
     const isForbidden = rules.forbiddenStores.some(f => rName.includes(f.toLowerCase()));
-    const isStoreSelling = isRetailerSellingProduct(r.retailerName, item.title, item.brand, item.model);
+    const isStoreSelling = isRetailerSellingProduct(r.retailerName, item.title, brand, item.model);
     return !isForbidden && isStoreSelling;
   });
 
@@ -440,7 +452,7 @@ export function sanitizeTrackedItem(item: TrackedItem): TrackedItem {
     validRetailers = rules.defaultRetailers.map((storeName, idx) => ({
       id: `r-heal-${idx}-${storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
       retailerName: storeName,
-      url: getRetailerDealUrl(storeName, item.title, undefined, item.brand, item.model),
+      url: getRetailerDealUrl(storeName, item.title, undefined, brand, item.model),
       price: null,
       originalPrice: msrp,
       inStock: true,
@@ -619,7 +631,7 @@ export function sanitizeTrackedItem(item: TrackedItem): TrackedItem {
   } else {
     // Sanitize and enrich existing verified retailers - strictly avoid mathematical price fabrication
     validRetailers = validRetailers.map(r => {
-      const linkDetails = getRetailerLinkDetails(r.retailerName, item.title, r.url, item.brand, item.model);
+      const linkDetails = getRetailerLinkDetails(r.retailerName, item.title, r.url, brand, item.model);
       return {
         ...r,
         url: linkDetails.url,
@@ -641,6 +653,7 @@ export function sanitizeTrackedItem(item: TrackedItem): TrackedItem {
   }
 
   return {
+    brand,
     ...item,
     category,
     imageUrl,

@@ -19,7 +19,7 @@ import {
   extractDirectProductSku,
   isRetailerSellingProduct
 } from '../src/utils/retailerUrls';
-import { detectProductCategory, estimateHistoricalPricing, sanitizeTrackedItem } from '../src/utils/productClassifier';
+import { detectProductCategory, estimateHistoricalPricing, sanitizeTrackedItem, getCategoryStoreRules } from '../src/utils/productClassifier';
 import { normalizeProductIdentity } from '../src/services/productIdentity';
 import { matchCandidateProduct, determineLinkType } from '../src/services/productMatcher';
 import { verifyRetailerPrice } from '../src/services/priceVerifier';
@@ -1104,6 +1104,82 @@ export function runComprehensiveSelfTest(): {
     fail('All Catalog Items Recoverable', 'DEAL_LINKS', `These items cannot be healed: ${strippedSeed.map(i => i.title).join(', ')}`);
   } else {
     pass('All Catalog Items Recoverable', 'DEAL_LINKS', `All ${INITIAL_TRACKED_ITEMS.length} catalog items regain store links if their retailer list is ever emptied`);
+  }
+
+  // ==========================================
+  // SECTION 15: Every Link On Every Item Is Correct
+  // ==========================================
+  // The standing requirement: each item must carry store links that are
+  // accurate. This audits every link on every tracked item and every preset --
+  // right retailer domain, resolvable shape, and for a search link, search
+  // terms exactly equal to what the query builder intended. A link that goes to
+  // the correct store but searches the wrong words is still a wrong link.
+
+  const RETAILER_DOMAINS: Record<string, string> = {
+    'amazon': 'amazon.com', 'walmart': 'walmart.com', 'target': 'target.com',
+    'best buy': 'bestbuy.com', 'rei': 'rei.com', 'bass pro shops': 'basspro.com',
+    "cabela's": 'cabelas.com', 'tackle warehouse': 'tacklewarehouse.com',
+    'backcountry': 'backcountry.com', 'b&h photo': 'bhphotovideo.com',
+    'newegg': 'newegg.com', 'home depot': 'homedepot.com', 'micro center': 'microcenter.com',
+    'costco': 'costco.com', 'breville': 'breville.com', "dick's sporting goods": 'dickssportinggoods.com'
+  };
+
+  // Search terms live in a query parameter at most stores and in the path at
+  // Home Depot; both count.
+  const extractSearchTerms = (url: string): string | null => {
+    const param = url.match(/(?:[?&](?:q|k|st|Ntt|searchTerm|keyword|search|d)=)([^&]*)/);
+    if (param) return decodeURIComponent(param[1]).replace(/\+/g, ' ');
+    const inPath = url.match(/homedepot\.com\/s\/([^?]+)/);
+    if (inPath) return decodeURIComponent(inPath[1]).replace(/\+/g, ' ');
+    return null;
+  };
+
+  const auditLink = (retailer: string, title: string, brand?: string, model?: string, existing?: string): string | null => {
+    const url = getRetailerLinkDetails(retailer, title, existing, brand, model).url;
+    const domain = RETAILER_DOMAINS[retailer.toLowerCase()];
+
+    if (isQuarantinedProductUrl(url)) return `${retailer}: serves a quarantined URL`;
+    if (domain && !url.includes(domain) && !url.includes('google.com/search')) {
+      return `${retailer}: wrong domain (expected ${domain}) -> ${url}`;
+    }
+    if (isVerifiedDirectProductUrl(url)) return null;
+    if (!isOfficialSearchUrl(url)) return `${retailer}: neither a verified product page nor an official search -> ${url}`;
+
+    const actual = (extractSearchTerms(url) || '').trim().toLowerCase();
+    const expected = cleanSearchQuery(title, brand, model).trim().toLowerCase();
+    if (!actual) return `${retailer}: search link carries no search terms -> ${url}`;
+    if (actual !== expected) return `${retailer}: searches "${actual}" but should search "${expected}"`;
+    return null;
+  };
+
+  let auditedLinks = 0;
+  const linkProblems: string[] = [];
+
+  for (const item of INITIAL_TRACKED_ITEMS) {
+    for (const r of item.retailers) {
+      auditedLinks++;
+      const problem = auditLink(r.retailerName, item.title, item.brand, item.model, r.url);
+      if (problem) linkProblems.push(`[${item.id}] ${problem}`);
+    }
+  }
+
+  for (const preset of POPULAR_ITEM_PRESETS as any[]) {
+    for (const store of getCategoryStoreRules(preset.category, preset.title).defaultRetailers) {
+      auditedLinks++;
+      const problem = auditLink(store, preset.title, preset.brand, preset.model);
+      if (problem) linkProblems.push(`[preset: ${preset.title.slice(0, 24)}] ${problem}`);
+    }
+  }
+
+  // An item carrying a wrong brand must still produce links that find the product.
+  auditedLinks++;
+  const pollutedProblem = auditLink('Bass Pro Shops', 'Ugly Stik GX2 Spinning Rod', 'Jackery', 'Explorer 1500 v2');
+  if (pollutedProblem) linkProblems.push(`[polluted brand] ${pollutedProblem}`);
+
+  if (linkProblems.length > 0) {
+    linkProblems.slice(0, 8).forEach(p => fail('Link Accuracy Audit', 'DEAL_LINKS', p));
+  } else {
+    pass('Link Accuracy Audit', 'DEAL_LINKS', `All ${auditedLinks} links across ${INITIAL_TRACKED_ITEMS.length} tracked items and ${POPULAR_ITEM_PRESETS.length} presets point at the right store and search exactly the intended terms`);
   }
 
   // Summary calculation

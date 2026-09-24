@@ -11,6 +11,7 @@
  */
 
 import { ProductMatchStatus, RetailerUrlType } from '../types';
+import { KNOWN_BRANDS } from '../services/productIdentity';
 
 export type { RetailerUrlType };
 
@@ -46,9 +47,20 @@ export function cleanSearchQuery(title: string, brand?: string, model?: string):
     .replace(/\s+/g, ' ')
     .trim();
 
-  // If brand is provided and not already in the query, prepend it
+  // Prepend the brand only when the title does not already name a different
+  // one. A tracked item can carry a wrong brand -- the preset matcher used to
+  // stamp "Jackery" onto an Ugly Stik -- and blindly prefixing it produced
+  // searches like "Jackery Ugly Stik GX2 Spinning Rod", which match nothing at
+  // any retailer. The title is the more trustworthy signal: the user typed it.
   if (brand && !query.toLowerCase().includes(brand.toLowerCase())) {
-    query = `${brand} ${query}`.trim();
+    const escapeToken = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const titleNamesAnotherBrand = KNOWN_BRANDS.some(known =>
+      known.toLowerCase() !== brand.toLowerCase() &&
+      new RegExp(`\\b${escapeToken(known)}\\b`, 'i').test(query)
+    );
+    if (!titleNamesAnotherBrand) {
+      query = `${brand} ${query}`.trim();
+    }
   }
 
   // Append the model number when it is a shopper-facing identifier that retailer

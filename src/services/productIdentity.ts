@@ -9,7 +9,7 @@
 import { ProductIdentity } from '../types';
 
 // Common known brands for fast canonical detection
-const KNOWN_BRANDS = [
+export const KNOWN_BRANDS = [
   'Anker', 'Jackery', 'EcoFlow', 'Bluetti', 'Apple', 'Sony', 'Samsung', 'LG',
   'DEWALT', 'Milwaukee', 'Ryobi', 'Makita', 'Bosch', 'Craftsman',
   'Shimano', 'Daiwa', 'Ugly Stik', 'Penn', 'Abu Garcia', 'St. Croix',
