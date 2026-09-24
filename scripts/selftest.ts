@@ -28,6 +28,7 @@ import { RetailerCandidate } from '../src/types';
 import { parseJsonLdProducts, compareStructuredProduct, selectMostIdentifiableProduct } from '../src/services/structuredDataVerifier';
 import { isQuarantinedProductUrl } from '../src/utils/retailerUrls';
 import { computeDealPlan } from '../src/utils/dealOptimizer';
+import { findMatchingPreset } from '../src/utils/presetMatcher';
 import {
   buildProductKey,
   sanitizeObservation,
@@ -990,6 +991,54 @@ export function runComprehensiveSelfTest(): {
     fail('Capture Priceless Node', 'DEAL_LINKS', 'A product node with no price must yield null');
   } else {
     pass('Capture Empty Page', 'DEAL_LINKS', 'Pages with no product or no price record nothing rather than guessing');
+  }
+
+  // ==========================================
+  // SECTION 13: Preset Matching
+  // ==========================================
+  // The matcher used to test only the typed title, never the preset being
+  // examined, so every alias condition was constant with respect to the
+  // candidate. Typing "Ugly Stik GX2" matched whichever preset sat first in the
+  // array and the new item inherited that preset's brand and model -- a fishing
+  // rod arrived branded Jackery, model Explorer 1500 v2.
+
+  const presetCases = [
+    { typed: 'Ugly Stik GX2 Spinning Rod', expect: 'ugly stik' },
+    { typed: 'Jackery Explorer 1500 v2', expect: 'jackery' },
+    { typed: 'Big Agnes Copper Spur HV UL2', expect: 'copper spur' },
+    { typed: 'Apple AirPods Pro', expect: 'airpods' },
+    { typed: 'Roborock S8 Pro Ultra', expect: 'roborock' }
+  ];
+
+  let presetFailures = 0;
+  for (const testCase of presetCases) {
+    const match = findMatchingPreset(testCase.typed, POPULAR_ITEM_PRESETS);
+    if (!match) {
+      fail(`Preset Match [${testCase.typed.slice(0, 22)}]`, 'PRODUCT_MATCH', 'No preset matched a title that should match one');
+      presetFailures++;
+    } else if (!match.title.toLowerCase().includes(testCase.expect)) {
+      fail(`Preset Match [${testCase.typed.slice(0, 22)}]`, 'PRODUCT_MATCH', `Matched the WRONG preset: "${match.title}" (brand ${match.brand}) for "${testCase.typed}"`);
+      presetFailures++;
+    }
+  }
+  if (presetFailures === 0) {
+    pass('Preset Matching Accuracy', 'PRODUCT_MATCH', `All ${presetCases.length} titles matched their own preset, not whichever came first`);
+  }
+
+  // A title resembling no preset must match nothing rather than the first entry.
+  const noMatch = findMatchingPreset('Generic Unbranded Widget 9000', POPULAR_ITEM_PRESETS);
+  if (noMatch) {
+    fail('Preset Non-Match', 'PRODUCT_MATCH', `An unrelated title matched "${noMatch.title}"`);
+  } else {
+    pass('Preset Non-Match', 'PRODUCT_MATCH', 'An unrelated title correctly matches no preset');
+  }
+
+  // The specific regression: the Ugly Stik must never come back as Jackery.
+  const uglyMatch = findMatchingPreset('Ugly Stik GX2 Spinning Rod', POPULAR_ITEM_PRESETS);
+  if (uglyMatch && /jackery/i.test(`${uglyMatch.brand} ${uglyMatch.title}`)) {
+    fail('Preset Cross-Contamination', 'PRODUCT_MATCH', 'Ugly Stik matched the Jackery preset -- the original bug is back');
+  } else {
+    pass('Preset Cross-Contamination', 'PRODUCT_MATCH', `Ugly Stik resolves to "${uglyMatch?.brand}" not Jackery`);
   }
 
   // Summary calculation

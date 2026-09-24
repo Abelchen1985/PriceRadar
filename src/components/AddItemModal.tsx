@@ -22,6 +22,7 @@ import {
   estimateHistoricalPricing
 } from '../utils/productClassifier';
 import { getRetailerDealUrl } from '../utils/retailerUrls';
+import { findMatchingPreset } from '../utils/presetMatcher';
 
 interface AddItemModalProps {
   onAddItem: (item: TrackedItem) => void;
@@ -147,14 +148,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
     e.preventDefault();
     if (!title.trim()) return;
 
-    const titleLower = title.trim().toLowerCase();
-    const matchedPreset = POPULAR_ITEM_PRESETS.find(p => 
-      p.title.toLowerCase() === titleLower ||
-      (titleLower.includes('jackery') && (titleLower.includes('1500') || titleLower.includes('solar generator'))) ||
-      (titleLower.includes('ugly stik') && titleLower.includes('gx2')) ||
-      (titleLower.includes('osprey') && titleLower.includes('atmos')) ||
-      (titleLower.includes('samsung') && titleLower.includes('s90d'))
-    );
+    const matchedPreset = findMatchingPreset(title, POPULAR_ITEM_PRESETS);
 
     let msrpNum = parseFloat(msrp) || (matchedPreset ? matchedPreset.msrp : 59.99);
     let targetNum = parseFloat(targetPrice) || (matchedPreset ? matchedPreset.targetPrice : msrpNum * 0.85);

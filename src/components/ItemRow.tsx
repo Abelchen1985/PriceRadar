@@ -67,6 +67,10 @@ export const ItemRow: React.FC<ItemRowProps> = ({
   }
 
   const currentPrice = lowestRetailer && typeof lowestRetailer.price === 'number' ? lowestRetailer.price : item.msrp;
+  // True only when some retailer actually has an observed price. Without this the
+  // card fell back to MSRP and still announced "Best on <first store>", which
+  // presents a list price nobody quoted as though it were that store's offer.
+  const hasObservedPrice = displayRetailers.some(r => typeof r.price === 'number' && r.price > 0);
   const savedVsMsrp = Math.max(0, item.msrp - currentPrice);
   const percentSaved = item.msrp > 0 ? (savedVsMsrp / item.msrp) * 100 : 0;
   const isAllTimeLow = currentPrice <= item.allTimeLow;
@@ -245,12 +249,19 @@ export const ItemRow: React.FC<ItemRowProps> = ({
           {/* Current Best Price Display */}
           <div className="text-right min-w-[130px] sm:min-w-[150px] shrink-0 bg-slate-950/60 p-2.5 px-3.5 rounded-xl border border-slate-800">
             <div className="text-xs text-slate-400 font-medium">
-              Best on <span className="text-slate-100 font-bold">{lowestRetailer?.retailerName || 'Retailer'}</span>
+              {hasObservedPrice
+                ? <>Best on <span className="text-slate-100 font-bold">{lowestRetailer?.retailerName || 'Retailer'}</span></>
+                : <span className="text-slate-300 font-bold">No price recorded yet</span>}
             </div>
             <div className={`text-2xl sm:text-3xl font-black tracking-tight ${
-              isAllTimeLow ? 'text-emerald-400' : 'text-white'
+              !hasObservedPrice ? 'text-slate-400' : isAllTimeLow ? 'text-emerald-400' : 'text-white'
             }`}>
               ${currentPrice.toFixed(2)}
+              {!hasObservedPrice && (
+                <span className="block text-[10px] font-semibold text-slate-500 tracking-normal">
+                  MSRP shown &mdash; no store price observed
+                </span>
+              )}
             </div>
             {isAllTimeLow ? (
               <span className="inline-block text-[10px] font-bold text-emerald-400 bg-emerald-950/90 border border-emerald-500/50 px-1.5 py-0.5 rounded">
