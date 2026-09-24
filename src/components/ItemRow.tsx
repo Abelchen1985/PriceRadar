@@ -13,10 +13,12 @@ import {
   RefreshCw,
   Send,
   Mail,
-  Check
+  Check,
+  Search
 } from 'lucide-react';
 import { TrackedItem, RetailerPrice, EmailRecipient } from '../types';
 import { getRetailerDealUrl, getRetailerLinkDetails, isRetailerSellingProduct } from '../utils/retailerUrls';
+import { describeLowPrice } from '../utils/priceLabels';
 
 interface ItemRowProps {
   item: TrackedItem;
@@ -66,14 +68,49 @@ export const ItemRow: React.FC<ItemRowProps> = ({
     lowestRetailer = displayRetailers.find(r => typeof r.price === 'number' && r.price > 0) || displayRetailers[0];
   }
 
-  const currentPrice = lowestRetailer && typeof lowestRetailer.price === 'number' ? lowestRetailer.price : item.msrp;
   // True only when some retailer actually has an observed price. Without this the
   // card fell back to MSRP and still announced "Best on <first store>", which
   // presents a list price nobody quoted as though it were that store's offer.
-  const hasObservedPrice = displayRetailers.some(r => typeof r.price === 'number' && r.price > 0);
+  //
+  // The test for an offer is deliberately strict: a price ALONE is not enough.
+  // A price attached to a search URL cannot be checked against anything -- there
+  // is no single page it came from -- so it is not an offer, and it is exactly
+  // the shape of the fabricated seed prices this app used to display. An offer
+  // needs a direct product URL and a price.
+  const classifiedRetailers = displayRetailers.map((retailer) => {
+    const linkDetails = getRetailerLinkDetails(
+      retailer.retailerName,
+      retailer.title || item.title,
+      retailer.url,
+      item.brand,
+      item.model
+    );
+    const hasPrice = typeof retailer.price === 'number' && retailer.price > 0;
+    return {
+      retailer,
+      linkDetails,
+      isOffer: hasPrice && linkDetails.isDirect
+    };
+  });
+  const offerLinks = classifiedRetailers.filter(r => r.isOffer);
+  const searchLinks = classifiedRetailers.filter(r => !r.isOffer);
+  const hasObservedPrice = offerLinks.length > 0;
+
+  // The price this row reasons about comes only from offers. Letting a price on
+  // a search link set it meant a figure nobody could check drove "below target",
+  // "at an all-time low" and the savings percentage.
+  const bestOfferEntry = offerLinks.reduce<(typeof offerLinks)[number] | null>((best, cur) => {
+    if (!cur.retailer.inStock) return best;
+    if (!best) return cur;
+    return (cur.retailer.price as number) < (best.retailer.price as number) ? cur : best;
+  }, null) || offerLinks[0] || null;
+  const currentPrice = bestOfferEntry ? (bestOfferEntry.retailer.price as number) : item.msrp;
   const savedVsMsrp = Math.max(0, item.msrp - currentPrice);
   const percentSaved = item.msrp > 0 ? (savedVsMsrp / item.msrp) * 100 : 0;
   const isAllTimeLow = currentPrice <= item.allTimeLow;
+  // Every description of the low price comes from one place, so a figure that
+  // was never observed cannot be labelled a record anywhere on this row.
+  const lowLabel = describeLowPrice(item);
   const isNearAllTimeLow = !isAllTimeLow && currentPrice <= item.allTimeLow * 1.05;
   const isBelowTarget = currentPrice <= item.targetPrice;
 
@@ -159,18 +196,26 @@ export const ItemRow: React.FC<ItemRowProps> = ({
                 MSRP: <span className="text-slate-300 line-through">${item.msrp.toFixed(2)}</span>
               </div>
               <div className="flex items-center space-x-1">
-                <span>All-Time Low:</span>
-                <span className="font-semibold text-emerald-400">${item.allTimeLow.toFixed(2)}</span>
-                <a
-                  href={getRetailerDealUrl(item.allTimeLowStore, item.title, undefined, item.brand, item.model)}
-                  target="_blank"
-                  rel="nofollow noopener noreferrer"
-                  referrerPolicy="no-referrer"
-                  title={`Open record low storefront: ${item.allTimeLowStore}`}
-                  className="text-slate-400 hover:text-emerald-300 text-[11px] underline decoration-slate-600 hover:decoration-emerald-400 transition ml-0.5"
-                >
-                  ({item.allTimeLowStore}, {item.allTimeLowDate})
-                </a>
+                <span>{lowLabel.label}:</span>
+                <span className={`font-semibold ${lowLabel.isObserved ? 'text-emerald-400' : 'text-slate-300'}`}>
+                  ${lowLabel.value.toFixed(2)}
+                </span>
+                {lowLabel.canLinkStore ? (
+                  <a
+                    href={getRetailerDealUrl(item.allTimeLowStore, item.title, undefined, item.brand, item.model)}
+                    target="_blank"
+                    rel="nofollow noopener noreferrer"
+                    referrerPolicy="no-referrer"
+                    title={`Open the storefront where this low was recorded: ${item.allTimeLowStore}`}
+                    className="text-slate-400 hover:text-emerald-300 text-[11px] underline decoration-slate-600 hover:decoration-emerald-400 transition ml-0.5"
+                  >
+                    ({lowLabel.detail})
+                  </a>
+                ) : (
+                  <span className="text-slate-500 text-[11px] ml-0.5" title={lowLabel.caveat}>
+                    ({lowLabel.detail})
+                  </span>
+                )}
               </div>
               <div className="text-slate-500 text-[11px]">
                 Updated {item.lastUpdated}
@@ -250,7 +295,7 @@ export const ItemRow: React.FC<ItemRowProps> = ({
           <div className="text-right min-w-[130px] sm:min-w-[150px] shrink-0 bg-slate-950/60 p-2.5 px-3.5 rounded-xl border border-slate-800">
             <div className="text-xs text-slate-400 font-medium">
               {hasObservedPrice
-                ? <>Best on <span className="text-slate-100 font-bold">{lowestRetailer?.retailerName || 'Retailer'}</span></>
+                ? <>Best on <span className="text-slate-100 font-bold">{bestOfferEntry?.retailer.retailerName || 'Retailer'}</span></>
                 : <span className="text-slate-300 font-bold">No price recorded yet</span>}
             </div>
             <div className={`text-2xl sm:text-3xl font-black tracking-tight ${
@@ -263,18 +308,19 @@ export const ItemRow: React.FC<ItemRowProps> = ({
                 </span>
               )}
             </div>
-            {isAllTimeLow ? (
+            {isAllTimeLow && lowLabel.isObserved ? (
               <span className="inline-block text-[10px] font-bold text-emerald-400 bg-emerald-950/90 border border-emerald-500/50 px-1.5 py-0.5 rounded">
                 All-Time Low (${item.allTimeLow.toFixed(0)})
               </span>
             ) : (
               <div className="text-[10px] text-slate-400">
-                Record Low: ${item.allTimeLow.toFixed(2)}
-                {item.allTimeLowStore && (
-                  <span className="text-slate-400 block text-[9px] truncate max-w-[130px]" title={`Historic low at ${item.allTimeLowStore} (${item.allTimeLowDate})`}>
-                    at {item.allTimeLowStore}
-                  </span>
-                )}
+                {lowLabel.label}: ${lowLabel.value.toFixed(2)}
+                <span
+                  className="text-slate-500 block text-[9px] truncate max-w-[130px]"
+                  title={lowLabel.caveat || lowLabel.detail}
+                >
+                  {lowLabel.isObserved ? `at ${item.allTimeLowStore}` : 'estimate'}
+                </span>
               </div>
             )}
           </div>
@@ -285,67 +331,85 @@ export const ItemRow: React.FC<ItemRowProps> = ({
       {/* Lower Tier: Store Deals & Verified Product Links */}
       <div className="pt-3.5 border-t border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-3">
         
-        {/* Left: Multi-Retailer Deal Strip with Direct vs Search Badges */}
-        <div className="flex items-center flex-wrap gap-2 min-w-0">
-          <span className="text-xs font-semibold text-slate-400 flex items-center space-x-1 mr-1 shrink-0">
-            <Store className="w-3.5 h-3.5 text-blue-400" />
-            <span>Store Deals:</span>
-          </span>
+        {/* Left: two groups, kept strictly apart.
+            
+            An OFFER is a real listing: a direct product URL with a price that
+            came from somewhere. It can be bought, so it gets a price and a
+            prominent card.
+            
+            A SEARCH LINK is a query we built from the product title. It has no
+            price, it makes no claim that the store stocks the item, and it is
+            rendered so it cannot be mistaken for a deal. Previously both sat
+            under one "Store Deals:" heading with a price chip on each, which is
+            how a search link that found nothing still looked like an offer. */}
+        <div className="flex flex-col gap-2 min-w-0">
 
-          <div className="flex flex-wrap items-center gap-1.5">
-            {displayRetailers.map((retailer) => {
-              const isBest = lowestRetailer && retailer.id === lowestRetailer.id;
-              const cardTitle = retailer.title || item.title;
-              const linkDetails = getRetailerLinkDetails(
-                retailer.retailerName,
-                cardTitle,
-                retailer.url,
-                item.brand,
-                item.model
-              );
-              const priceLabel = typeof retailer.price === 'number' 
-                ? `$${retailer.price.toFixed(0)}` 
-                : 'Check';
-              const priceDetail = typeof retailer.price === 'number' 
-                ? `$${retailer.price.toFixed(2)}` 
-                : 'Catalog Check';
-
-              return (
-                <a
-                  key={retailer.id}
-                  href={linkDetails.url}
-                  target="_blank"
-                  rel="nofollow noopener noreferrer"
-                  referrerPolicy="no-referrer"
-                  title={`${retailer.retailerName}: ${cardTitle} • ${priceDetail} (${retailer.stockMessage}) • ${linkDetails.tooltip}`}
-                  className={`px-2.5 py-1.5 rounded-xl text-xs font-medium border flex items-center space-x-1.5 transition ${
-                    isBest 
-                      ? 'bg-emerald-950/80 border-emerald-500 text-emerald-300 font-bold shadow-sm shadow-emerald-900/50 hover:bg-emerald-900/80' 
-                      : retailer.inStock 
-                        ? 'bg-slate-800/90 border-slate-700 text-slate-200 hover:border-slate-500 hover:text-white hover:bg-slate-700/80' 
-                        : 'bg-slate-900 border-slate-800 text-slate-600 line-through cursor-not-allowed'
-                  }`}
-                >
-                  <span className="font-semibold">{retailer.retailerName}</span>
-                  <span className="font-bold">{priceLabel}</span>
-                  {linkDetails.isDirect ? (
+          {offerLinks.length > 0 && (
+            <div className="flex items-center flex-wrap gap-2 min-w-0">
+              <span className="text-xs font-semibold text-slate-400 flex items-center space-x-1 mr-1 shrink-0">
+                <Store className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Offers:</span>
+              </span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {offerLinks.map(({ retailer, linkDetails }) => {
+                  const isBest = bestOfferEntry?.retailer.id === retailer.id;
+                  return (
+                  <a
+                    key={retailer.id}
+                    href={linkDetails.url}
+                    target="_blank"
+                    rel="nofollow noopener noreferrer"
+                    referrerPolicy="no-referrer"
+                    title={`${retailer.retailerName}: ${retailer.title || item.title} • $${(retailer.price as number).toFixed(2)} (${retailer.stockMessage}) • ${linkDetails.tooltip}`}
+                    className={`px-2.5 py-1.5 rounded-xl text-xs font-medium border flex items-center space-x-1.5 transition ${
+                      isBest
+                        ? 'bg-emerald-950/80 border-emerald-500 text-emerald-300 font-bold shadow-sm shadow-emerald-900/50 hover:bg-emerald-900/80'
+                        : retailer.inStock
+                          ? 'bg-slate-800/90 border-slate-700 text-slate-200 hover:border-slate-500 hover:text-white hover:bg-slate-700/80'
+                          : 'bg-slate-900 border-slate-800 text-slate-600 line-through cursor-not-allowed'
+                    }`}
+                  >
+                    <span className="font-semibold">{retailer.retailerName}</span>
+                    <span className="font-bold">${(retailer.price as number).toFixed(0)}</span>
                     <span className="text-[9px] uppercase tracking-wider px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
                       Direct
                     </span>
-                  ) : (
-                    <span className="text-[9px] uppercase tracking-wider px-1 py-0.2 rounded bg-sky-500/20 text-sky-300 font-semibold border border-sky-500/30">
-                      Search
-                    </span>
-                  )}
-                  {isBest ? (
-                    <span className="text-[10px] text-emerald-400">★</span>
-                  ) : (
-                    <ExternalLink className="w-2.5 h-2.5 opacity-60" />
-                  )}
-                </a>
-              );
-            })}
-          </div>
+                    {isBest ? (
+                      <span className="text-[10px] text-emerald-400">★</span>
+                    ) : (
+                      <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                    )}
+                  </a>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {searchLinks.length > 0 && (
+            <div className="flex items-center flex-wrap gap-2 min-w-0">
+              <span className="text-xs font-medium text-slate-500 flex items-center space-x-1 mr-1 shrink-0">
+                <Search className="w-3.5 h-3.5 text-slate-500" />
+                <span>{offerLinks.length > 0 ? 'Also search:' : 'No offers recorded — search:'}</span>
+              </span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {searchLinks.map(({ retailer, linkDetails }) => (
+                  <a
+                    key={retailer.id}
+                    href={linkDetails.url}
+                    target="_blank"
+                    rel="nofollow noopener noreferrer"
+                    referrerPolicy="no-referrer"
+                    title={`Search ${retailer.retailerName} for "${retailer.title || item.title}". This is a search, not a listing — no price has been recorded here and the store may not carry it.`}
+                    className="px-2 py-1 rounded-lg text-[11px] font-normal border border-dashed border-slate-700 bg-transparent text-slate-400 hover:text-slate-200 hover:border-slate-500 flex items-center space-x-1 transition"
+                  >
+                    <span>{retailer.retailerName}</span>
+                    <ExternalLink className="w-2.5 h-2.5 opacity-50" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right: Email Alert Settings & Quick Action Buttons */}

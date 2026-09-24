@@ -668,7 +668,24 @@ export function sanitizeTrackedItem(item: TrackedItem): TrackedItem {
 
 export interface HistoricalPricingEstimate {
   suggestedMsrp: number;
+  /**
+   * A typical street/sale price for this product. This is an ESTIMATE from a
+   * reference table -- it is useful for suggesting a target price, and it is
+   * not, and must never be presented as, a price anyone observed.
+   *
+   * A real all-time low has a store, a date and an observation behind it, and
+   * it lives in observationStore.getStats().allTimeLow. This module cannot
+   * observe anything, so it cannot produce one.
+   */
+  typicalSalePrice: number;
+  /**
+   * @deprecated Alias of typicalSalePrice, kept so existing callers still
+   * compile. It is NOT an observed low. New code should read typicalSalePrice
+   * and, for a real low, getStats().allTimeLow.
+   */
   allTimeLow: number;
+  /** Always false from this module: an estimate is not an observation. */
+  isObserved: boolean;
   allTimeLowStore: string;
   allTimeLowDate: string;
   typicalSaleDiscountPct: number;
@@ -695,13 +712,15 @@ export function estimateHistoricalPricing(
     return {
       suggestedMsrp: 59.99,
       allTimeLow: 47.50,
-      allTimeLowStore: 'Bass Pro Shops',
-      allTimeLowDate: 'Nov 2024 (Holiday Sale)',
+      typicalSalePrice: 47.50,
+      isObserved: false,
+      allTimeLowStore: 'Estimate',
+      allTimeLowDate: 'Not an observed low',
       typicalSaleDiscountPct: 20.8,
       recommendedTargetPrice: 47.50,
       savingsAmount: 12.49,
       isKnownBenchmark: true,
-      marketNote: 'Historical lowest price recorded during Bass Pro Shops Holiday Event'
+      marketNote: 'Estimated typical sale price. Not a recorded observation.'
     };
   }
 
@@ -709,13 +728,15 @@ export function estimateHistoricalPricing(
     return {
       suggestedMsrp: 239.99,
       allTimeLow: 199.99,
-      allTimeLowStore: 'Tackle Warehouse',
-      allTimeLowDate: 'March 2024 (Spring Angler Classic)',
+      typicalSalePrice: 199.99,
+      isObserved: false,
+      allTimeLowStore: 'Estimate',
+      allTimeLowDate: 'Not an observed low',
       typicalSaleDiscountPct: 16.7,
       recommendedTargetPrice: 205.00,
       savingsAmount: 40.00,
       isKnownBenchmark: true,
-      marketNote: 'All-time low reached during Tackle Warehouse 15% Angler Sale'
+      marketNote: 'Estimated typical sale price. Not a recorded observation.'
     };
   }
 
@@ -723,13 +744,15 @@ export function estimateHistoricalPricing(
     return {
       suggestedMsrp: 340.00,
       allTimeLow: 254.95,
-      allTimeLowStore: 'REI',
-      allTimeLowDate: 'May 2024 (Anniversary Sale)',
+      typicalSalePrice: 254.95,
+      isObserved: false,
+      allTimeLowStore: 'Estimate',
+      allTimeLowDate: 'Not an observed low',
       typicalSaleDiscountPct: 25.0,
       recommendedTargetPrice: 270.00,
       savingsAmount: 85.05,
       isKnownBenchmark: true,
-      marketNote: 'Member 20% coupon + manufacturer rebate combined record'
+      marketNote: 'Estimated typical sale price. Not a recorded observation.'
     };
   }
 
@@ -737,13 +760,15 @@ export function estimateHistoricalPricing(
     return {
       suggestedMsrp: 399.99,
       allTimeLow: 299.99,
-      allTimeLowStore: 'REI',
-      allTimeLowDate: 'Black Friday 2024',
+      typicalSalePrice: 299.99,
+      isObserved: false,
+      allTimeLowStore: 'Estimate',
+      allTimeLowDate: 'Not an observed low',
       typicalSaleDiscountPct: 25.0,
       recommendedTargetPrice: 319.99,
       savingsAmount: 100.00,
       isKnownBenchmark: true,
-      marketNote: 'Annual holiday promo across outdoor storefronts'
+      marketNote: 'Estimated typical sale price. Not a recorded observation.'
     };
   }
 
@@ -751,13 +776,15 @@ export function estimateHistoricalPricing(
     return {
       suggestedMsrp: 399.99,
       allTimeLow: 328.00,
-      allTimeLowStore: 'Amazon',
-      allTimeLowDate: 'July 2024 (Prime Days)',
+      typicalSalePrice: 328.00,
+      isObserved: false,
+      allTimeLowStore: 'Estimate',
+      allTimeLowDate: 'Not an observed low',
       typicalSaleDiscountPct: 18.0,
       recommendedTargetPrice: 339.99,
       savingsAmount: 71.99,
       isKnownBenchmark: true,
-      marketNote: 'Direct manufacturer instant rebate matched by Best Buy & Amazon'
+      marketNote: 'Estimated typical sale price. Not a recorded observation.'
     };
   }
 
@@ -765,13 +792,15 @@ export function estimateHistoricalPricing(
     return {
       suggestedMsrp: 499.99,
       allTimeLow: 449.00,
-      allTimeLowStore: 'Walmart',
-      allTimeLowDate: 'Nov 2024 (Cyber Week)',
+      typicalSalePrice: 449.00,
+      isObserved: false,
+      allTimeLowStore: 'Estimate',
+      allTimeLowDate: 'Not an observed low',
       typicalSaleDiscountPct: 10.2,
       recommendedTargetPrice: 449.99,
       savingsAmount: 50.99,
       isKnownBenchmark: true,
-      marketNote: 'Sony official bundle discount'
+      marketNote: 'Estimated typical sale price. Not a recorded observation.'
     };
   }
 
@@ -779,13 +808,15 @@ export function estimateHistoricalPricing(
     return {
       suggestedMsrp: 999.95,
       allTimeLow: 799.95,
-      allTimeLowStore: 'Williams Sonoma',
-      allTimeLowDate: 'Black Friday 2024',
+      typicalSalePrice: 799.95,
+      isObserved: false,
+      allTimeLowStore: 'Estimate',
+      allTimeLowDate: 'Not an observed low',
       typicalSaleDiscountPct: 20.0,
       recommendedTargetPrice: 849.00,
       savingsAmount: 200.00,
       isKnownBenchmark: true,
-      marketNote: '20% off annual specialty appliance promotional event'
+      marketNote: 'Estimated typical sale price. Not a recorded observation.'
     };
   }
 
@@ -793,13 +824,15 @@ export function estimateHistoricalPricing(
     return {
       suggestedMsrp: 449.00,
       allTimeLow: 349.00,
-      allTimeLowStore: 'Micro Center',
-      allTimeLowDate: 'March 2024 (In-Store Bundle)',
+      typicalSalePrice: 349.00,
+      isObserved: false,
+      allTimeLowStore: 'Estimate',
+      allTimeLowDate: 'Not an observed low',
       typicalSaleDiscountPct: 22.3,
       recommendedTargetPrice: 369.00,
       savingsAmount: 100.00,
       isKnownBenchmark: true,
-      marketNote: 'Micro Center in-store exclusive discount threshold'
+      marketNote: 'Estimated typical sale price. Not a recorded observation.'
     };
   }
 
@@ -811,13 +844,15 @@ export function estimateHistoricalPricing(
     return {
       suggestedMsrp: 799.00,
       allTimeLow: 499.00,
-      allTimeLowStore: 'Amazon',
-      allTimeLowDate: 'Nov 29, 2024 (Black Friday)',
+      typicalSalePrice: 499.00,
+      isObserved: false,
+      allTimeLowStore: 'Estimate',
+      allTimeLowDate: 'Not an observed low',
       typicalSaleDiscountPct: 37.5,
       recommendedTargetPrice: 549.00,
       savingsAmount: 300.00,
       isKnownBenchmark: true,
-      marketNote: 'Verified Black Friday promotional record on Amazon & Anker Direct'
+      marketNote: 'Estimated typical sale price. Not a recorded observation.'
     };
   }
 
@@ -827,51 +862,59 @@ export function estimateHistoricalPricing(
       return {
         suggestedMsrp: 799.99,
         allTimeLow: 649.00,
-        allTimeLowStore: 'Amazon',
-        allTimeLowDate: 'Nov 2024 (Black Friday)',
+        typicalSalePrice: 649.00,
+        isObserved: false,
+        allTimeLowStore: 'Estimate',
+        allTimeLowDate: 'Not an observed low',
         typicalSaleDiscountPct: 18.8,
         recommendedTargetPrice: 679.00,
         savingsAmount: 150.99,
         isKnownBenchmark: true,
-        marketNote: 'Jackery Explorer 1500 v2 + 100W Solar Panel official bundle holiday promotion'
+        marketNote: 'Estimated typical sale price. Not a recorded observation.'
       };
     }
     if (text.includes('2000')) {
       return {
         suggestedMsrp: 1499.99,
         allTimeLow: 1199.00,
-        allTimeLowStore: 'Amazon',
-        allTimeLowDate: 'Nov 2024',
+        typicalSalePrice: 1199.00,
+        isObserved: false,
+        allTimeLowStore: 'Estimate',
+        allTimeLowDate: 'Not an observed low',
         typicalSaleDiscountPct: 20.0,
         recommendedTargetPrice: 1249.00,
         savingsAmount: 300.99,
         isKnownBenchmark: true,
-        marketNote: 'Flagship high-capacity solar generator discount'
+        marketNote: 'Estimated typical sale price. Not a recorded observation.'
       };
     }
     if (text.includes('1000')) {
       return {
         suggestedMsrp: 599.99,
         allTimeLow: 479.00,
-        allTimeLowStore: 'Amazon',
-        allTimeLowDate: 'Prime Day 2024',
+        typicalSalePrice: 479.00,
+        isObserved: false,
+        allTimeLowStore: 'Estimate',
+        allTimeLowDate: 'Not an observed low',
         typicalSaleDiscountPct: 20.1,
         recommendedTargetPrice: 499.00,
         savingsAmount: 120.99,
         isKnownBenchmark: true,
-        marketNote: 'Mid-capacity power station combo benchmark'
+        marketNote: 'Estimated typical sale price. Not a recorded observation.'
       };
     }
     return {
       suggestedMsrp: 799.99,
       allTimeLow: 649.00,
-      allTimeLowStore: 'Amazon',
-      allTimeLowDate: 'Nov 2024',
+      typicalSalePrice: 649.00,
+      isObserved: false,
+      allTimeLowStore: 'Estimate',
+      allTimeLowDate: 'Not an observed low',
       typicalSaleDiscountPct: 18.8,
       recommendedTargetPrice: 679.00,
       savingsAmount: 150.99,
       isKnownBenchmark: true,
-      marketNote: 'Portable solar generator bundle market benchmark'
+      marketNote: 'Estimated typical sale price. Not a recorded observation.'
     };
   }
 
@@ -883,13 +926,15 @@ export function estimateHistoricalPricing(
     return {
       suggestedMsrp: tvMsrp,
       allTimeLow: tvAtl,
-      allTimeLowStore: 'Amazon',
-      allTimeLowDate: 'Dec 14, 2024',
+      typicalSalePrice: tvAtl,
+      isObserved: false,
+      allTimeLowStore: 'Estimate',
+      allTimeLowDate: 'Not an observed low',
       typicalSaleDiscountPct: 31.9,
       recommendedTargetPrice: is65 ? 1550.00 : 1350.00,
       savingsAmount: Number((tvMsrp - tvAtl).toFixed(2)),
       isKnownBenchmark: true,
-      marketNote: 'Direct manufacturer instant rebate matched by Best Buy & Amazon'
+      marketNote: 'Estimated typical sale price. Not a recorded observation.'
     };
   }
 
@@ -907,20 +952,25 @@ export function estimateHistoricalPricing(
   if (category === 'Audio & Headphones') discountPct = 22;
   if (category === 'Tools & Hardware') discountPct = 25;
 
-  const allTimeLow = Number((baseMsrp * (1 - discountPct / 100)).toFixed(2));
+  // Purely arithmetic: MSRP minus a category-typical discount. Nobody ever saw
+  // this price. It is a reasonable place to set a target price and it is not a
+  // fact about the market, so it is not attributed to any store.
+  const estimatedSalePrice = Number((baseMsrp * (1 - discountPct / 100)).toFixed(2));
   const recommendedTarget = Number((baseMsrp * (1 - (discountPct - 5) / 100)).toFixed(2));
-  const savings = Number((baseMsrp - allTimeLow).toFixed(2));
+  const savings = Number((baseMsrp - estimatedSalePrice).toFixed(2));
 
   return {
     suggestedMsrp: baseMsrp,
-    allTimeLow,
-    allTimeLowStore: rules.defaultATLStore,
-    allTimeLowDate: 'Last Major Promotional Sale',
+    allTimeLow: estimatedSalePrice,
+    typicalSalePrice: estimatedSalePrice,
+    isObserved: false,
+    allTimeLowStore: 'Estimate',
+    allTimeLowDate: 'Not an observed low',
     typicalSaleDiscountPct: discountPct,
     recommendedTargetPrice: recommendedTarget,
     savingsAmount: savings,
     isKnownBenchmark: false,
-    marketNote: `Estimated based on typical ${discountPct}% peak holiday / seasonal sales at ${rules.defaultATLStore}`
+    marketNote: `Estimate only: MSRP less a typical ${discountPct}% ${category} discount. No price was observed.`
   };
 }
 

@@ -542,12 +542,15 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-blue-500"
                   />
 
-                  {/* Historical Lowest Price helper card directly under MSRP box */}
-                  <div className="mt-2 p-2.5 rounded-xl bg-slate-900/90 border border-emerald-500/30 text-xs">
+                  {/* Suggested target price. This is an ESTIMATE from a reference
+                      table, not a price anyone observed, and it says so. A real
+                      all-time low only appears once the observation store has
+                      actually recorded one. */}
+                  <div className="mt-2 p-2.5 rounded-xl bg-slate-900/90 border border-slate-600/50 text-xs">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-1.5 font-bold text-emerald-400">
-                        <TrendingDown className="w-3.5 h-3.5" />
-                        <span>All-Time Low: ${pricingEstimate.allTimeLow.toFixed(2)}</span>
+                      <div className="flex items-center space-x-1.5 font-bold text-slate-200">
+                        <TrendingDown className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Typical sale price: ${pricingEstimate.typicalSalePrice.toFixed(2)}</span>
                       </div>
                       <button
                         type="button"
@@ -556,15 +559,17 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
                           setIsTargetManuallySet(true);
                         }}
                         className="px-2 py-0.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold text-[10px] rounded border border-emerald-500/40 transition cursor-pointer"
-                        title="Set target price to All-Time Low"
+                        title="Use this estimate as the target price"
                       >
-                        Match 🎯
+                        Use 🎯
                       </button>
                     </div>
                     <div className="text-[11px] text-slate-400 mt-1 leading-snug">
-                      Recorded on <strong className="text-slate-200">{pricingEstimate.allTimeLowStore}</strong> ({pricingEstimate.allTimeLowDate})
-                      <span className="block text-[10px] text-emerald-400/90 mt-0.5">
-                        Save ${pricingEstimate.savingsAmount.toFixed(2)} ({pricingEstimate.typicalSaleDiscountPct}% off MSRP)
+                      <strong className="text-amber-300/90">Estimate, not an observed price.</strong> No store has been
+                      seen selling it at this figure &mdash; it is MSRP less a typical
+                      {' '}{pricingEstimate.typicalSaleDiscountPct}% discount, offered as a starting point for your target.
+                      <span className="block text-[10px] text-slate-500 mt-0.5">
+                        A real all-time low appears here once PriceRadar has actually recorded prices for this item.
                       </span>
                     </div>
                   </div>
@@ -609,7 +614,7 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
                             : 'bg-emerald-950/40 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/60'
                         }`}
                       >
-                        🎯 All-Time Low (${pricingEstimate.allTimeLow.toFixed(2)})
+                        🎯 Typical sale (${pricingEstimate.typicalSalePrice.toFixed(2)})
                       </button>
                       <button
                         type="button"

@@ -11,6 +11,7 @@ import {
   Star
 } from 'lucide-react';
 import { TrackedItem } from '../types';
+import { describeLowPrice } from '../utils/priceLabels';
 import { getRetailerLinkDetails, isRetailerSellingProduct } from '../utils/retailerUrls';
 
 interface RetailerCompareModalProps {
@@ -46,6 +47,7 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
   const lowestPrice = verifiedPrices.length > 0 
     ? Math.min(...verifiedPrices)
     : item.targetPrice;
+  const lowLabel = describeLowPrice(item);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
@@ -90,17 +92,17 @@ export const RetailerCompareModal: React.FC<RetailerCompareModalProps> = ({
         <div className="bg-gradient-to-r from-emerald-950/90 via-slate-900 to-emerald-950/90 border-b border-emerald-800/60 px-6 py-3 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center space-x-2">
             <Flame className="w-5 h-5 text-emerald-400 animate-pulse" />
-            <span className="text-sm font-bold text-emerald-300">
-              All-Time Lowest in History: <span className="text-white text-base">${item.allTimeLow.toFixed(2)}</span>
+            <span className={`text-sm font-bold ${lowLabel.isObserved ? 'text-emerald-300' : 'text-slate-300'}`}>
+              {lowLabel.label}: <span className="text-white text-base">${lowLabel.value.toFixed(2)}</span>
             </span>
-            <span className="text-xs text-slate-400">
-              (Recorded at {item.allTimeLowStore} on {item.allTimeLowDate})
+            <span className="text-xs text-slate-400" title={lowLabel.caveat}>
+              ({lowLabel.detail})
             </span>
           </div>
 
           <div className="text-xs font-semibold text-slate-300">
             Current Best: <span className="text-emerald-400 text-sm font-bold">${lowestPrice.toFixed(2)}</span>
-            {lowestPrice <= item.allTimeLow ? (
+            {lowestPrice <= item.allTimeLow && lowLabel.isObserved ? (
               <span className="ml-2 px-2 py-0.5 bg-emerald-500 text-black text-[11px] font-black rounded-full uppercase">
                 Matching Record Low!
               </span>

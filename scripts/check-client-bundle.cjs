@@ -20,9 +20,15 @@ const path = require('path');
 // Modules that must never be reachable from the browser bundle.
 const SERVER_ONLY = [
   'services/observationStore',
+  'services/offerStore',
   'services/structuredDataVerifier',
   'scripts/selftest'
 ];
+
+// Note: src/services/offers.ts is deliberately NOT on this list. It is the pure
+// model -- types, validity rules, formatting -- with no filesystem or env
+// access, so the browser may import it. offerStore.ts is the persistence layer
+// and must stay server-side.
 
 const SRC = path.join(__dirname, '..', 'src');
 
@@ -49,7 +55,7 @@ for (const file of walk(SRC)) {
     const isTypeOnly = Boolean(m[1]) || /^\s*\{\s*type\s/.test(m[2]);
     const spec = m[3];
     if (isTypeOnly) continue;
-    if (SERVER_ONLY.some(mod => spec.includes(mod.split('/').pop()) && /selftest|observationStore|structuredDataVerifier/.test(spec))) {
+    if (SERVER_ONLY.some(mod => spec.includes(mod.split('/').pop()) && /selftest|observationStore|offerStore|structuredDataVerifier/.test(spec))) {
       offenders.push({
         file: path.relative(path.join(__dirname, '..'), file),
         spec,

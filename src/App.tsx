@@ -17,6 +17,7 @@ import {
   Cloud
 } from 'lucide-react';
 import { TrackedItem, AlertLog, EmailRecipient } from './types';
+import { canClaimAtAllTimeLow } from './utils/priceLabels';
 import { INITIAL_TRACKED_ITEMS, DEFAULT_EMAIL_RECIPIENTS } from './data/catalog';
 import { Header } from './components/Header';
 import { ItemRow } from './components/ItemRow';
@@ -271,7 +272,7 @@ export default function App() {
     const validPrices = item.retailers.filter(r => typeof r.price === 'number' && r.price > 0).map(r => r.price as number);
     const minPrice = validPrices.length > 0 ? Math.min(...validPrices) : item.msrp;
     const lowestRetailer = item.retailers.find(r => r.price === minPrice) || item.retailers[0];
-    const isAllTimeLow = minPrice <= item.allTimeLow;
+    const isAllTimeLow = canClaimAtAllTimeLow(item) && minPrice <= item.allTimeLow;
 
     const emailsPayload = Array.isArray(emailToUse) 
       ? emailToUse 
@@ -374,7 +375,11 @@ export default function App() {
   });
 
   // Calculate high-level stats
+  // "At an all-time low" is a claim about history, so it may only be made about
+  // an item whose low was actually recorded. An item whose low is an estimate
+  // from MSRP arithmetic can never qualify, however cheap it looks right now.
   const allTimeLowItems = items.filter(it => {
+    if (!canClaimAtAllTimeLow(it)) return false;
     const valid = it.retailers.filter(r => typeof r.price === 'number' && r.price > 0).map(r => r.price as number);
     if (valid.length === 0) return false;
     const minPrice = Math.min(...valid);

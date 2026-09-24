@@ -23,6 +23,17 @@ import {
   isDurable,
   MEANINGFUL_HISTORY_DAYS
 } from "./src/services/observationStore";
+import {
+  recordOffer,
+  getOffers,
+  getAllOffers,
+  getOfferById,
+  getBestOffer,
+  retireOffer,
+  noteClick,
+  getClickCounts,
+  isDurable as offersAreDurable
+} from "./src/services/offerStore";
 import { ProductIdentity, RetailerCandidate, VerifiedPrice, DebugTrace, ProductMatchResult } from "./src/types";
 
 interface AlertRecord {
@@ -811,27 +822,39 @@ async function startServer() {
     });
 
     const retailer = retailerFromUrl(String(url));
-    const result = recordObservation({
-      productKey: buildProductKey(identity),
-      retailer,
+    const productKey = buildProductKey(identity);
+
+    // A capture is the strongest evidence this app can get without a retailer
+    // API: a real browser, on the real product page, reading the merchant's own
+    // structured data. So it becomes an OFFER, not merely an observation --
+    // recordOffer files the observation too, so history still accrues.
+    const result = recordOffer({
+      productKey,
+      merchant: retailer,
       price: best.price,
       currency: best.currency || 'USD',
       inStock: best.availability ? /InStock|LimitedAvailability|PreOrder|BackOrder/i.test(best.availability) : null,
       url: String(url),
       source: 'browser_capture',
-      verified: Boolean(best.gtin || best.mpn || best.sku)
+      sourceDetail: 'schema.org Product JSON-LD captured in-browser',
+      merchantSku: best.sku,
+      gtin: best.gtin,
+      mpn: best.mpn,
+      observedAt: new Date().toISOString()
     });
 
     res.json({
       success: true,
-      recorded: result.recorded,
+      recorded: result.stored,
       reason: result.reason,
       retailer,
       product: best.name,
       price: best.price,
-      productKey: buildProductKey(identity),
-      stats: getStats(buildProductKey(identity)),
-      historyIsDurable: isDurable()
+      productKey,
+      offer: result.offer,
+      stats: getStats(productKey),
+      historyIsDurable: isDurable(),
+      offersAreDurable: offersAreDurable()
     });
   });
 
@@ -943,6 +966,98 @@ async function startServer() {
       historyIsDurable: isDurable(),
       meaningfulHistoryDays: MEANINGFUL_HISTORY_DAYS
     });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Offers & the outbound redirector
+  //
+  // An offer is the only thing that earns a "Buy" button: it binds a merchant,
+  // an exact product URL, a price and a timestamp, and it exists only because a
+  // source produced it. Constructed search links are NOT offers and never come
+  // through here.
+  //
+  // /go/:offerId is deliberate indirection. Every outbound click resolves an id
+  // against the store, so a URL that dies is fixable in one place rather than in
+  // every copy ever handed out, and a dead link becomes detectable. It is a
+  // CLOSED redirect: it will only ever send someone to a URL already on file,
+  // so it cannot be abused as an open redirect by putting a target in the query
+  // string. It logs a per-offer counter and nothing about who clicked -- no IP,
+  // no user id, no referrer, no session.
+
+  app.post("/api/offers", (req, res) => {
+    const body = req.body || {};
+    const productKey = body.productKey || buildProductKey(
+      normalizeProductIdentity({
+        title: body.title || '',
+        brand: body.brand,
+        model: body.model,
+        mpn: body.mpn,
+        gtin: body.gtin || body.upc
+      })
+    );
+
+    const result = recordOffer({ ...body, productKey });
+    if (!result.stored) {
+      return res.status(400).json({ success: false, error: result.reason });
+    }
+
+    res.json({
+      success: true,
+      reason: result.reason,
+      offer: result.offer,
+      offersForProduct: getOffers(productKey),
+      offersAreDurable: offersAreDurable()
+    });
+  });
+
+  app.get("/api/offers", (req, res) => {
+    const key = req.query.key ? String(req.query.key) : undefined;
+    if (!key) {
+      const all = getAllOffers();
+      return res.json({
+        success: true,
+        offerCount: all.length,
+        productKeys: Array.from(new Set(all.map(o => o.productKey))),
+        offersAreDurable: offersAreDurable(),
+        clicks: getClickCounts()
+      });
+    }
+    const offers = getOffers(key);
+    res.json({
+      success: true,
+      productKey: key,
+      offers,
+      best: getBestOffer(key),
+      offersAreDurable: offersAreDurable()
+    });
+  });
+
+  // Retire an offer whose URL has been proven dead.
+  app.post("/api/offers/retire", (req, res) => {
+    const id = req.body?.id ? String(req.body.id) : '';
+    if (!id) return res.status(400).json({ success: false, error: 'id is required' });
+    const removed = retireOffer(id);
+    res.json({ success: true, removed });
+  });
+
+  app.get("/go/:offerId", (req, res) => {
+    const offer = getOfferById(String(req.params.offerId || ''));
+    if (!offer) {
+      // Not found is the correct answer. Falling back to a search page here
+      // would quietly resurrect exactly the behaviour this redesign removes:
+      // sending someone to a guess while implying it was a real listing.
+      return res.status(404).send(
+        '<!doctype html><meta charset="utf-8">' +
+        '<title>Listing no longer on file</title>' +
+        '<body style="font-family:system-ui;max-width:32rem;margin:4rem auto;line-height:1.5">' +
+        '<h1 style="font-size:1.25rem">This listing is no longer on file</h1>' +
+        '<p>The offer behind this link was retired, most likely because the retailer page stopped resolving. ' +
+        'Nothing was recorded about this click.</p>' +
+        '<p><a href="/">Back to PriceRadar</a></p></body>'
+      );
+    }
+    noteClick(offer.id);
+    res.redirect(302, offer.url);
   });
 
   // Automated self-test & link integrity suite

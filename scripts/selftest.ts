@@ -29,6 +29,9 @@ import { parseJsonLdProducts, compareStructuredProduct, selectMostIdentifiablePr
 import { isQuarantinedProductUrl } from '../src/utils/retailerUrls';
 import { computeDealPlan } from '../src/utils/dealOptimizer';
 import { findMatchingPreset } from '../src/utils/presetMatcher';
+import { recordOffer, getAllOffers, getBestOffer, __resetForTests as __resetOffersForTests } from '../src/services/offerStore';
+import { isPriceCurrent } from '../src/services/offers';
+import { describeLowPrice } from '../src/utils/priceLabels';
 import {
   buildProductKey,
   sanitizeObservation,
@@ -1180,6 +1183,144 @@ export function runComprehensiveSelfTest(): {
     linkProblems.slice(0, 8).forEach(p => fail('Link Accuracy Audit', 'DEAL_LINKS', p));
   } else {
     pass('Link Accuracy Audit', 'DEAL_LINKS', `All ${auditedLinks} links across ${INITIAL_TRACKED_ITEMS.length} tracked items and ${POPULAR_ITEM_PRESETS.length} presets point at the right store and search exactly the intended terms`);
+  }
+
+  // ---------------------------------------------------------------------------
+  // SECTION 16: The Offer Model
+  //
+  // An offer is the only thing allowed to put a price and a Buy action on the
+  // screen. These checks hold the line that made the old behaviour possible:
+  // a record with no source, no timestamp or no URL must never be storable.
+
+  __resetOffersForTests();
+
+  const nowIso = new Date().toISOString();
+  const goodOffer = {
+    productKey: 'gtin:00027242924437',
+    merchant: 'Best Buy',
+    url: 'https://www.bestbuy.com/site/x/6505727.p',
+    price: 328.00,
+    shippingCost: 0,
+    currency: 'USD',
+    inStock: true,
+    observedAt: nowIso,
+    source: 'structured_data' as const
+  };
+
+  const stored = recordOffer(goodOffer);
+  if (stored.stored && stored.offer) {
+    pass('Offer With A Source Is Stored', 'OFFERS', `${stored.offer.merchant} @ $${stored.offer.price} observed ${stored.offer.observedAt}`);
+  } else {
+    fail('Offer With A Source Is Stored', 'OFFERS', stored.reason);
+  }
+
+  const malformed: Array<[string, any]> = [
+    ['no url', { ...goodOffer, url: '' }],
+    ['search url is not a product url', { ...goodOffer, url: 'not-a-url' }],
+    ['no source', { ...goodOffer, source: undefined }],
+    ['invented source', { ...goodOffer, source: 'vibes' }],
+    ['no product key', { ...goodOffer, productKey: '' }],
+    ['negative price', { ...goodOffer, price: -5 }]
+  ];
+  const wronglyAccepted = malformed.filter(([, payload]) => recordOffer(payload).stored);
+  if (wronglyAccepted.length === 0) {
+    pass('Malformed Offers Are Rejected', 'OFFERS', `All ${malformed.length} malformed payloads refused (${malformed.map(m => m[0]).join(', ')})`);
+  } else {
+    fail('Malformed Offers Are Rejected', 'OFFERS', `Accepted: ${wronglyAccepted.map(m => m[0]).join(', ')}`);
+  }
+
+  // Every stored offer must be able to answer "when?" and "from where?".
+  const missingProvenance = getAllOffers().filter(o => !o.observedAt || !o.source || !o.url);
+  if (missingProvenance.length === 0) {
+    pass('Every Offer Carries Provenance', 'OFFERS', `${getAllOffers().length} offer(s), each with a url, a source and a timestamp`);
+  } else {
+    fail('Every Offer Carries Provenance', 'OFFERS', `${missingProvenance.length} offer(s) missing url/source/timestamp`);
+  }
+
+  // Tracking parameters must be stripped before an offer URL is stored.
+  __resetOffersForTests();
+  const tracked = recordOffer({ ...goodOffer, url: 'https://www.bestbuy.com/site/x/6505727.p?ref=abc&loc=xyz' });
+  if (tracked.stored && tracked.offer && !tracked.offer.url.includes('?')) {
+    pass('Offer URLs Are Stripped Of Query Strings', 'OFFERS', tracked.offer.url);
+  } else {
+    fail('Offer URLs Are Stripped Of Query Strings', 'OFFERS', tracked.offer?.url || tracked.reason);
+  }
+
+  // A stale price must stop being presented as current.
+  const staleIso = new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString();
+  const staleOffer = { ...goodOffer, id: 'of-stale', observedAt: staleIso } as any;
+  if (!isPriceCurrent(staleOffer) && isPriceCurrent({ ...goodOffer, id: 'of-fresh' } as any)) {
+    pass('Stale Prices Are Not Current', 'OFFERS', '72h-old price is not shown as current; a fresh one is');
+  } else {
+    fail('Stale Prices Are Not Current', 'OFFERS', 'Price freshness window is not being enforced');
+  }
+
+  // An unpriced offer must never win the "best price" slot.
+  __resetOffersForTests();
+  recordOffer({ ...goodOffer, merchant: 'Store A', price: 400 });
+  recordOffer({ ...goodOffer, merchant: 'Store B', price: null, url: 'https://www.bestbuy.com/site/y/1.p' });
+  const best = getBestOffer(goodOffer.productKey);
+  if (best && best.merchant === 'Store A' && best.price === 400) {
+    pass('Unpriced Offers Never Win Best Price', 'OFFERS', 'Best offer is the only priced one');
+  } else {
+    fail('Unpriced Offers Never Win Best Price', 'OFFERS', `Got ${best ? best.merchant + '/' + best.price : 'none'}`);
+  }
+
+  __resetOffersForTests();
+
+  // ---------------------------------------------------------------------------
+  // SECTION 17: No Fabricated Price History
+  //
+  // The rule these enforce: a figure may be called an all-time low, attributed
+  // to a store, or given a date ONLY if it was observed. The estimator cannot
+  // observe anything, so nothing it returns may claim to be a record.
+
+  const estimateSamples = [
+    'Ugly Stik GX2 Spinning Rod',
+    'Sony WH-1000XM5 Wireless Headphones',
+    'Osprey Atmos AG 65 Backpack',
+    'Some Product Nobody Has Ever Benchmarked 9000'
+  ];
+
+  const claimingEstimates: string[] = [];
+  for (const title of estimateSamples) {
+    const est = estimateHistoricalPricing(title, detectProductCategory(title));
+    if (est.isObserved !== false) claimingEstimates.push(`${title}: isObserved was not false`);
+    if (est.allTimeLowStore !== 'Estimate') claimingEstimates.push(`${title}: attributed to "${est.allTimeLowStore}"`);
+    if (/20[0-9]{2}|january|february|march|april|may|june|july|august|september|october|november|december|black friday|prime day/i.test(est.allTimeLowDate)) {
+      claimingEstimates.push(`${title}: invented a date "${est.allTimeLowDate}"`);
+    }
+    if (/(recorded|reached|achieved|observed|matched|set)\s+(at|on|during|in|by)\b/i.test(est.marketNote)) {
+      claimingEstimates.push(`${title}: market note claims an event: "${est.marketNote}"`);
+    }
+    if (est.typicalSalePrice !== est.allTimeLow) {
+      claimingEstimates.push(`${title}: typicalSalePrice and legacy allTimeLow disagree`);
+    }
+  }
+
+  if (claimingEstimates.length === 0) {
+    pass('Estimates Never Claim To Be Observations', 'PRICE_HONESTY', `${estimateSamples.length} estimates checked: none attributed to a store, dated, or narrated as a recorded event`);
+  } else {
+    claimingEstimates.slice(0, 6).forEach(c => fail('Estimates Never Claim To Be Observations', 'PRICE_HONESTY', c));
+  }
+
+  // Seeded items must not be flagged as having an observed low, because none of
+  // them came from an observation.
+  const falselyObserved = INITIAL_TRACKED_ITEMS.filter(it => (it as any).allTimeLowIsObserved === true);
+  if (falselyObserved.length === 0) {
+    pass('No Seed Item Claims A Recorded Low', 'PRICE_HONESTY', `All ${INITIAL_TRACKED_ITEMS.length} seeded items are marked as estimates`);
+  } else {
+    fail('No Seed Item Claims A Recorded Low', 'PRICE_HONESTY', `${falselyObserved.map(i => i.id).join(', ')} claim an observed all-time low`);
+  }
+
+  // The label helper must refuse to attribute an unobserved low to a store.
+  const estLabel = describeLowPrice({ allTimeLow: 47.5, allTimeLowStore: 'Bass Pro Shops', allTimeLowDate: 'Nov 2024', allTimeLowIsObserved: false });
+  const obsLabel = describeLowPrice({ allTimeLow: 47.5, allTimeLowStore: 'Bass Pro Shops', allTimeLowDate: 'Nov 2024', allTimeLowIsObserved: true });
+  if (!estLabel.canLinkStore && estLabel.label !== 'All-Time Low' && !estLabel.detail.includes('Bass Pro')
+      && obsLabel.canLinkStore && obsLabel.label === 'All-Time Low') {
+    pass('Unobserved Lows Are Not Attributed To A Store', 'PRICE_HONESTY', `Estimate renders as "${estLabel.label} — ${estLabel.detail}"; observed renders as "${obsLabel.label}"`);
+  } else {
+    fail('Unobserved Lows Are Not Attributed To A Store', 'PRICE_HONESTY', `Estimate label leaked store attribution: ${JSON.stringify(estLabel)}`);
   }
 
   // Summary calculation

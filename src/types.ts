@@ -234,6 +234,14 @@ export interface TrackedItem {
   allTimeLow: number;
   allTimeLowDate: string;
   allTimeLowStore: string;
+  /**
+   * True only when allTimeLow came from a price this app actually RECORDED --
+   * i.e. from the observation store, with a real store and a real date behind
+   * it. False (or absent) means the number is an estimate from a reference
+   * table or from MSRP arithmetic, and the UI must not attribute it to a
+   * store, give it a date, or call it a record.
+   */
+  allTimeLowIsObserved?: boolean;
   targetPrice: number;
   emailAlertEnabled: boolean;
   userEmail: string;

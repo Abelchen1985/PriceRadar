@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, TrendingDown, Flame, Calendar, Award, Info, Sparkles } from 'lucide-react';
 import { TrackedItem } from '../types';
+import { describeLowPrice } from '../utils/priceLabels';
 
 interface PriceHistoryModalProps {
   item: TrackedItem | null;
@@ -17,6 +18,7 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ item, onCl
     .map(r => r.price as number);
   const currentLowest = verifiedPrices.length > 0 ? Math.min(...verifiedPrices) : item.targetPrice;
   const isAtAllTimeLow = currentLowest <= item.allTimeLow;
+  const lowLabel = describeLowPrice(item);
   const highestHistorical = Math.max(item.msrp, ...item.priceHistory.map(p => p.lowest));
   const avgPrice = Number(
     (item.priceHistory.reduce((acc, p) => acc + p.lowest, 0) / item.priceHistory.length).toFixed(2)
@@ -88,16 +90,21 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ item, onCl
         {/* Historic Low Analysis Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-6 pb-2">
           
-          <div className="bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-3">
-            <div className="flex items-center space-x-1 text-xs text-emerald-400 font-medium">
+          <div className={`rounded-xl p-3 border ${lowLabel.isObserved
+            ? 'bg-emerald-950/40 border-emerald-500/40'
+            : 'bg-slate-800/60 border-slate-700'}`}>
+            <div className={`flex items-center space-x-1 text-xs font-medium ${lowLabel.isObserved ? 'text-emerald-400' : 'text-slate-400'}`}>
               <Flame className="w-3.5 h-3.5" />
-              <span>All-Time Low</span>
+              <span>{lowLabel.label}</span>
             </div>
             <div className="text-xl font-black text-white mt-1">
-              ${item.allTimeLow.toFixed(2)}
+              ${lowLabel.value.toFixed(2)}
             </div>
-            <div className="text-[11px] text-emerald-300 font-medium truncate">
-              {item.allTimeLowStore} &bull; {item.allTimeLowDate}
+            <div
+              className={`text-[11px] font-medium truncate ${lowLabel.isObserved ? 'text-emerald-300' : 'text-slate-500'}`}
+              title={lowLabel.caveat}
+            >
+              {lowLabel.detail}
             </div>
           </div>
 
@@ -107,7 +114,9 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ item, onCl
               ${currentLowest.toFixed(2)}
             </div>
             <div className="text-[11px] text-slate-400">
-              {isAtAllTimeLow ? '🔥 At All-Time Low' : `+$${(currentLowest - item.allTimeLow).toFixed(2)} vs Record`}
+              {isAtAllTimeLow && lowLabel.isObserved
+                ? '🔥 At All-Time Low'
+                : `+$${(currentLowest - item.allTimeLow).toFixed(2)} vs ${lowLabel.isObserved ? 'record' : 'estimate'}`}
             </div>
           </div>
 

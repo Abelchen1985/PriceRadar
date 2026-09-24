@@ -9,3 +9,6 @@ coverage/
 
 # Recorded price observations (regenerated at runtime)
 data/
+
+# scratch bundle used to run the test suite off-machine
+.pr-src.tgz
