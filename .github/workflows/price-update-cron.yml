@@ -1,52 +1,16 @@
-name: PriceRadar 2x Daily Price Sweep (Midnight & Noon)
+name: PriceRadar Price Sweep (retired)
+
+# This workflow pinged a live Express server's /api/cron/sync-now endpoint
+# (an old AI Studio preview URL that no longer exists). PriceRadar now runs
+# as a static site on GitHub Pages with its own scheduled sync workflow --
+# see sync-prices.yml, which replaces this one. Kept here (disabled) instead
+# of deleted so the change is visible in history.
 
 on:
-  schedule:
-    # Runs at 00:00 (Midnight) and 12:00 (Noon) UTC every day
-    - cron: '0 0,12 * * *'
-  workflow_dispatch: # Allows manual trigger from GitHub UI
-
-env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+  workflow_dispatch:
 
 jobs:
-  sweep-prices:
+  retired:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Ping Live Scraper & Price Update Endpoint
-        env:
-          APP_URL: ${{ secrets.APP_URL || 'https://ais-pre-patyh5cmk3gi6h3fo22226-865296898510.us-east1.run.app' }}
-          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL || 'alerts@example.com' }}
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
-        run: |
-          echo "Starting PriceRadar Midnight & Noon Automated Price Sweep..."
-          echo "Target App URL: $APP_URL"
-          
-          # Check if APP_URL is still pointing to the unconfigured placeholder
-          if [[ "$APP_URL" == *"your-deployed-app.run.app"* ]]; then
-            echo "⚠️ Warning: APP_URL is still set to placeholder 'https://your-deployed-app.run.app'."
-            echo "Please set repository secret 'APP_URL' in GitHub repository Settings -> Secrets and variables -> Actions."
-            echo "Falling back to live preview URL: https://ais-pre-patyh5cmk3gi6h3fo22226-865296898510.us-east1.run.app"
-            APP_URL="https://ais-pre-patyh5cmk3gi6h3fo22226-865296898510.us-east1.run.app"
-          fi
-          
-          # Execute curl with -k (insecure) to prevent exit code 60 SSL handshake failures, and connection timeouts
-          RESPONSE=$(curl -s -k -L --connect-timeout 15 --max-time 60 -w "\nHTTP_STATUS:%{http_code}" -X POST "$APP_URL/api/cron/sync-now" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $CRON_SECRET" \
-            -d "{\"email\": \"$ALERT_EMAIL\"}" || echo -e "\nHTTP_STATUS:CURL_FAILED")
-            
-          echo "Response from PriceRadar Engine:"
-          echo "$RESPONSE"
-          
-          STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS" | cut -d: -f2 | tr -d ' \r\n')
-          if [ "$STATUS" -ge 200 ] 2>/dev/null && [ "$STATUS" -lt 300 ] 2>/dev/null; then
-            echo "✅ Price sweep completed successfully (HTTP $STATUS)."
-          else
-            echo "⚠️ Notice: Price sweep ping received status '$STATUS'."
-            echo "Tip: Verify your PriceRadar backend is awake and secrets.APP_URL is set in GitHub Secrets."
-          fi
-
+      - run: echo "Retired -- see .github/workflows/sync-prices.yml instead."

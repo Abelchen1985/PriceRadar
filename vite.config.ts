@@ -5,6 +5,9 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    // Served at https://<user>.github.io/PriceRadar/ -- without this, every
+    // asset/link would resolve against the domain root and 404.
+    base: '/PriceRadar/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

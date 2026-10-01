@@ -16,7 +16,7 @@ import {
   Clock,
   Cloud
 } from 'lucide-react';
-import { TrackedItem, AlertLog, EmailRecipient } from './types';
+import { TrackedItem, AlertLog, EmailRecipient, RetailerPrice } from './types';
 import { canClaimAtAllTimeLow } from './utils/priceLabels';
 import { INITIAL_TRACKED_ITEMS, DEFAULT_EMAIL_RECIPIENTS } from './data/catalog';
 import { Header } from './components/Header';
@@ -174,14 +174,62 @@ export default function App() {
     showToast('Recipients Updated', `Item alert routing updated to ${emails.length} inbox(es)`);
   };
 
-  // Fetch initial alerts from server
+  // Fetch alert history from the static alerts.json the sync workflow writes
+  // (replaces a live /api/alerts endpoint -- there is no server in production).
   useEffect(() => {
-    fetch('/api/alerts')
+    fetch(`${import.meta.env.BASE_URL}alerts.json`)
       .then(r => r.json())
       .then(data => {
         if (data.alerts) setAlertLogs(data.alerts);
       })
       .catch(err => console.error(err));
+  }, []);
+
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
+
+  // Merges freshly-synced retailer/price data (public/data.json, regenerated
+  // every 2 hours by .github/workflows/sync-prices.yml) into the current
+  // items, matched by id. Only price-related fields are overwritten -- a
+  // user's own target price, alert settings and any custom (isCustom) items
+  // they added locally are left untouched, since those only ever live in
+  // this browser's localStorage.
+  const mergeSyncedItems = (prev: TrackedItem[], synced: TrackedItem[]): TrackedItem[] => {
+    const byId = new Map(synced.map(s => [s.id, s]));
+    return prev.map(it => {
+      const fresh = byId.get(it.id);
+      if (!fresh) return it;
+      return {
+        ...it,
+        retailers: fresh.retailers,
+        allTimeLow: fresh.allTimeLow,
+        allTimeLowDate: fresh.allTimeLowDate,
+        allTimeLowStore: fresh.allTimeLowStore,
+        allTimeLowIsObserved: fresh.allTimeLowIsObserved,
+        lastUpdated: fresh.lastUpdated
+      };
+    });
+  };
+
+  const fetchSyncedData = async (): Promise<TrackedItem[] | null> => {
+    try {
+      const res = await fetch(`${import.meta.env.BASE_URL}data.json`);
+      const json = await res.json();
+      if (Array.isArray(json.items) && json.items.length > 0) {
+        setLastSyncedAt(json.generatedAt || null);
+        return json.items as TrackedItem[];
+      }
+    } catch (e) {
+      console.error('Could not load synced price data:', e);
+    }
+    return null;
+  };
+
+  // On mount, pull in whatever the last scheduled sync produced so prices
+  // aren't stuck at catalog.ts's static seed values forever.
+  useEffect(() => {
+    fetchSyncedData().then(synced => {
+      if (synced) setItems(prev => mergeSyncedItems(prev, synced));
+    });
   }, []);
 
   const showToast = (title: string, desc: string, type: 'success' | 'info' = 'success') => {
@@ -202,54 +250,28 @@ export default function App() {
     showToast("Target Price Updated", `We'll email you if price drops to $${newTarget.toFixed(2)}`);
   };
 
+  // There is no live backend to call anymore (static GitHub Pages site) --
+  // "refresh" now means "pull in whatever the scheduled sync last produced",
+  // which runs automatically every 2 hours via .github/workflows/sync-prices.yml.
+  // This only ever reflects data as of that last run, not this exact second.
   const handleScrapeItem = async (item: TrackedItem) => {
     setScrapingItemIds(prev => [...prev, item.id]);
     try {
-      const res = await fetch('/api/scrape-prices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: `${item.brand} ${item.title}`,
-          currentItem: item
-        })
-      });
-      const json = await res.json();
-      const incoming: any[] = (json.data && Array.isArray(json.data.retailers)) ? json.data.retailers : [];
-      // Only trust retailer updates that carry an actual verified price (> 0).
-      // The backend returns price: 0 for candidates it could not verify, and an
-      // empty/all-zero response must never overwrite prices we already have.
-      const verifiedIncoming = incoming.filter((r: any) => r && typeof r.price === 'number' && r.price > 0);
-
-      if (verifiedIncoming.length > 0) {
-        setItems(prev => prev.map(it => {
-          if (it.id !== item.id) return it;
-          const updatedRetailers = it.retailers.map((existing: any) => {
-            const match = verifiedIncoming.find((r: any) => r.retailerName.toLowerCase() === existing.retailerName.toLowerCase());
-            return match ? { ...existing, ...match, url: match.url || existing.url } : existing;
-          });
-          // Include any newly-discovered retailers that weren't already tracked for this item
-          verifiedIncoming.forEach((r: any) => {
-            if (!updatedRetailers.some((ex: any) => ex.retailerName.toLowerCase() === r.retailerName.toLowerCase())) {
-              updatedRetailers.push(r);
-            }
-          });
-          return {
-            ...it,
-            retailers: updatedRetailers,
-            lastUpdated: 'Just now'
-          };
-        }));
-        showToast("Live Prices Verified", `Updated real-time storefront quotes for ${item.title.slice(0, 24)}...`);
+      const synced = await fetchSyncedData();
+      const fresh = synced?.find(s => s.id === item.id);
+      if (fresh && fresh.retailers.some(r => typeof r.price === 'number' && (r.price as number) > 0)) {
+        setItems(prev => mergeSyncedItems(prev, [fresh]));
+        showToast("Latest Synced Prices Loaded", `Showing the most recent automated sync for ${item.title.slice(0, 24)}...`);
       } else {
         showToast(
-          "No Verified Listings Found",
-          json.data?.marketAnalysis || `Kept existing prices for ${item.title.slice(0, 24)}... — no verified live listing found.`,
+          "No Verified Listings Yet",
+          `Kept existing prices for ${item.title.slice(0, 24)}... — the next automated sync hasn't verified a live listing.`,
           "info"
         );
       }
     } catch (e) {
       console.error(e);
-      showToast("Scrape Notice", "Couldn't reach the live price engine — kept existing prices.", "info");
+      showToast("Sync Notice", "Couldn't load the latest synced data — kept existing prices.", "info");
     } finally {
       setScrapingItemIds(prev => prev.filter(id => id !== item.id));
     }
@@ -257,11 +279,14 @@ export default function App() {
 
   const handleRefreshAll = async () => {
     setIsRefreshing(true);
-    for (const item of items.slice(0, 3)) {
-      await handleScrapeItem(item);
+    const synced = await fetchSyncedData();
+    if (synced) {
+      setItems(prev => mergeSyncedItems(prev, synced));
+      showToast("Latest Synced Prices Loaded", "All tracked items updated from the most recent automated sync.");
+    } else {
+      showToast("Sync Notice", "Couldn't load the latest synced data.", "info");
     }
     setIsRefreshing(false);
-    showToast("All Storefronts Synced", "All tracked items updated with real-time multi-retailer quotes.");
   };
 
   const handleSendAlert = async (item: TrackedItem, emailToUse?: string | string[]) => {
@@ -430,7 +455,7 @@ export default function App() {
                   className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold transition cursor-pointer"
                 >
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Updates 2x Daily: Midnight &amp; Noon (00:00 &amp; 12:00)</span>
+                  <span>Auto-Updates Every 2 Hours</span>
                 </button>
               </div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">
@@ -646,7 +671,7 @@ export default function App() {
               className="text-amber-400 hover:underline font-semibold flex items-center space-x-1"
             >
               <Clock className="w-3.5 h-3.5" />
-              <span>Updates: 12 AM &amp; 12 PM (2x Daily)</span>
+              <span>Auto-Updates Every 2 Hours</span>
             </button>
             <span>&bull;</span>
             <button

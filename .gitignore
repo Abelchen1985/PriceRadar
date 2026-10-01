@@ -7,8 +7,11 @@ coverage/
 .env*
 !.env.example
 
-# Recorded price observations (regenerated at runtime)
-data/
+# Recorded price observations -- only observations.json is committed (the
+# GitHub Actions sync workflow is the only writer in production; it has no
+# persistent disk between runs, so the history must live in git instead)
+data/*
+!data/observations.json
 
 # scratch bundle used to run the test suite off-machine
 .pr-src.tgz

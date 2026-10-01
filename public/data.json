@@ -1,0 +1,2528 @@
+{
+  "generatedAt": "2026-10-01T22:30:24.796Z",
+  "items": [
+    {
+      "id": "outdoor-osprey-atmos-65",
+      "title": "Osprey Atmos AG 65 Men's Expedition Backpack",
+      "category": "Hiking & Backpacking",
+      "brand": "Osprey",
+      "model": "Atmos AG 65 (L/XL)",
+      "imageUrl": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&auto=format&fit=crop&q=80",
+      "msrp": 340,
+      "allTimeLow": 254.95,
+      "allTimeLowDate": "Not an observed low",
+      "allTimeLowStore": "Estimate",
+      "targetPrice": 275,
+      "emailAlertEnabled": true,
+      "userEmail": "alerts@example.com",
+      "alertEmails": [
+        "alerts@example.com"
+      ],
+      "alertCondition": "below_target",
+      "lastUpdated": "2026-10-01T22:30:24.773Z",
+      "retailers": [
+        {
+          "id": "r-amazon-1790893824768",
+          "retailerName": "Amazon",
+          "url": "https://www.amazon.com/s?k=Osprey%20Atmos%20AG%2065%20(L%2FXL)",
+          "price": null,
+          "originalPrice": 340,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.768Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-walmart-1790893824769",
+          "retailerName": "Walmart",
+          "url": "https://www.walmart.com/search?q=Osprey%20Atmos%20AG%2065%20(L%2FXL)",
+          "price": null,
+          "originalPrice": 340,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.768Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-rei-1790893824769",
+          "retailerName": "REI",
+          "url": "https://www.rei.com/search?q=Osprey%20Atmos%20AG%2065%20(L%2FXL)",
+          "price": null,
+          "originalPrice": 340,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.769Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-backcountry-1790893824769",
+          "retailerName": "Backcountry",
+          "url": "https://www.backcountry.com/Store/catalog/search.jsp?q=Osprey%20Atmos%20AG%2065%20(L%2FXL)",
+          "price": null,
+          "originalPrice": 340,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.769Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        }
+      ],
+      "priceHistory": [
+        {
+          "date": "90d ago",
+          "rei": 340,
+          "backcountry": 340,
+          "bassPro": 340,
+          "amazon": 340,
+          "lowest": 340
+        },
+        {
+          "date": "60d ago",
+          "rei": 340,
+          "backcountry": 319,
+          "bassPro": 340,
+          "amazon": 319,
+          "lowest": 319
+        },
+        {
+          "date": "30d ago",
+          "rei": 289,
+          "backcountry": 289,
+          "bassPro": 340,
+          "amazon": 289,
+          "lowest": 289
+        },
+        {
+          "date": "14d ago",
+          "rei": 289,
+          "backcountry": 289,
+          "bassPro": 340,
+          "amazon": 289,
+          "lowest": 289
+        },
+        {
+          "date": "7d ago",
+          "rei": 272,
+          "backcountry": 289,
+          "bassPro": 340,
+          "amazon": 272,
+          "lowest": 272
+        },
+        {
+          "date": "Today",
+          "rei": 272,
+          "backcountry": 289,
+          "bassPro": 340,
+          "amazon": 272,
+          "lowest": 272
+        }
+      ],
+      "allTimeLowIsObserved": false
+    },
+    {
+      "id": "fish-shimano-stradic",
+      "title": "Shimano Stradic FM Freshwater & Saltwater Spinning Reel",
+      "category": "Fishing & Angling",
+      "brand": "Shimano",
+      "model": "STC3000XGFM",
+      "imageUrl": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=300&auto=format&fit=crop&q=80",
+      "msrp": 239.99,
+      "allTimeLow": 199.99,
+      "allTimeLowDate": "Not an observed low",
+      "allTimeLowStore": "Estimate",
+      "targetPrice": 215,
+      "emailAlertEnabled": true,
+      "userEmail": "alerts@example.com",
+      "alertEmails": [
+        "alerts@example.com"
+      ],
+      "alertCondition": "below_target",
+      "lastUpdated": "2026-10-01T22:30:24.773Z",
+      "retailers": [
+        {
+          "id": "r-amazon-1790893824773",
+          "retailerName": "Amazon",
+          "url": "https://www.amazon.com/s?k=Shimano%20STC3000XGFM",
+          "price": null,
+          "originalPrice": 239.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.773Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-walmart-1790893824773",
+          "retailerName": "Walmart",
+          "url": "https://www.walmart.com/search?q=Shimano%20STC3000XGFM",
+          "price": null,
+          "originalPrice": 239.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.773Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-target-1790893824773",
+          "retailerName": "Target",
+          "url": "https://www.target.com/s?searchTerm=Shimano%20STC3000XGFM",
+          "price": null,
+          "originalPrice": 239.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.773Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-bass-pro-shops-1790893824773",
+          "retailerName": "Bass Pro Shops",
+          "url": "https://www.basspro.com/shop/en/SearchDisplay?searchTerm=Shimano%20STC3000XGFM",
+          "price": null,
+          "originalPrice": 239.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "directSku": "SearchDisplay",
+          "observedAt": "2026-10-01T22:30:24.773Z",
+          "evidence": {
+            "productId": "SearchDisplay",
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-tackle-warehouse-1790893824773",
+          "retailerName": "Tackle Warehouse",
+          "url": "https://www.tacklewarehouse.com/searchresults.html?search=Shimano%20STC3000XGFM",
+          "price": null,
+          "originalPrice": 239.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.773Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        }
+      ],
+      "priceHistory": [
+        {
+          "date": "90d ago",
+          "tackleWarehouse": 239.99,
+          "bassPro": 239.99,
+          "cabelas": 239.99,
+          "amazon": 239.99,
+          "lowest": 239.99
+        },
+        {
+          "date": "60d ago",
+          "tackleWarehouse": 229.99,
+          "bassPro": 239.99,
+          "cabelas": 239.99,
+          "amazon": 234.95,
+          "lowest": 229.99
+        },
+        {
+          "date": "30d ago",
+          "tackleWarehouse": 219.99,
+          "bassPro": 229.99,
+          "cabelas": 229.99,
+          "amazon": 229.95,
+          "lowest": 219.99
+        },
+        {
+          "date": "14d ago",
+          "tackleWarehouse": 214.99,
+          "bassPro": 224.99,
+          "cabelas": 224.99,
+          "amazon": 229.95,
+          "lowest": 214.99
+        },
+        {
+          "date": "7d ago",
+          "tackleWarehouse": 209.99,
+          "bassPro": 219.99,
+          "cabelas": 219.99,
+          "amazon": 224.95,
+          "lowest": 209.99
+        },
+        {
+          "date": "Today",
+          "tackleWarehouse": 209.99,
+          "bassPro": 219.99,
+          "cabelas": 219.99,
+          "amazon": 224.95,
+          "lowest": 209.99
+        }
+      ],
+      "allTimeLowIsObserved": false
+    },
+    {
+      "id": "outdoor-garmin-inreach",
+      "title": "Garmin inReach Mini 2 Lightweight Satellite Communicator GPS",
+      "category": "Hiking & Backpacking",
+      "brand": "Garmin",
+      "model": "010-02602-00",
+      "imageUrl": "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=300&auto=format&fit=crop&q=80",
+      "msrp": 399.99,
+      "allTimeLow": 299.99,
+      "allTimeLowDate": "Not an observed low",
+      "allTimeLowStore": "Estimate",
+      "targetPrice": 349,
+      "emailAlertEnabled": true,
+      "userEmail": "alerts@example.com",
+      "alertEmails": [
+        "alerts@example.com"
+      ],
+      "alertCondition": "below_target",
+      "lastUpdated": "2026-10-01T22:30:24.774Z",
+      "retailers": [
+        {
+          "id": "r-amazon-1790893824774",
+          "retailerName": "Amazon",
+          "url": "https://www.amazon.com/s?k=Garmin%20010-02602-00",
+          "price": null,
+          "originalPrice": 399.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.774Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-best-buy-1790893824774",
+          "retailerName": "Best Buy",
+          "url": "https://www.bestbuy.com/site/searchpage.jsp?st=Garmin%20010-02602-00",
+          "price": null,
+          "originalPrice": 399.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.774Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-walmart-1790893824774",
+          "retailerName": "Walmart",
+          "url": "https://www.walmart.com/search?q=Garmin%20010-02602-00",
+          "price": null,
+          "originalPrice": 399.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.774Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-target-1790893824774",
+          "retailerName": "Target",
+          "url": "https://www.target.com/s?searchTerm=Garmin%20010-02602-00",
+          "price": null,
+          "originalPrice": 399.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.774Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-rei-1790893824774",
+          "retailerName": "REI",
+          "url": "https://www.rei.com/search?q=Garmin%20010-02602-00",
+          "price": null,
+          "originalPrice": 399.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.774Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-backcountry-1790893824774",
+          "retailerName": "Backcountry",
+          "url": "https://www.backcountry.com/Store/catalog/search.jsp?q=Garmin%20010-02602-00",
+          "price": null,
+          "originalPrice": 399.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.774Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        }
+      ],
+      "priceHistory": [
+        {
+          "date": "90d ago",
+          "rei": 399.99,
+          "bassPro": 399.99,
+          "cabelas": 399.99,
+          "amazon": 399.99,
+          "lowest": 399.99
+        },
+        {
+          "date": "60d ago",
+          "rei": 379.99,
+          "bassPro": 399.99,
+          "cabelas": 399.99,
+          "amazon": 379.99,
+          "lowest": 379.99
+        },
+        {
+          "date": "30d ago",
+          "rei": 349.99,
+          "bassPro": 349.99,
+          "cabelas": 349.99,
+          "amazon": 349.99,
+          "lowest": 349.99
+        },
+        {
+          "date": "14d ago",
+          "rei": 349.99,
+          "bassPro": 349.99,
+          "cabelas": 349.99,
+          "amazon": 349.99,
+          "lowest": 349.99
+        },
+        {
+          "date": "7d ago",
+          "rei": 349.99,
+          "bassPro": 349.99,
+          "cabelas": 349.99,
+          "amazon": 349.99,
+          "lowest": 349.99
+        },
+        {
+          "date": "Today",
+          "rei": 349.99,
+          "bassPro": 349.99,
+          "cabelas": 349.99,
+          "amazon": 349.99,
+          "lowest": 349.99
+        }
+      ],
+      "allTimeLowIsObserved": false
+    },
+    {
+      "id": "fish-garmin-echomap",
+      "title": "Garmin ECHOMAP UHD2 53cv Fish Finder with GT20-TM Transducer",
+      "category": "Fishing & Angling",
+      "brand": "Garmin",
+      "model": "010-02679-00",
+      "imageUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300&auto=format&fit=crop&q=80",
+      "msrp": 399.99,
+      "allTimeLow": 311.99,
+      "allTimeLowDate": "Not an observed low",
+      "allTimeLowStore": "Estimate",
+      "targetPrice": 329,
+      "emailAlertEnabled": true,
+      "userEmail": "alerts@example.com",
+      "alertEmails": [
+        "alerts@example.com"
+      ],
+      "alertCondition": "below_target",
+      "lastUpdated": "2026-10-01T22:30:24.775Z",
+      "retailers": [
+        {
+          "id": "r-amazon-1790893824774",
+          "retailerName": "Amazon",
+          "url": "https://www.amazon.com/s?k=Garmin%20010-02679-00",
+          "price": null,
+          "originalPrice": 399.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.774Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-walmart-1790893824774",
+          "retailerName": "Walmart",
+          "url": "https://www.walmart.com/search?q=Garmin%20010-02679-00",
+          "price": null,
+          "originalPrice": 399.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.774Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-target-1790893824774",
+          "retailerName": "Target",
+          "url": "https://www.target.com/s?searchTerm=Garmin%20010-02679-00",
+          "price": null,
+          "originalPrice": 399.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.774Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-bass-pro-shops-1790893824774",
+          "retailerName": "Bass Pro Shops",
+          "url": "https://www.basspro.com/shop/en/SearchDisplay?searchTerm=Garmin%20010-02679-00",
+          "price": null,
+          "originalPrice": 399.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "directSku": "SearchDisplay",
+          "observedAt": "2026-10-01T22:30:24.774Z",
+          "evidence": {
+            "productId": "SearchDisplay",
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-tackle-warehouse-1790893824774",
+          "retailerName": "Tackle Warehouse",
+          "url": "https://www.tacklewarehouse.com/searchresults.html?search=Garmin%20010-02679-00",
+          "price": null,
+          "originalPrice": 399.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.774Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        }
+      ],
+      "priceHistory": [
+        {
+          "date": "90d ago",
+          "bassPro": 399.99,
+          "cabelas": 399.99,
+          "amazon": 399.99,
+          "lowest": 399.99
+        },
+        {
+          "date": "60d ago",
+          "bassPro": 369.99,
+          "cabelas": 369.99,
+          "amazon": 379.99,
+          "lowest": 369.99
+        },
+        {
+          "date": "30d ago",
+          "bassPro": 349.99,
+          "cabelas": 349.99,
+          "amazon": 349.99,
+          "lowest": 349.99
+        },
+        {
+          "date": "14d ago",
+          "bassPro": 329.99,
+          "cabelas": 329.99,
+          "amazon": 349.99,
+          "lowest": 329.99
+        },
+        {
+          "date": "7d ago",
+          "bassPro": 329.99,
+          "cabelas": 329.99,
+          "amazon": 349.99,
+          "lowest": 329.99
+        },
+        {
+          "date": "Today",
+          "bassPro": 329.99,
+          "cabelas": 329.99,
+          "amazon": 349.99,
+          "lowest": 329.99
+        }
+      ],
+      "allTimeLowIsObserved": false
+    },
+    {
+      "id": "camp-yeti-tundra45",
+      "title": "YETI Tundra 45 Hard Rugged Outdoor & Marine Cooler",
+      "category": "Camping & Bushcraft",
+      "brand": "YETI",
+      "model": "10045020000",
+      "imageUrl": "https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?w=300&auto=format&fit=crop&q=80",
+      "msrp": 325,
+      "allTimeLow": 243.75,
+      "allTimeLowDate": "Not an observed low",
+      "allTimeLowStore": "Estimate",
+      "targetPrice": 275,
+      "emailAlertEnabled": true,
+      "userEmail": "alerts@example.com",
+      "alertEmails": [
+        "alerts@example.com"
+      ],
+      "alertCondition": "below_target",
+      "lastUpdated": "2026-10-01T22:30:24.775Z",
+      "retailers": [
+        {
+          "id": "r-amazon-1790893824775",
+          "retailerName": "Amazon",
+          "url": "https://www.amazon.com/s?k=YETI%2010045020000",
+          "price": null,
+          "originalPrice": 325,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.775Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-best-buy-1790893824775",
+          "retailerName": "Best Buy",
+          "url": "https://www.bestbuy.com/site/searchpage.jsp?st=YETI%2010045020000",
+          "price": null,
+          "originalPrice": 325,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.775Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-walmart-1790893824775",
+          "retailerName": "Walmart",
+          "url": "https://www.walmart.com/search?q=YETI%2010045020000",
+          "price": null,
+          "originalPrice": 325,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.775Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-target-1790893824775",
+          "retailerName": "Target",
+          "url": "https://www.target.com/s?searchTerm=YETI%2010045020000",
+          "price": null,
+          "originalPrice": 325,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.775Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-rei-1790893824775",
+          "retailerName": "REI",
+          "url": "https://www.rei.com/search?q=YETI%2010045020000",
+          "price": null,
+          "originalPrice": 325,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.775Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-bass-pro-shops-1790893824775",
+          "retailerName": "Bass Pro Shops",
+          "url": "https://www.basspro.com/shop/en/SearchDisplay?searchTerm=YETI%2010045020000",
+          "price": null,
+          "originalPrice": 325,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "directSku": "SearchDisplay",
+          "observedAt": "2026-10-01T22:30:24.775Z",
+          "evidence": {
+            "productId": "SearchDisplay",
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-backcountry-1790893824775",
+          "retailerName": "Backcountry",
+          "url": "https://www.backcountry.com/Store/catalog/search.jsp?q=YETI%2010045020000",
+          "price": null,
+          "originalPrice": 325,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.775Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        }
+      ],
+      "priceHistory": [
+        {
+          "date": "90d ago",
+          "rei": 325,
+          "bassPro": 325,
+          "cabelas": 325,
+          "amazon": 325,
+          "lowest": 325
+        },
+        {
+          "date": "60d ago",
+          "rei": 325,
+          "bassPro": 325,
+          "cabelas": 325,
+          "amazon": 325,
+          "lowest": 325
+        },
+        {
+          "date": "30d ago",
+          "rei": 295,
+          "bassPro": 325,
+          "cabelas": 325,
+          "amazon": 325,
+          "lowest": 295
+        },
+        {
+          "date": "14d ago",
+          "rei": 280,
+          "bassPro": 325,
+          "cabelas": 325,
+          "amazon": 325,
+          "lowest": 280
+        },
+        {
+          "date": "7d ago",
+          "rei": 275,
+          "bassPro": 325,
+          "cabelas": 325,
+          "amazon": 325,
+          "lowest": 275
+        },
+        {
+          "date": "Today",
+          "rei": 275,
+          "bassPro": 325,
+          "cabelas": 325,
+          "amazon": 325,
+          "lowest": 275
+        }
+      ],
+      "allTimeLowIsObserved": false
+    },
+    {
+      "id": "audio-sony-xm5",
+      "title": "Sony WH-1000XM5 Wireless Noise-Canceling Headphones",
+      "category": "Audio & Headphones",
+      "brand": "Sony",
+      "model": "WH1000XM5/B",
+      "imageUrl": "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=300&auto=format&fit=crop&q=80",
+      "msrp": 399.99,
+      "allTimeLow": 328,
+      "allTimeLowDate": "Not an observed low",
+      "allTimeLowStore": "Estimate",
+      "targetPrice": 330,
+      "emailAlertEnabled": true,
+      "userEmail": "alerts@example.com",
+      "alertEmails": [
+        "alerts@example.com"
+      ],
+      "alertCondition": "all_time_low",
+      "lastUpdated": "2026-10-01T22:30:24.775Z",
+      "retailers": [
+        {
+          "id": "r-amazon-1790893824775",
+          "retailerName": "Amazon",
+          "url": "https://www.amazon.com/s?k=Sony%20WH1000XM5%2FB",
+          "price": null,
+          "originalPrice": 399.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.775Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-best-buy-1790893824775",
+          "retailerName": "Best Buy",
+          "url": "https://www.bestbuy.com/site/searchpage.jsp?st=Sony%20WH1000XM5%2FB",
+          "price": null,
+          "originalPrice": 399.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.775Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-walmart-1790893824775",
+          "retailerName": "Walmart",
+          "url": "https://www.walmart.com/search?q=Sony%20WH1000XM5%2FB",
+          "price": null,
+          "originalPrice": 399.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.775Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-target-1790893824775",
+          "retailerName": "Target",
+          "url": "https://www.target.com/s?searchTerm=Sony%20WH1000XM5%2FB",
+          "price": null,
+          "originalPrice": 399.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.775Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-b&h-photo-1790893824775",
+          "retailerName": "B&H Photo",
+          "url": "https://www.bhphotovideo.com/c/search?Ntt=Sony%20WH1000XM5%2FB",
+          "price": null,
+          "originalPrice": 399.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.775Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        }
+      ],
+      "priceHistory": [
+        {
+          "date": "90d ago",
+          "amazon": 399.99,
+          "bestBuy": 399.99,
+          "walmart": 399.99,
+          "lowest": 399.99
+        },
+        {
+          "date": "60d ago",
+          "amazon": 378,
+          "bestBuy": 379.99,
+          "walmart": 378,
+          "lowest": 378
+        },
+        {
+          "date": "30d ago",
+          "amazon": 348,
+          "bestBuy": 349.99,
+          "walmart": 348,
+          "lowest": 348
+        },
+        {
+          "date": "14d ago",
+          "amazon": 338,
+          "bestBuy": 339.99,
+          "walmart": 338,
+          "lowest": 338
+        },
+        {
+          "date": "7d ago",
+          "amazon": 328,
+          "bestBuy": 329.99,
+          "walmart": 328,
+          "lowest": 328
+        },
+        {
+          "date": "Today",
+          "amazon": 328,
+          "bestBuy": 329.99,
+          "walmart": 328,
+          "lowest": 328
+        }
+      ],
+      "allTimeLowIsObserved": false
+    },
+    {
+      "id": "gaming-ps5-slim",
+      "title": "Sony PlayStation 5 Slim 1TB Digital Edition Console",
+      "category": "Gaming & Consoles",
+      "brand": "Sony",
+      "model": "CFI-2000B01X",
+      "imageUrl": "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=300&auto=format&fit=crop&q=80",
+      "msrp": 449.99,
+      "allTimeLow": 449,
+      "allTimeLowDate": "Not an observed low",
+      "allTimeLowStore": "Estimate",
+      "targetPrice": 420,
+      "emailAlertEnabled": true,
+      "userEmail": "alerts@example.com",
+      "alertEmails": [
+        "alerts@example.com",
+        "deals@example.com"
+      ],
+      "alertCondition": "below_target",
+      "lastUpdated": "2026-10-01T22:30:24.776Z",
+      "retailers": [
+        {
+          "id": "r-amazon-1790893824776",
+          "retailerName": "Amazon",
+          "url": "https://www.amazon.com/s?k=Sony%20CFI-2000B01X",
+          "price": null,
+          "originalPrice": 449.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.776Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-best-buy-1790893824776",
+          "retailerName": "Best Buy",
+          "url": "https://www.bestbuy.com/site/searchpage.jsp?st=Sony%20CFI-2000B01X",
+          "price": null,
+          "originalPrice": 449.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.776Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-walmart-1790893824776",
+          "retailerName": "Walmart",
+          "url": "https://www.walmart.com/search?q=Sony%20CFI-2000B01X",
+          "price": null,
+          "originalPrice": 449.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.776Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-target-1790893824776",
+          "retailerName": "Target",
+          "url": "https://www.target.com/s?searchTerm=Sony%20CFI-2000B01X",
+          "price": null,
+          "originalPrice": 449.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.776Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-newegg-1790893824776",
+          "retailerName": "Newegg",
+          "url": "https://www.newegg.com/p/pl?d=Sony%20CFI-2000B01X",
+          "price": null,
+          "originalPrice": 449.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.776Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-micro-center-1790893824776",
+          "retailerName": "Micro Center",
+          "url": "https://www.microcenter.com/search/search_results.aspx?Ntt=Sony%20CFI-2000B01X",
+          "price": null,
+          "originalPrice": 449.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.776Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        }
+      ],
+      "priceHistory": [
+        {
+          "date": "90d ago",
+          "amazon": 449.99,
+          "walmart": 449.99,
+          "bestBuy": 449.99,
+          "lowest": 449.99
+        },
+        {
+          "date": "60d ago",
+          "amazon": 449.99,
+          "walmart": 439,
+          "bestBuy": 449.99,
+          "lowest": 439
+        },
+        {
+          "date": "30d ago",
+          "amazon": 449,
+          "walmart": 429,
+          "bestBuy": 449.99,
+          "lowest": 429
+        },
+        {
+          "date": "14d ago",
+          "amazon": 449,
+          "walmart": 429,
+          "bestBuy": 449.99,
+          "lowest": 429
+        },
+        {
+          "date": "7d ago",
+          "amazon": 449,
+          "walmart": 429,
+          "bestBuy": 449.99,
+          "lowest": 429
+        },
+        {
+          "date": "Today",
+          "amazon": 449,
+          "walmart": 429,
+          "bestBuy": 449.99,
+          "lowest": 429
+        }
+      ],
+      "allTimeLowIsObserved": false
+    },
+    {
+      "id": "home-breville-touch",
+      "title": "Breville Barista Touch Espresso Machine & Grinder",
+      "category": "Home & Kitchen",
+      "brand": "Breville",
+      "model": "BES880BSS",
+      "imageUrl": "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=300&auto=format&fit=crop&q=80",
+      "msrp": 999.95,
+      "allTimeLow": 799.95,
+      "allTimeLowDate": "Not an observed low",
+      "allTimeLowStore": "Estimate",
+      "targetPrice": 850,
+      "emailAlertEnabled": true,
+      "userEmail": "alerts@example.com",
+      "alertEmails": [
+        "alerts@example.com"
+      ],
+      "alertCondition": "below_target",
+      "lastUpdated": "2026-10-01T22:30:24.776Z",
+      "retailers": [
+        {
+          "id": "r-amazon-1790893824776",
+          "retailerName": "Amazon",
+          "url": "https://www.amazon.com/s?k=Breville%20BES880BSS",
+          "price": null,
+          "originalPrice": 999.95,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.776Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-best-buy-1790893824776",
+          "retailerName": "Best Buy",
+          "url": "https://www.bestbuy.com/site/searchpage.jsp?st=Breville%20BES880BSS",
+          "price": null,
+          "originalPrice": 999.95,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.776Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-walmart-1790893824776",
+          "retailerName": "Walmart",
+          "url": "https://www.walmart.com/search?q=Breville%20BES880BSS",
+          "price": null,
+          "originalPrice": 999.95,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.776Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        }
+      ],
+      "priceHistory": [
+        {
+          "date": "90d ago",
+          "amazon": 999.95,
+          "bestBuy": 999.95,
+          "lowest": 999.95
+        },
+        {
+          "date": "60d ago",
+          "amazon": 949.95,
+          "bestBuy": 999.95,
+          "lowest": 949.95
+        },
+        {
+          "date": "30d ago",
+          "amazon": 899.95,
+          "bestBuy": 999.95,
+          "lowest": 899.95
+        },
+        {
+          "date": "14d ago",
+          "amazon": 899.95,
+          "bestBuy": 999.95,
+          "lowest": 899.95
+        },
+        {
+          "date": "7d ago",
+          "amazon": 899.95,
+          "bestBuy": 999.95,
+          "lowest": 899.95
+        },
+        {
+          "date": "Today",
+          "amazon": 899.95,
+          "bestBuy": 999.95,
+          "lowest": 899.95
+        }
+      ],
+      "allTimeLowIsObserved": false
+    },
+    {
+      "id": "lap-macbook-air-m3",
+      "title": "Apple MacBook Air 15\" M3 (16GB RAM, 512GB SSD, Midnight)",
+      "category": "Laptops & Computers",
+      "brand": "Apple",
+      "model": "MXD13LL/A",
+      "imageUrl": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&auto=format&fit=crop&q=80",
+      "msrp": 1499,
+      "allTimeLow": 1199.2,
+      "allTimeLowDate": "Not an observed low",
+      "allTimeLowStore": "Estimate",
+      "targetPrice": 1280,
+      "emailAlertEnabled": true,
+      "userEmail": "alerts@example.com",
+      "alertCondition": "below_target",
+      "lastUpdated": "2026-10-01T22:30:24.777Z",
+      "retailers": [
+        {
+          "id": "r-amazon-1790893824777",
+          "retailerName": "Amazon",
+          "url": "https://www.amazon.com/s?k=Apple%20MXD13LL%2FA",
+          "price": null,
+          "originalPrice": 1499,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.777Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-best-buy-1790893824777",
+          "retailerName": "Best Buy",
+          "url": "https://www.bestbuy.com/site/searchpage.jsp?st=Apple%20MXD13LL%2FA",
+          "price": null,
+          "originalPrice": 1499,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.777Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-walmart-1790893824777",
+          "retailerName": "Walmart",
+          "url": "https://www.walmart.com/search?q=Apple%20MXD13LL%2FA",
+          "price": null,
+          "originalPrice": 1499,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.777Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-target-1790893824777",
+          "retailerName": "Target",
+          "url": "https://www.target.com/s?searchTerm=Apple%20MXD13LL%2FA",
+          "price": null,
+          "originalPrice": 1499,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.777Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-b&h-photo-1790893824777",
+          "retailerName": "B&H Photo",
+          "url": "https://www.bhphotovideo.com/c/search?Ntt=Apple%20MXD13LL%2FA",
+          "price": null,
+          "originalPrice": 1499,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.777Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-newegg-1790893824777",
+          "retailerName": "Newegg",
+          "url": "https://www.newegg.com/p/pl?d=Apple%20MXD13LL%2FA",
+          "price": null,
+          "originalPrice": 1499,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.777Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-micro-center-1790893824777",
+          "retailerName": "Micro Center",
+          "url": "https://www.microcenter.com/search/search_results.aspx?Ntt=Apple%20MXD13LL%2FA",
+          "price": null,
+          "originalPrice": 1499,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.777Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        }
+      ],
+      "priceHistory": [
+        {
+          "date": "90d ago",
+          "amazon": 1499,
+          "bestBuy": 1499,
+          "lowest": 1499
+        },
+        {
+          "date": "60d ago",
+          "amazon": 1399,
+          "bestBuy": 1349,
+          "lowest": 1349
+        },
+        {
+          "date": "30d ago",
+          "amazon": 1349,
+          "bestBuy": 1299,
+          "lowest": 1299
+        },
+        {
+          "date": "14d ago",
+          "amazon": 1299,
+          "bestBuy": 1249,
+          "lowest": 1249
+        },
+        {
+          "date": "7d ago",
+          "amazon": 1299,
+          "bestBuy": 1249,
+          "lowest": 1249
+        },
+        {
+          "date": "Today",
+          "amazon": 1299,
+          "bestBuy": 1249,
+          "lowest": 1249
+        }
+      ],
+      "allTimeLowIsObserved": false
+    },
+    {
+      "id": "app-dyson-v15",
+      "title": "Dyson V15 Detect Cordless Vacuum Cleaner",
+      "category": "Appliances",
+      "brand": "Dyson",
+      "model": "368340-01",
+      "imageUrl": "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=300&auto=format&fit=crop&q=80",
+      "msrp": 749.99,
+      "allTimeLow": 599.99,
+      "allTimeLowDate": "Not an observed low",
+      "allTimeLowStore": "Estimate",
+      "targetPrice": 620,
+      "emailAlertEnabled": true,
+      "userEmail": "alerts@example.com",
+      "alertCondition": "below_target",
+      "lastUpdated": "2026-10-01T22:30:24.777Z",
+      "retailers": [
+        {
+          "id": "r-amazon-1790893824777",
+          "retailerName": "Amazon",
+          "url": "https://www.amazon.com/s?k=Dyson%20368340-01",
+          "price": null,
+          "originalPrice": 749.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.777Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-best-buy-1790893824777",
+          "retailerName": "Best Buy",
+          "url": "https://www.bestbuy.com/site/searchpage.jsp?st=Dyson%20368340-01",
+          "price": null,
+          "originalPrice": 749.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.777Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-walmart-1790893824777",
+          "retailerName": "Walmart",
+          "url": "https://www.walmart.com/search?q=Dyson%20368340-01",
+          "price": null,
+          "originalPrice": 749.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.777Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-target-1790893824777",
+          "retailerName": "Target",
+          "url": "https://www.target.com/s?searchTerm=Dyson%20368340-01",
+          "price": null,
+          "originalPrice": 749.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.777Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        }
+      ],
+      "priceHistory": [
+        {
+          "date": "90d ago",
+          "amazon": 749.99,
+          "target": 749.99,
+          "bestBuy": 749.99,
+          "lowest": 749.99
+        },
+        {
+          "date": "60d ago",
+          "amazon": 699.99,
+          "target": 649.99,
+          "bestBuy": 699.99,
+          "lowest": 649.99
+        },
+        {
+          "date": "30d ago",
+          "amazon": 679.99,
+          "target": 629.99,
+          "bestBuy": 679.99,
+          "lowest": 629.99
+        },
+        {
+          "date": "14d ago",
+          "amazon": 649.99,
+          "target": 599.99,
+          "bestBuy": 649.99,
+          "lowest": 599.99
+        },
+        {
+          "date": "7d ago",
+          "amazon": 649.99,
+          "target": 599.99,
+          "bestBuy": 649.99,
+          "lowest": 599.99
+        },
+        {
+          "date": "Today",
+          "amazon": 649.99,
+          "target": 599.99,
+          "bestBuy": 649.99,
+          "lowest": 599.99
+        }
+      ],
+      "allTimeLowIsObserved": false
+    },
+    {
+      "id": "tools-dewalt-drill",
+      "title": "DeWalt 20V MAX Cordless Drill & Impact Driver Combo Kit",
+      "category": "Tools & Hardware",
+      "brand": "DeWalt",
+      "model": "DCK280C2",
+      "imageUrl": "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=300&auto=format&fit=crop&q=80",
+      "msrp": 239,
+      "allTimeLow": 179.25,
+      "allTimeLowDate": "Not an observed low",
+      "allTimeLowStore": "Estimate",
+      "targetPrice": 150,
+      "emailAlertEnabled": true,
+      "userEmail": "alerts@example.com",
+      "alertCondition": "below_target",
+      "lastUpdated": "2026-10-01T22:30:24.778Z",
+      "retailers": [
+        {
+          "id": "r-amazon-1790893824778",
+          "retailerName": "Amazon",
+          "url": "https://www.amazon.com/s?k=DeWalt%20DCK280C2",
+          "price": null,
+          "originalPrice": 239,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.778Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-best-buy-1790893824778",
+          "retailerName": "Best Buy",
+          "url": "https://www.bestbuy.com/site/searchpage.jsp?st=DeWalt%20DCK280C2",
+          "price": null,
+          "originalPrice": 239,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.778Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-walmart-1790893824778",
+          "retailerName": "Walmart",
+          "url": "https://www.walmart.com/search?q=DeWalt%20DCK280C2",
+          "price": null,
+          "originalPrice": 239,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.778Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-target-1790893824778",
+          "retailerName": "Target",
+          "url": "https://www.target.com/s?searchTerm=DeWalt%20DCK280C2",
+          "price": null,
+          "originalPrice": 239,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.778Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        }
+      ],
+      "priceHistory": [
+        {
+          "date": "90d ago",
+          "amazon": 229,
+          "lowest": 229
+        },
+        {
+          "date": "60d ago",
+          "amazon": 199,
+          "lowest": 189
+        },
+        {
+          "date": "30d ago",
+          "amazon": 169,
+          "lowest": 159
+        },
+        {
+          "date": "14d ago",
+          "amazon": 159,
+          "lowest": 149
+        },
+        {
+          "date": "7d ago",
+          "amazon": 159,
+          "lowest": 149
+        },
+        {
+          "date": "Today",
+          "amazon": 159,
+          "lowest": 149
+        }
+      ],
+      "allTimeLowIsObserved": false
+    },
+    {
+      "id": "tv-samsung-oled-65",
+      "title": "Samsung 65\" Class OLED S90D 4K Smart TV",
+      "category": "TV & Home Theater",
+      "brand": "Samsung",
+      "model": "QN65S90DAFXZA",
+      "imageUrl": "https://images.unsplash.com/photo-1593784991095-a205069470b6?w=300&auto=format&fit=crop&q=80",
+      "msrp": 2199.99,
+      "allTimeLow": 1497.99,
+      "allTimeLowDate": "Not an observed low",
+      "allTimeLowStore": "Estimate",
+      "targetPrice": 1550,
+      "emailAlertEnabled": true,
+      "userEmail": "alerts@example.com",
+      "alertCondition": "below_target",
+      "lastUpdated": "2026-10-01T22:30:24.779Z",
+      "retailers": [
+        {
+          "id": "r-amazon-1790893824779",
+          "retailerName": "Amazon",
+          "url": "https://www.amazon.com/s?k=Samsung%20QN65S90DAFXZA",
+          "price": null,
+          "originalPrice": 2199.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.779Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-best-buy-1790893824779",
+          "retailerName": "Best Buy",
+          "url": "https://www.bestbuy.com/site/searchpage.jsp?st=Samsung%20QN65S90DAFXZA",
+          "price": null,
+          "originalPrice": 2199.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.779Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-walmart-1790893824779",
+          "retailerName": "Walmart",
+          "url": "https://www.walmart.com/search?q=Samsung%20QN65S90DAFXZA",
+          "price": null,
+          "originalPrice": 2199.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.779Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-target-1790893824779",
+          "retailerName": "Target",
+          "url": "https://www.target.com/s?searchTerm=Samsung%20QN65S90DAFXZA",
+          "price": null,
+          "originalPrice": 2199.99,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.779Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        }
+      ],
+      "priceHistory": [
+        {
+          "date": "90d ago",
+          "amazon": 1899.99,
+          "bestBuy": 1899.99,
+          "lowest": 1899.99
+        },
+        {
+          "date": "60d ago",
+          "amazon": 1699.99,
+          "bestBuy": 1699.99,
+          "lowest": 1699.99
+        },
+        {
+          "date": "30d ago",
+          "amazon": 1599.99,
+          "bestBuy": 1599.99,
+          "lowest": 1599.99
+        },
+        {
+          "date": "14d ago",
+          "amazon": 1497.99,
+          "bestBuy": 1499.99,
+          "lowest": 1497.99
+        },
+        {
+          "date": "7d ago",
+          "amazon": 1497.99,
+          "bestBuy": 1499.99,
+          "lowest": 1497.99
+        },
+        {
+          "date": "Today",
+          "amazon": 1497.99,
+          "bestBuy": 1499.99,
+          "lowest": 1497.99
+        }
+      ],
+      "allTimeLowIsObserved": false
+    },
+    {
+      "id": "cpu-7800x3d",
+      "title": "AMD Ryzen 7 7800X3D 8-Core Gaming Desktop Processor",
+      "category": "PC Components",
+      "brand": "AMD",
+      "model": "100-100000910WOF",
+      "imageUrl": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=300&auto=format&fit=crop&q=80",
+      "msrp": 449,
+      "allTimeLow": 349,
+      "allTimeLowDate": "Not an observed low",
+      "allTimeLowStore": "Estimate",
+      "targetPrice": 360,
+      "emailAlertEnabled": true,
+      "userEmail": "alerts@example.com",
+      "alertCondition": "below_target",
+      "lastUpdated": "2026-10-01T22:30:24.795Z",
+      "retailers": [
+        {
+          "id": "r-amazon-1790893824779",
+          "retailerName": "Amazon",
+          "url": "https://www.amazon.com/s?k=AMD%20100-100000910WOF",
+          "price": null,
+          "originalPrice": 449,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.779Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-best-buy-1790893824779",
+          "retailerName": "Best Buy",
+          "url": "https://www.bestbuy.com/site/searchpage.jsp?st=AMD%20100-100000910WOF",
+          "price": null,
+          "originalPrice": 449,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.779Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-walmart-1790893824779",
+          "retailerName": "Walmart",
+          "url": "https://www.walmart.com/search?q=AMD%20100-100000910WOF",
+          "price": null,
+          "originalPrice": 449,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.779Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-b&h-photo-1790893824779",
+          "retailerName": "B&H Photo",
+          "url": "https://www.bhphotovideo.com/c/search?Ntt=AMD%20100-100000910WOF",
+          "price": null,
+          "originalPrice": 449,
+          "inStock": true,
+          "stockMessage": "Availability Unverified",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": false,
+          "priceVerified": false,
+          "matchStatus": "unverified_search",
+          "urlType": "catalog_search",
+          "linkType": "search_results",
+          "matchStatusDetailed": "search_only",
+          "confidence": 45,
+          "observedAt": "2026-10-01T22:30:24.779Z",
+          "evidence": {
+            "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
+          }
+        },
+        {
+          "id": "r-newegg-1790893824786",
+          "retailerName": "Newegg",
+          "title": "AMD AMD Ryzen 7 7800X3D 8-Core Gaming Desktop Processor",
+          "url": "https://www.newegg.com/amd-ryzen-7-7800x3d-ryzen-7-7000-series-raphael-zen-4-socket-am5/p/N82E16819113793",
+          "price": 449,
+          "originalPrice": 449,
+          "inStock": true,
+          "stockMessage": "Verified In Stock",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": false,
+          "productMatchVerified": true,
+          "priceVerified": true,
+          "matchStatus": "verified_exact",
+          "urlType": "direct_product",
+          "linkType": "verified_product",
+          "matchStatusDetailed": "strong",
+          "confidence": 75,
+          "directSku": "N82E16819113793",
+          "observedAt": "2026-10-01T22:30:24.779Z",
+          "evidence": {
+            "title": "AMD AMD Ryzen 7 7800X3D 8-Core Gaming Desktop Processor",
+            "productId": "N82E16819113793",
+            "priceText": "$449.00",
+            "matchingNotes": "✓ Brand matches (AMD) • ✓ Direct product landing page confirmed (N82E16819113793)"
+          }
+        },
+        {
+          "id": "r-micro-center-1790893824795",
+          "retailerName": "Micro Center",
+          "title": "AMD AMD Ryzen 7 7800X3D 8-Core Gaming Desktop Processor",
+          "url": "https://www.microcenter.com/product/674503/amd-ryzen-7-7800x3d-raphael-am5-42ghz-8-core-boxed-processor-heatsink-not-included",
+          "price": 429.99,
+          "originalPrice": 449,
+          "inStock": true,
+          "stockMessage": "Verified In Stock",
+          "shipping": "Standard Shipping",
+          "shippingCost": 0,
+          "rating": null,
+          "reviewCount": null,
+          "isBestPrice": true,
+          "productMatchVerified": true,
+          "priceVerified": true,
+          "matchStatus": "verified_exact",
+          "urlType": "direct_product",
+          "linkType": "verified_product",
+          "matchStatusDetailed": "strong",
+          "confidence": 75,
+          "directSku": "674503",
+          "observedAt": "2026-10-01T22:30:24.786Z",
+          "evidence": {
+            "title": "AMD AMD Ryzen 7 7800X3D 8-Core Gaming Desktop Processor",
+            "productId": "674503",
+            "priceText": "$429.99",
+            "matchingNotes": "✓ Brand matches (AMD) • ✓ Direct product landing page confirmed (674503)"
+          }
+        }
+      ],
+      "priceHistory": [
+        {
+          "date": "90d ago",
+          "amazon": 449,
+          "bestBuy": 449,
+          "newegg": 449,
+          "microcenter": 399.99,
+          "lowest": 399.99
+        },
+        {
+          "date": "60d ago",
+          "amazon": 419.99,
+          "bestBuy": 429.99,
+          "newegg": 419.99,
+          "microcenter": 379.99,
+          "lowest": 379.99
+        },
+        {
+          "date": "30d ago",
+          "amazon": 389.99,
+          "bestBuy": 399.99,
+          "newegg": 389.99,
+          "microcenter": 369.99,
+          "lowest": 369.99
+        },
+        {
+          "date": "14d ago",
+          "amazon": 379.99,
+          "bestBuy": 389.99,
+          "newegg": 379.99,
+          "microcenter": 359.99,
+          "lowest": 359.99
+        },
+        {
+          "date": "7d ago",
+          "amazon": 374.99,
+          "bestBuy": 379.99,
+          "newegg": 369.99,
+          "microcenter": 349.99,
+          "lowest": 349.99
+        },
+        {
+          "date": "Today",
+          "amazon": 369.99,
+          "bestBuy": 379.99,
+          "newegg": 369.99,
+          "microcenter": 349.99,
+          "lowest": 349.99
+        }
+      ],
+      "allTimeLowIsObserved": false
+    }
+  ]
+}
