@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-21T09:08:43.326Z",
+  "generatedAt": "2026-10-21T14:52:31.354Z",
   "items": [
     {
       "id": "outdoor-osprey-atmos-65",
@@ -19,10 +19,10 @@
         "alerts@example.com"
       ],
       "alertCondition": "below_target",
-      "lastUpdated": "2026-10-21T09:08:43.024Z",
+      "lastUpdated": "2026-10-21T14:52:31.323Z",
       "retailers": [
         {
-          "id": "r-amazon-1792573723022",
+          "id": "r-amazon-1792594351321",
           "retailerName": "Amazon",
           "url": "https://www.amazon.com/s?k=Osprey%20Atmos%20AG%2065%20(L%2FXL)",
           "price": null,
@@ -41,13 +41,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.021Z",
+          "observedAt": "2026-10-21T14:52:31.320Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-walmart-1792573723022",
+          "id": "r-walmart-1792594351321",
           "retailerName": "Walmart",
           "url": "https://www.walmart.com/search?q=Osprey%20Atmos%20AG%2065%20(L%2FXL)",
           "price": null,
@@ -66,13 +66,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.022Z",
+          "observedAt": "2026-10-21T14:52:31.321Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-rei-1792573723022",
+          "id": "r-rei-1792594351321",
           "retailerName": "REI",
           "url": "https://www.rei.com/search?q=Osprey%20Atmos%20AG%2065%20(L%2FXL)",
           "price": null,
@@ -91,13 +91,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.022Z",
+          "observedAt": "2026-10-21T14:52:31.321Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-backcountry-1792573723022",
+          "id": "r-backcountry-1792594351321",
           "retailerName": "Backcountry",
           "url": "https://www.backcountry.com/Store/catalog/search.jsp?q=Osprey%20Atmos%20AG%2065%20(L%2FXL)",
           "price": null,
@@ -116,7 +116,7 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.022Z",
+          "observedAt": "2026-10-21T14:52:31.321Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
@@ -192,10 +192,10 @@
         "alerts@example.com"
       ],
       "alertCondition": "below_target",
-      "lastUpdated": "2026-10-21T09:08:43.024Z",
+      "lastUpdated": "2026-10-21T14:52:31.324Z",
       "retailers": [
         {
-          "id": "r-amazon-1792573723024",
+          "id": "r-amazon-1792594351323",
           "retailerName": "Amazon",
           "url": "https://www.amazon.com/s?k=Shimano%20STC3000XGFM",
           "price": null,
@@ -214,13 +214,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.024Z",
+          "observedAt": "2026-10-21T14:52:31.323Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-walmart-1792573723024",
+          "id": "r-walmart-1792594351323",
           "retailerName": "Walmart",
           "url": "https://www.walmart.com/search?q=Shimano%20STC3000XGFM",
           "price": null,
@@ -239,13 +239,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.024Z",
+          "observedAt": "2026-10-21T14:52:31.323Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-target-1792573723024",
+          "id": "r-target-1792594351323",
           "retailerName": "Target",
           "url": "https://www.target.com/s?searchTerm=Shimano%20STC3000XGFM",
           "price": null,
@@ -264,13 +264,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.024Z",
+          "observedAt": "2026-10-21T14:52:31.323Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-bass-pro-shops-1792573723024",
+          "id": "r-bass-pro-shops-1792594351324",
           "retailerName": "Bass Pro Shops",
           "url": "https://www.basspro.com/shop/en/SearchDisplay?searchTerm=Shimano%20STC3000XGFM",
           "price": null,
@@ -290,14 +290,14 @@
           "matchStatusDetailed": "search_only",
           "confidence": 45,
           "directSku": "SearchDisplay",
-          "observedAt": "2026-10-21T09:08:43.024Z",
+          "observedAt": "2026-10-21T14:52:31.323Z",
           "evidence": {
             "productId": "SearchDisplay",
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-tackle-warehouse-1792573723024",
+          "id": "r-tackle-warehouse-1792594351324",
           "retailerName": "Tackle Warehouse",
           "url": "https://www.tacklewarehouse.com/searchresults.html?search=Shimano%20STC3000XGFM",
           "price": null,
@@ -316,7 +316,7 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.024Z",
+          "observedAt": "2026-10-21T14:52:31.324Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
@@ -392,10 +392,10 @@
         "alerts@example.com"
       ],
       "alertCondition": "below_target",
-      "lastUpdated": "2026-10-21T09:08:43.026Z",
+      "lastUpdated": "2026-10-21T14:52:31.325Z",
       "retailers": [
         {
-          "id": "r-amazon-1792573723025",
+          "id": "r-amazon-1792594351324",
           "retailerName": "Amazon",
           "url": "https://www.amazon.com/s?k=Garmin%20010-02602-00",
           "price": null,
@@ -414,13 +414,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.025Z",
+          "observedAt": "2026-10-21T14:52:31.324Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-best-buy-1792573723025",
+          "id": "r-best-buy-1792594351325",
           "retailerName": "Best Buy",
           "url": "https://www.bestbuy.com/site/searchpage.jsp?st=Garmin%20010-02602-00",
           "price": null,
@@ -439,13 +439,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.025Z",
+          "observedAt": "2026-10-21T14:52:31.324Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-walmart-1792573723025",
+          "id": "r-walmart-1792594351325",
           "retailerName": "Walmart",
           "url": "https://www.walmart.com/search?q=Garmin%20010-02602-00",
           "price": null,
@@ -464,13 +464,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.025Z",
+          "observedAt": "2026-10-21T14:52:31.325Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-target-1792573723025",
+          "id": "r-target-1792594351325",
           "retailerName": "Target",
           "url": "https://www.target.com/s?searchTerm=Garmin%20010-02602-00",
           "price": null,
@@ -489,13 +489,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.025Z",
+          "observedAt": "2026-10-21T14:52:31.325Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-rei-1792573723025",
+          "id": "r-rei-1792594351325",
           "retailerName": "REI",
           "url": "https://www.rei.com/search?q=Garmin%20010-02602-00",
           "price": null,
@@ -514,13 +514,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.025Z",
+          "observedAt": "2026-10-21T14:52:31.325Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-backcountry-1792573723025",
+          "id": "r-backcountry-1792594351325",
           "retailerName": "Backcountry",
           "url": "https://www.backcountry.com/Store/catalog/search.jsp?q=Garmin%20010-02602-00",
           "price": null,
@@ -539,7 +539,7 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.025Z",
+          "observedAt": "2026-10-21T14:52:31.325Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
@@ -615,10 +615,10 @@
         "alerts@example.com"
       ],
       "alertCondition": "below_target",
-      "lastUpdated": "2026-10-21T09:08:43.026Z",
+      "lastUpdated": "2026-10-21T14:52:31.326Z",
       "retailers": [
         {
-          "id": "r-amazon-1792573723026",
+          "id": "r-amazon-1792594351326",
           "retailerName": "Amazon",
           "url": "https://www.amazon.com/s?k=Garmin%20010-02679-00",
           "price": null,
@@ -637,13 +637,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.026Z",
+          "observedAt": "2026-10-21T14:52:31.326Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-walmart-1792573723026",
+          "id": "r-walmart-1792594351326",
           "retailerName": "Walmart",
           "url": "https://www.walmart.com/search?q=Garmin%20010-02679-00",
           "price": null,
@@ -662,13 +662,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.026Z",
+          "observedAt": "2026-10-21T14:52:31.326Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-target-1792573723026",
+          "id": "r-target-1792594351326",
           "retailerName": "Target",
           "url": "https://www.target.com/s?searchTerm=Garmin%20010-02679-00",
           "price": null,
@@ -687,13 +687,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.026Z",
+          "observedAt": "2026-10-21T14:52:31.326Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-bass-pro-shops-1792573723026",
+          "id": "r-bass-pro-shops-1792594351326",
           "retailerName": "Bass Pro Shops",
           "url": "https://www.basspro.com/shop/en/SearchDisplay?searchTerm=Garmin%20010-02679-00",
           "price": null,
@@ -713,14 +713,14 @@
           "matchStatusDetailed": "search_only",
           "confidence": 45,
           "directSku": "SearchDisplay",
-          "observedAt": "2026-10-21T09:08:43.026Z",
+          "observedAt": "2026-10-21T14:52:31.326Z",
           "evidence": {
             "productId": "SearchDisplay",
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-tackle-warehouse-1792573723026",
+          "id": "r-tackle-warehouse-1792594351326",
           "retailerName": "Tackle Warehouse",
           "url": "https://www.tacklewarehouse.com/searchresults.html?search=Garmin%20010-02679-00",
           "price": null,
@@ -739,7 +739,7 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.026Z",
+          "observedAt": "2026-10-21T14:52:31.326Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
@@ -809,10 +809,10 @@
         "alerts@example.com"
       ],
       "alertCondition": "below_target",
-      "lastUpdated": "2026-10-21T09:08:43.028Z",
+      "lastUpdated": "2026-10-21T14:52:31.328Z",
       "retailers": [
         {
-          "id": "r-amazon-1792573723027",
+          "id": "r-amazon-1792594351327",
           "retailerName": "Amazon",
           "url": "https://www.amazon.com/s?k=YETI%2010045020000",
           "price": null,
@@ -831,13 +831,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.027Z",
+          "observedAt": "2026-10-21T14:52:31.327Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-best-buy-1792573723027",
+          "id": "r-best-buy-1792594351327",
           "retailerName": "Best Buy",
           "url": "https://www.bestbuy.com/site/searchpage.jsp?st=YETI%2010045020000",
           "price": null,
@@ -856,13 +856,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.027Z",
+          "observedAt": "2026-10-21T14:52:31.327Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-walmart-1792573723027",
+          "id": "r-walmart-1792594351327",
           "retailerName": "Walmart",
           "url": "https://www.walmart.com/search?q=YETI%2010045020000",
           "price": null,
@@ -881,13 +881,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.027Z",
+          "observedAt": "2026-10-21T14:52:31.327Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-target-1792573723027",
+          "id": "r-target-1792594351327",
           "retailerName": "Target",
           "url": "https://www.target.com/s?searchTerm=YETI%2010045020000",
           "price": null,
@@ -906,13 +906,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.027Z",
+          "observedAt": "2026-10-21T14:52:31.327Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-rei-1792573723027",
+          "id": "r-rei-1792594351328",
           "retailerName": "REI",
           "url": "https://www.rei.com/search?q=YETI%2010045020000",
           "price": null,
@@ -931,13 +931,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.027Z",
+          "observedAt": "2026-10-21T14:52:31.328Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-bass-pro-shops-1792573723028",
+          "id": "r-bass-pro-shops-1792594351328",
           "retailerName": "Bass Pro Shops",
           "url": "https://www.basspro.com/shop/en/SearchDisplay?searchTerm=YETI%2010045020000",
           "price": null,
@@ -957,14 +957,14 @@
           "matchStatusDetailed": "search_only",
           "confidence": 45,
           "directSku": "SearchDisplay",
-          "observedAt": "2026-10-21T09:08:43.028Z",
+          "observedAt": "2026-10-21T14:52:31.328Z",
           "evidence": {
             "productId": "SearchDisplay",
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-backcountry-1792573723028",
+          "id": "r-backcountry-1792594351328",
           "retailerName": "Backcountry",
           "url": "https://www.backcountry.com/Store/catalog/search.jsp?q=YETI%2010045020000",
           "price": null,
@@ -983,7 +983,7 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.028Z",
+          "observedAt": "2026-10-21T14:52:31.328Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
@@ -1059,10 +1059,10 @@
         "alerts@example.com"
       ],
       "alertCondition": "all_time_low",
-      "lastUpdated": "2026-10-21T09:08:43.028Z",
+      "lastUpdated": "2026-10-21T14:52:31.329Z",
       "retailers": [
         {
-          "id": "r-amazon-1792573723028",
+          "id": "r-amazon-1792594351328",
           "retailerName": "Amazon",
           "url": "https://www.amazon.com/s?k=Sony%20WH1000XM5%2FB",
           "price": null,
@@ -1081,13 +1081,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.028Z",
+          "observedAt": "2026-10-21T14:52:31.328Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-best-buy-1792573723028",
+          "id": "r-best-buy-1792594351328",
           "retailerName": "Best Buy",
           "url": "https://www.bestbuy.com/site/searchpage.jsp?st=Sony%20WH1000XM5%2FB",
           "price": null,
@@ -1106,13 +1106,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.028Z",
+          "observedAt": "2026-10-21T14:52:31.328Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-walmart-1792573723028",
+          "id": "r-walmart-1792594351328",
           "retailerName": "Walmart",
           "url": "https://www.walmart.com/search?q=Sony%20WH1000XM5%2FB",
           "price": null,
@@ -1131,13 +1131,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.028Z",
+          "observedAt": "2026-10-21T14:52:31.328Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-target-1792573723028",
+          "id": "r-target-1792594351328",
           "retailerName": "Target",
           "url": "https://www.target.com/s?searchTerm=Sony%20WH1000XM5%2FB",
           "price": null,
@@ -1156,13 +1156,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.028Z",
+          "observedAt": "2026-10-21T14:52:31.328Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-b&h-photo-1792573723028",
+          "id": "r-b&h-photo-1792594351328",
           "retailerName": "B&H Photo",
           "url": "https://www.bhphotovideo.com/c/search?Ntt=Sony%20WH1000XM5%2FB",
           "price": null,
@@ -1181,7 +1181,7 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.028Z",
+          "observedAt": "2026-10-21T14:52:31.328Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
@@ -1252,10 +1252,10 @@
         "deals@example.com"
       ],
       "alertCondition": "below_target",
-      "lastUpdated": "2026-10-21T09:08:43.029Z",
+      "lastUpdated": "2026-10-21T14:52:31.329Z",
       "retailers": [
         {
-          "id": "r-amazon-1792573723029",
+          "id": "r-amazon-1792594351329",
           "retailerName": "Amazon",
           "url": "https://www.amazon.com/s?k=Sony%20CFI-2000B01X",
           "price": null,
@@ -1274,13 +1274,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.029Z",
+          "observedAt": "2026-10-21T14:52:31.329Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-best-buy-1792573723029",
+          "id": "r-best-buy-1792594351329",
           "retailerName": "Best Buy",
           "url": "https://www.bestbuy.com/site/searchpage.jsp?st=Sony%20CFI-2000B01X",
           "price": null,
@@ -1299,13 +1299,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.029Z",
+          "observedAt": "2026-10-21T14:52:31.329Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-walmart-1792573723029",
+          "id": "r-walmart-1792594351329",
           "retailerName": "Walmart",
           "url": "https://www.walmart.com/search?q=Sony%20CFI-2000B01X",
           "price": null,
@@ -1324,13 +1324,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.029Z",
+          "observedAt": "2026-10-21T14:52:31.329Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-target-1792573723029",
+          "id": "r-target-1792594351329",
           "retailerName": "Target",
           "url": "https://www.target.com/s?searchTerm=Sony%20CFI-2000B01X",
           "price": null,
@@ -1349,13 +1349,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.029Z",
+          "observedAt": "2026-10-21T14:52:31.329Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-newegg-1792573723029",
+          "id": "r-newegg-1792594351329",
           "retailerName": "Newegg",
           "url": "https://www.newegg.com/p/pl?d=Sony%20CFI-2000B01X",
           "price": null,
@@ -1374,13 +1374,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.029Z",
+          "observedAt": "2026-10-21T14:52:31.329Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-micro-center-1792573723029",
+          "id": "r-micro-center-1792594351329",
           "retailerName": "Micro Center",
           "url": "https://www.microcenter.com/search/search_results.aspx?Ntt=Sony%20CFI-2000B01X",
           "price": null,
@@ -1399,7 +1399,7 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.029Z",
+          "observedAt": "2026-10-21T14:52:31.329Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
@@ -1469,10 +1469,10 @@
         "alerts@example.com"
       ],
       "alertCondition": "below_target",
-      "lastUpdated": "2026-10-21T09:08:43.030Z",
+      "lastUpdated": "2026-10-21T14:52:31.330Z",
       "retailers": [
         {
-          "id": "r-amazon-1792573723029",
+          "id": "r-amazon-1792594351330",
           "retailerName": "Amazon",
           "url": "https://www.amazon.com/s?k=Breville%20BES880BSS",
           "price": null,
@@ -1491,13 +1491,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.029Z",
+          "observedAt": "2026-10-21T14:52:31.330Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-best-buy-1792573723029",
+          "id": "r-best-buy-1792594351330",
           "retailerName": "Best Buy",
           "url": "https://www.bestbuy.com/site/searchpage.jsp?st=Breville%20BES880BSS",
           "price": null,
@@ -1516,13 +1516,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.029Z",
+          "observedAt": "2026-10-21T14:52:31.330Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-walmart-1792573723029",
+          "id": "r-walmart-1792594351330",
           "retailerName": "Walmart",
           "url": "https://www.walmart.com/search?q=Breville%20BES880BSS",
           "price": null,
@@ -1541,7 +1541,7 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.029Z",
+          "observedAt": "2026-10-21T14:52:31.330Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
@@ -1602,10 +1602,10 @@
       "emailAlertEnabled": true,
       "userEmail": "alerts@example.com",
       "alertCondition": "below_target",
-      "lastUpdated": "2026-10-21T09:08:43.030Z",
+      "lastUpdated": "2026-10-21T14:52:31.331Z",
       "retailers": [
         {
-          "id": "r-amazon-1792573723030",
+          "id": "r-amazon-1792594351330",
           "retailerName": "Amazon",
           "url": "https://www.amazon.com/s?k=Apple%20MXD13LL%2FA",
           "price": null,
@@ -1624,13 +1624,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.030Z",
+          "observedAt": "2026-10-21T14:52:31.330Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-best-buy-1792573723030",
+          "id": "r-best-buy-1792594351330",
           "retailerName": "Best Buy",
           "url": "https://www.bestbuy.com/site/searchpage.jsp?st=Apple%20MXD13LL%2FA",
           "price": null,
@@ -1649,13 +1649,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.030Z",
+          "observedAt": "2026-10-21T14:52:31.330Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-walmart-1792573723030",
+          "id": "r-walmart-1792594351330",
           "retailerName": "Walmart",
           "url": "https://www.walmart.com/search?q=Apple%20MXD13LL%2FA",
           "price": null,
@@ -1674,13 +1674,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.030Z",
+          "observedAt": "2026-10-21T14:52:31.330Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-target-1792573723030",
+          "id": "r-target-1792594351330",
           "retailerName": "Target",
           "url": "https://www.target.com/s?searchTerm=Apple%20MXD13LL%2FA",
           "price": null,
@@ -1699,13 +1699,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.030Z",
+          "observedAt": "2026-10-21T14:52:31.330Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-b&h-photo-1792573723030",
+          "id": "r-b&h-photo-1792594351330",
           "retailerName": "B&H Photo",
           "url": "https://www.bhphotovideo.com/c/search?Ntt=Apple%20MXD13LL%2FA",
           "price": null,
@@ -1724,13 +1724,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.030Z",
+          "observedAt": "2026-10-21T14:52:31.330Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-newegg-1792573723030",
+          "id": "r-newegg-1792594351330",
           "retailerName": "Newegg",
           "url": "https://www.newegg.com/p/pl?d=Apple%20MXD13LL%2FA",
           "price": null,
@@ -1749,13 +1749,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.030Z",
+          "observedAt": "2026-10-21T14:52:31.330Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-micro-center-1792573723030",
+          "id": "r-micro-center-1792594351331",
           "retailerName": "Micro Center",
           "url": "https://www.microcenter.com/search/search_results.aspx?Ntt=Apple%20MXD13LL%2FA",
           "price": null,
@@ -1774,7 +1774,7 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.030Z",
+          "observedAt": "2026-10-21T14:52:31.330Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
@@ -1835,10 +1835,10 @@
       "emailAlertEnabled": true,
       "userEmail": "alerts@example.com",
       "alertCondition": "below_target",
-      "lastUpdated": "2026-10-21T09:08:43.031Z",
+      "lastUpdated": "2026-10-21T14:52:31.331Z",
       "retailers": [
         {
-          "id": "r-amazon-1792573723031",
+          "id": "r-amazon-1792594351331",
           "retailerName": "Amazon",
           "url": "https://www.amazon.com/s?k=Dyson%20368340-01",
           "price": null,
@@ -1857,13 +1857,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.031Z",
+          "observedAt": "2026-10-21T14:52:31.331Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-best-buy-1792573723031",
+          "id": "r-best-buy-1792594351331",
           "retailerName": "Best Buy",
           "url": "https://www.bestbuy.com/site/searchpage.jsp?st=Dyson%20368340-01",
           "price": null,
@@ -1882,13 +1882,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.031Z",
+          "observedAt": "2026-10-21T14:52:31.331Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-walmart-1792573723031",
+          "id": "r-walmart-1792594351331",
           "retailerName": "Walmart",
           "url": "https://www.walmart.com/search?q=Dyson%20368340-01",
           "price": null,
@@ -1907,13 +1907,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.031Z",
+          "observedAt": "2026-10-21T14:52:31.331Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-target-1792573723031",
+          "id": "r-target-1792594351331",
           "retailerName": "Target",
           "url": "https://www.target.com/s?searchTerm=Dyson%20368340-01",
           "price": null,
@@ -1932,7 +1932,7 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.031Z",
+          "observedAt": "2026-10-21T14:52:31.331Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
@@ -1999,10 +1999,10 @@
       "emailAlertEnabled": true,
       "userEmail": "alerts@example.com",
       "alertCondition": "below_target",
-      "lastUpdated": "2026-10-21T09:08:43.031Z",
+      "lastUpdated": "2026-10-21T14:52:31.332Z",
       "retailers": [
         {
-          "id": "r-amazon-1792573723031",
+          "id": "r-amazon-1792594351331",
           "retailerName": "Amazon",
           "url": "https://www.amazon.com/s?k=DeWalt%20DCK280C2",
           "price": null,
@@ -2021,13 +2021,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.031Z",
+          "observedAt": "2026-10-21T14:52:31.331Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-best-buy-1792573723031",
+          "id": "r-best-buy-1792594351331",
           "retailerName": "Best Buy",
           "url": "https://www.bestbuy.com/site/searchpage.jsp?st=DeWalt%20DCK280C2",
           "price": null,
@@ -2046,13 +2046,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.031Z",
+          "observedAt": "2026-10-21T14:52:31.331Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-walmart-1792573723031",
+          "id": "r-walmart-1792594351331",
           "retailerName": "Walmart",
           "url": "https://www.walmart.com/search?q=DeWalt%20DCK280C2",
           "price": null,
@@ -2071,13 +2071,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.031Z",
+          "observedAt": "2026-10-21T14:52:31.331Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-target-1792573723031",
+          "id": "r-target-1792594351331",
           "retailerName": "Target",
           "url": "https://www.target.com/s?searchTerm=DeWalt%20DCK280C2",
           "price": null,
@@ -2096,7 +2096,7 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.031Z",
+          "observedAt": "2026-10-21T14:52:31.331Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
@@ -2151,10 +2151,10 @@
       "emailAlertEnabled": true,
       "userEmail": "alerts@example.com",
       "alertCondition": "below_target",
-      "lastUpdated": "2026-10-21T09:08:43.032Z",
+      "lastUpdated": "2026-10-21T14:52:31.332Z",
       "retailers": [
         {
-          "id": "r-amazon-1792573723032",
+          "id": "r-amazon-1792594351332",
           "retailerName": "Amazon",
           "url": "https://www.amazon.com/s?k=Samsung%20QN65S90DAFXZA",
           "price": null,
@@ -2173,13 +2173,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.031Z",
+          "observedAt": "2026-10-21T14:52:31.332Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-best-buy-1792573723032",
+          "id": "r-best-buy-1792594351332",
           "retailerName": "Best Buy",
           "url": "https://www.bestbuy.com/site/searchpage.jsp?st=Samsung%20QN65S90DAFXZA",
           "price": null,
@@ -2198,13 +2198,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.032Z",
+          "observedAt": "2026-10-21T14:52:31.332Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-walmart-1792573723032",
+          "id": "r-walmart-1792594351332",
           "retailerName": "Walmart",
           "url": "https://www.walmart.com/search?q=Samsung%20QN65S90DAFXZA",
           "price": null,
@@ -2223,13 +2223,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.032Z",
+          "observedAt": "2026-10-21T14:52:31.332Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-target-1792573723032",
+          "id": "r-target-1792594351332",
           "retailerName": "Target",
           "url": "https://www.target.com/s?searchTerm=Samsung%20QN65S90DAFXZA",
           "price": null,
@@ -2248,7 +2248,7 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.032Z",
+          "observedAt": "2026-10-21T14:52:31.332Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
@@ -2309,10 +2309,10 @@
       "emailAlertEnabled": true,
       "userEmail": "alerts@example.com",
       "alertCondition": "below_target",
-      "lastUpdated": "2026-10-21T09:08:43.326Z",
+      "lastUpdated": "2026-10-21T14:52:31.353Z",
       "retailers": [
         {
-          "id": "r-amazon-1792573723032",
+          "id": "r-amazon-1792594351332",
           "retailerName": "Amazon",
           "url": "https://www.amazon.com/s?k=AMD%20100-100000910WOF",
           "price": null,
@@ -2331,13 +2331,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.032Z",
+          "observedAt": "2026-10-21T14:52:31.332Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-best-buy-1792573723032",
+          "id": "r-best-buy-1792594351332",
           "retailerName": "Best Buy",
           "url": "https://www.bestbuy.com/site/searchpage.jsp?st=AMD%20100-100000910WOF",
           "price": null,
@@ -2356,13 +2356,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.032Z",
+          "observedAt": "2026-10-21T14:52:31.332Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-walmart-1792573723032",
+          "id": "r-walmart-1792594351332",
           "retailerName": "Walmart",
           "url": "https://www.walmart.com/search?q=AMD%20100-100000910WOF",
           "price": null,
@@ -2381,13 +2381,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.032Z",
+          "observedAt": "2026-10-21T14:52:31.332Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-b&h-photo-1792573723032",
+          "id": "r-b&h-photo-1792594351332",
           "retailerName": "B&H Photo",
           "url": "https://www.bhphotovideo.com/c/search?Ntt=AMD%20100-100000910WOF",
           "price": null,
@@ -2406,13 +2406,13 @@
           "linkType": "search_results",
           "matchStatusDetailed": "search_only",
           "confidence": 45,
-          "observedAt": "2026-10-21T09:08:43.032Z",
+          "observedAt": "2026-10-21T14:52:31.332Z",
           "evidence": {
             "matchingNotes": "Candidate URL is a retailer catalog search endpoint, not a direct product page"
           }
         },
         {
-          "id": "r-newegg-1792573723165",
+          "id": "r-newegg-1792594351334",
           "retailerName": "Newegg",
           "title": "AMD AMD Ryzen 7 7800X3D 8-Core Gaming Desktop Processor",
           "url": "https://www.newegg.com/amd-ryzen-7-7800x3d-ryzen-7-7000-series-raphael-zen-4-socket-am5/p/N82E16819113793",
@@ -2433,7 +2433,7 @@
           "matchStatusDetailed": "strong",
           "confidence": 75,
           "directSku": "N82E16819113793",
-          "observedAt": "2026-10-21T09:08:43.032Z",
+          "observedAt": "2026-10-21T14:52:31.332Z",
           "evidence": {
             "title": "AMD AMD Ryzen 7 7800X3D 8-Core Gaming Desktop Processor",
             "productId": "N82E16819113793",
@@ -2442,7 +2442,7 @@
           }
         },
         {
-          "id": "r-micro-center-1792573723311",
+          "id": "r-micro-center-1792594351335",
           "retailerName": "Micro Center",
           "title": "AMD AMD Ryzen 7 7800X3D 8-Core Gaming Desktop Processor",
           "url": "https://www.microcenter.com/product/674503/amd-ryzen-7-7800x3d-raphael-am5-42ghz-8-core-boxed-processor-heatsink-not-included",
@@ -2463,7 +2463,7 @@
           "matchStatusDetailed": "strong",
           "confidence": 75,
           "directSku": "674503",
-          "observedAt": "2026-10-21T09:08:43.165Z",
+          "observedAt": "2026-10-21T14:52:31.334Z",
           "evidence": {
             "title": "AMD AMD Ryzen 7 7800X3D 8-Core Gaming Desktop Processor",
             "productId": "674503",
