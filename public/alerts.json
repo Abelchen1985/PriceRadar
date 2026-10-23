@@ -1,6 +1,21 @@
 {
   "alerts": [
     {
+      "id": "alert-1792746457660-xzuj",
+      "timestamp": "2026-10-23T09:07:37.660Z",
+      "email": "alerts@example.com",
+      "itemTitle": "AMD Ryzen 7 7800X3D 8-Core Gaming Desktop Processor",
+      "oldPrice": 449,
+      "newPrice": 429.99,
+      "dropPercent": 4.2,
+      "allTimeLow": 429.99,
+      "isAllTimeLow": true,
+      "retailer": "Micro Center",
+      "retailerUrl": "https://www.microcenter.com/product/674503/amd-ryzen-7-7800x3d-raphael-am5-42ghz-8-core-boxed-processor-heatsink-not-included",
+      "triggerReason": "Verified price $429.99 matches or beats all-time low $429.99",
+      "status": "delivered"
+    },
+    {
       "id": "alert-1792726349870-eylf",
       "timestamp": "2026-10-23T03:32:29.870Z",
       "email": "alerts@example.com",
