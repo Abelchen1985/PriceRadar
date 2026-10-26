@@ -1,6 +1,21 @@
 {
   "alerts": [
     {
+      "id": "alert-1793053213012-5c4e",
+      "timestamp": "2026-10-26T22:20:13.012Z",
+      "email": "alerts@example.com",
+      "itemTitle": "AMD Ryzen 7 7800X3D 8-Core Gaming Desktop Processor",
+      "oldPrice": 449,
+      "newPrice": 429.99,
+      "dropPercent": 4.2,
+      "allTimeLow": 429.99,
+      "isAllTimeLow": true,
+      "retailer": "Micro Center",
+      "retailerUrl": "https://www.microcenter.com/product/674503/amd-ryzen-7-7800x3d-raphael-am5-42ghz-8-core-boxed-processor-heatsink-not-included",
+      "triggerReason": "Verified price $429.99 matches or beats all-time low $429.99",
+      "status": "delivered"
+    },
+    {
       "id": "alert-1793032290867-bl17",
       "timestamp": "2026-10-26T16:31:30.867Z",
       "email": "alerts@example.com",
@@ -723,21 +738,6 @@
     {
       "id": "alert-1792225023881-34ex",
       "timestamp": "2026-10-17T08:17:03.881Z",
-      "email": "alerts@example.com",
-      "itemTitle": "AMD Ryzen 7 7800X3D 8-Core Gaming Desktop Processor",
-      "oldPrice": 449,
-      "newPrice": 429.99,
-      "dropPercent": 4.2,
-      "allTimeLow": 429.99,
-      "isAllTimeLow": true,
-      "retailer": "Micro Center",
-      "retailerUrl": "https://www.microcenter.com/product/674503/amd-ryzen-7-7800x3d-raphael-am5-42ghz-8-core-boxed-processor-heatsink-not-included",
-      "triggerReason": "Verified price $429.99 matches or beats all-time low $429.99",
-      "status": "delivered"
-    },
-    {
-      "id": "alert-1792206528941-8f3h",
-      "timestamp": "2026-10-17T03:08:48.941Z",
       "email": "alerts@example.com",
       "itemTitle": "AMD Ryzen 7 7800X3D 8-Core Gaming Desktop Processor",
       "oldPrice": 449,
